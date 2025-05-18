@@ -1,0 +1,81 @@
+﻿@model CreateEmployeeVM
+
+@{
+    ViewBag.Title = "Create Employee";
+}
+<h4>Create Employee</h4>
+<hr />
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <form asp-action="CreateEmployee">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <!-- ApplcationUser -->
+                <h5 class="mt-4">User Information</h5>
+                <div class="form-group">
+                    <label asp-for="@Model.Email" class="control-label"></label>
+                    <input asp-for="@Model.Email" class="form-control" />
+                    <span asp-validation-for="@Model.Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Age" class="control-label"></label>
+                    <input asp-for="@Model.Age" class="form-control" />
+                    <span asp-validation-for="@Model.Age" class="text-danger"></span>
+                </div>
+
+                <!-- Employee -->
+                <h5 class="mt-4">Employee Information</h5>
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.Name" class="control-label"></label>
+                    <input asp-for="@Model.Employee.Name" class="form-control" />
+                    <span asp-validation-for="@Model.Employee.Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.PhoneNumber" class="control-label"></label>
+                    <input asp-for="@Model.Employee.PhoneNumber" class="form-control" />
+                    <span asp-validation-for="@Model.Employee.PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.Address" class="control-label"></label>
+                    <input asp-for="@Model.Employee.Address" class="form-control" />
+                    <span asp-validation-for="@Model.Employee.Address" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.YearsOfExperience" class="control-label"></label>
+                    <input asp-for="@Model.Employee.YearsOfExperience" class="form-control" />
+                    <span asp-validation-for="@Model.Employee.YearsOfExperience" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.Specialization" class="control-label"></label>
+                    <input asp-for="@Model.Employee.Specialization" class="form-control" />
+                    <span asp-validation-for="@Model.Employee.Specialization" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="@Model.Employee.Bio" class="control-label"></label>
+                    <textarea asp-for="@Model.Employee.Bio" class="form-control"></textarea>
+                    <span asp-validation-for="@Model.Employee.Bio" class="text-danger"></span>
+                </div>
+
+                <div class="mt-5 mb-5">
+                    <div class="row">
+                        <div class="col-lg-6 p-lg-2 p-0">
+                            <input type="submit" value="Create" class="btn btn-primary w-100" />
+                        </div>
+                        <div class="col-lg-6 p-lg-2 p-0">
+                            <a asp-action="Employees" class="btn btn-outline-primary btn btn-outline-primary w-100  mt-3 mt-lg-0">Employees list</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

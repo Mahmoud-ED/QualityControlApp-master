@@ -1,0 +1,80 @@
+﻿@model CompanyQuestion
+
+@{
+    ViewData["Title"] = "تعديل السؤال";
+}
+
+<style>
+    .content {
+        margin-top: 20px; /* ضبط المسافة العلوية */
+        padding: 20px; /* إضافة بعض الحشوة */
+        background-color: #f8f9fa; /* لون خلفية للتباين */
+        border-radius: 5px; /* زوايا مدورة */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ظل خفيف */
+    }
+
+    h1 {
+        margin-bottom: 20px; /* مسافة تحت العنوان */
+    }
+
+    .form-group label {
+        font-weight: bold; /* جعل تسميات الحقول غامقة */
+    }
+</style>
+
+<div class="content">
+    <h1>@ViewData["Title"]</h1>
+
+    <form asp-action="Edit" method="post">
+        <div class="form-group">
+            <label asp-for="Created" class="control-label"></label>
+            <input asp-for="Created" class="form-control" readonly />
+            <span asp-validation-for="Created" class="text-danger"></span>
+        </div>
+
+       
+        <div class="form-group  mt-4">
+            <span>  المستخدم</span>
+            <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users">
+            </select>
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group  mt-4 ">
+            <span>  الشركة</span>
+
+            <select asp-for="CompanyId" class="form-control" asp-items="ViewBag.Companies">
+            </select>
+            <span asp-validation-for="CompanyId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Active" class="control-label">الحالة</label>
+            <input asp-for="Active" type="checkbox" />
+            <span asp-validation-for="Active" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="SaftyGrid" class="control-label">شبكة الأمان</label>
+            <input asp-for="SaftyGrid" class="form-control" />
+            <span asp-validation-for="SaftyGrid" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="SqurtyGrid" class="control-label">شبكة الأمان الثانية</label>
+            <input asp-for="SqurtyGrid" class="form-control" />
+            <span asp-validation-for="SqurtyGrid" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="حفظ" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

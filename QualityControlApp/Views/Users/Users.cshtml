@@ -1,0 +1,260 @@
+﻿
+@model IEnumerable<ApplicationUser>
+
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewBag.Title = "Users";
+}
+<partial name="Partial/_datatables-css"></partial>
+
+<style>
+    tr {
+        height: 50px;
+    }
+</style>
+
+@if (ViewBag.UserList == null)
+{
+    <h4><b>@ViewContext.RouteData.Values["Action"]?.ToString() - <small>Online (@ViewBag.ActiveUsers)</small></b></h4>
+}
+else
+{
+    <h4><b>@ViewContext.RouteData.Values["Action"]?.ToString() - <small> @ViewBag.UserList</small></b></h4>
+}
+<div style="min-height:74vh;">
+    <form asp-action="Users">
+        
+            <div class="row mt-3 ">
+                <div class="col-lg-3 col-md-6">
+                    <a asp-action="Users" style="text-decoration:none">
+                        <div class="card  mb-3">
+                            <div class="card-body px-2 p-0">
+                                <p class="card-text">All Users</p>
+                                <div class="row">
+                                    <div class="col-8  pt-2">
+                                        <h5 class="card-title">@ViewBag.AllUsers</h5>
+                                    </div>
+                                    <div class="col-4 ">
+                                        <i class="bi bi-people fs-3 text-secondary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a asp-action="Users" asp-route-userList="Confirmed" style="text-decoration:none">
+                        <div class="card  mb-3">
+                            <div class="card-body px-2 py-0">
+                                <p class="card-text">Confirmed</p>
+                                <div class="row">
+                                    <div class="col-8  pt-2">
+                                        <h5 class="card-title">@ViewBag.Confirmed</h5>
+                                    </div>
+                                    <div class="col-4 ">
+                                        <i class="bi bi-people fs-3 text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a asp-action="Users" asp-route-userList="Unconfirmed" style="text-decoration:none">
+                        <div class="card  mb-3">
+                            <div class="card-body px-2 py-0">
+                                <p class="card-text">Unconfirmed</p>
+                                <div class="row">
+                                    <div class="col-8  pt-2">
+                                        <h5 class="card-title">@ViewBag.Unconfirmed</h5>
+                                    </div>
+                                    <div class="col-4 ">
+                                        <i class="bi bi-people fs-3 text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a asp-action="Users" asp-route-userList="Locked" style="text-decoration:none">
+                        <div class="card  mb-3">
+                            <div class="card-body px-2 py-0">
+                                <p class="card-text">Locked users</p>
+                                <div class="row">
+                                    <div class="col-8  pt-2">
+                                        <h5 class="card-title">@ViewBag.Locked</h5>
+                                    </div>
+                                    <div class="col-4 ">
+                                        <i class="bi bi-people fs-3 text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12 d-flex justify-content-between">
+                    <a asp-action="CreateUser" class="btn btn-primary mb-2">Create User</a>
+                    <a asp-action="Employees" asp-controller="Employees" class="btn btn-primary mb-2 px-5">Employees</a>
+                </div>
+            </div>
+
+            <div style="min-height:200px;">
+                <table id="table1" class="table table-hover table-striped table-bordered w-100">
+                    <thead style="background-color:#cee0ed">
+                        <tr>
+                            <th>
+                                N
+                            </th>
+                            <th style="width:5%;">
+                                Confirm
+                            </th>
+                            <th>
+                                User Name/Email
+                            </th>
+                            <th>
+                                User Roles
+                            </th>
+                            <th>
+                                Created Date
+                            </th>
+                            <th>
+                                LastAccessTime
+                            </th>
+                            <th>
+                                Lockout
+                            </th>
+                            <th>
+                                Profile Name
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 0;
+                            foreach (var user in Model)
+                            {
+                                if (!User.IsInRole("Prog") && await _userManager.IsInRoleAsync(user, "Prog"))// منع ظهور أي مبرمج لمستخدم ليس مبرمج
+                                {
+                                    continue;
+                                }
+                                i++;
+                                <tr>
+                                    <td style="text-align:center;">
+                                        @i
+                                    </td>
+                                    @if (user.EmailConfirmed)
+                                    {
+                                        <td style="background-color:#c1f63e">
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                        </td>
+                                        <input type="hidden" name="Confirmed" id="Confirmed" value="false" />
+
+                                    }
+                                    @*----------------------------------------------------*@
+                                    @*<td>
+                                        <a asp-action="EditUser" asp-route-id="@user.Id">
+                                            @Html.DisplayFor(modelItem => user.Email)
+                                        </a>
+                                    </td>*@
+                                @*----------------------------------------------------*@
+
+                                <td>
+                                    @if ((await authorizationService.AuthorizeAsync(User, "EditUserPolicy")).Succeeded)
+                                    {
+                                        <a asp-action="EditUser" asp-route-id="@user.Id">
+                                            @Html.DisplayFor(modelItem => user.UserName)
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => user.UserName)
+                                    }
+                                </td>
+                                @*----------------------------------------------------*@
+
+
+
+                                    <td>
+                                        @{
+                                            var roles = await _userManager.GetRolesAsync(user);
+                                            @foreach (var role in roles)
+                                            {
+                                                @role
+
+                                                <br />
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@user.CreatedDateLocalTime</small>
+                                    </td>
+                                    <td>
+                                        <small>@user.LastAccessTimeLocalTime</small>
+                                    </td>
+
+
+                                    @if (user.LockoutEnd != null && user.LockoutEnd.Value.Year > DateTime.Now.Year)
+                                    {
+                                        <td style="background-color:#fe5151;color:white">
+                                            @*<small>@user.LockoutEnd.Value.ToLocalTime().ToString("dd-MM-yyyy hh:mm:ss tt") (+02:00)</small>*@
+                                            <small>@user.LockoutEnd.Value.UtcDateTime.ToString("dd-MM-yyyy hh:mm:ss tt")</small>
+
+                                        </td>
+                                    }
+                                    else if (user.LockoutEnd != null && user.LockoutEnd.Value > DateTime.UtcNow)
+                                    {
+                                        <td style="background-color:#fff986;">
+                                            <small>@user.LockoutEnd.Value.ToLocalTime().ToString("dd-MM-yyyy hh:mm:ss tt")</small>
+                                        </td>
+                                    }
+                                    else if (user.LockoutEnd != null)
+                                    {
+                                        <td>
+                                            <small>@*@user.LockoutEnd.Value.ToString("dd-MM-yyyy hh:MM:ss tt")*@</small>
+                                            <small>@user.LockoutEnd.Value.ToLocalTime().ToString("dd-MM-yyyy hh:mm:ss tt")</small>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                        </td>
+                                    }
+                                    <td>
+                                        @if (user.UserProfile != null)
+                                        {
+                                            <small>@user.UserProfile.DisplayName</small>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+      
+    </form>
+</div>
+
+
+<partial name="Partial/_datatables-js"></partial>
+
+
+<script>
+    var table = new DataTable('#table1', {
+        language: {
+            // url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/ar.json',
+        },
+        scrollX: true
+    });
+
+</script>

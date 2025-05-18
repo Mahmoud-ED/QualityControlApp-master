@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "_LayoutDashboard"; // إذا كان هناك تخطيط (Layout)، يمكنك تغييره حسب حاجتك
+}
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>عرض التقرير</title>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 20px;">
+        <h2>التقرير</h2>
+        <iframe id="reportFrame"
+                src="@Url.Action("GenerateReport", "Reports")"
+                width="100%"
+                height="800px"
+                frameborder="0">
+        </iframe>
+    </div>
+</body>
+</html>

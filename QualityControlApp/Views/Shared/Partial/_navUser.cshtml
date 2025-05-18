@@ -1,0 +1,63 @@
+﻿@inject SignInManager<ApplicationUser> _signInManager
+@inject UserManager<ApplicationUser> _userManager
+@inject IUnitOfWork<UserProfile> _userProfile
+
+
+@if (_signInManager.IsSignedIn(User))
+{
+    <ul class="navbar-nav ml-5">
+        <li class="nav-item dropdown ">
+            <a class="nav-link dropdown-toggle me-5 fs-6" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <!--------------------------------------------------------------------------------->
+                @{
+                    var userProfile = _userProfile.Entity.GetWhere(a => a.UserId == _userManager.GetUserId(User)).FirstOrDefault();
+                    if (userProfile != null)
+                    {
+                        <img src="~/pictures/userProfile/@userProfile.ImageUrl" alt="no img" style="width:43px;height:43px" class="rounded-circle img-responsive" />
+                        @userProfile.DisplayName
+                    }
+                    else
+                    {
+                        <img src="~/img/User.png" alt="no img" style="width:43px;height:43px" class="rounded-circle img-responsive" />
+                        @User.Identity.Name
+                    }
+                }
+                <!--------------------------------------------------------------------------------->
+            </a>
+            <ul class="dropdown-menu bg-white px-3">
+                <li><h5 class="dropdown-header text-uppercase  pl-2 mt-2">Account</h5></li>
+                @if (User.IsInRole("EmployeeRequest") || User.IsInRole("Employee"))
+                {
+
+                    <li>
+                        <a class="dropdown-item fs-6" asp-action="Index" asp-controller="Employee" asp-route-id="@_userManager.GetUserId(User)">
+                            CompanyAndQuestions <i class="bi badge-info" style="float:right"></i>
+                        </a>
+                    </li>
+                }
+                @if (User.IsInRole("Prog") || User.IsInRole("Admin") )
+                {
+                    <li>
+                        <a class="dropdown-item fs-6" asp-action="Index" asp-controller="Admin">
+                            Dashboard<i class="bi bi-gear" style="float:right"></i>
+                        </a>
+                    </li>
+                }
+
+                <li><a class="dropdown-item fs-6" asp-action="UserProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)" target="_blank">Profile<i class="bi bi-person" style="float:right"></i></a></li>
+                <li><hr class="dropdown-divider text-opacity-50"></li>
+                <li><a class="dropdown-item fs-6" asp-action="ChangePassword" asp-controller="Account">Change Password</a></li>
+                <li><h5 class="dropdown-header text-uppercase  pl-2 mt-2">Signed in</h5></li>
+                <li><a class="dropdown-item fs-6" asp-action="Logout" asp-controller="Account">Logout<i class="bi bi-box-arrow-right" style="float:right"></i></a></li>
+            </ul>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav me-5">
+        <li><a class="nav-link" asp-action="Register" asp-controller="Account">Register</a></li>
+        <li><a class="nav-link" asp-action="Login" asp-controller="Account">Login</a></li>
+    </ul>
+}
+

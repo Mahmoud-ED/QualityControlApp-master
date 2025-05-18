@@ -1,0 +1,110 @@
+﻿@model IEnumerable<Question >
+
+
+@{
+    ViewData["Title"] = ViewContext.RouteData.Values["controller"]?.ToString();
+    // Layout = "_Layout";
+}
+
+<partial name="Partial/_datatables-css"></partial>
+
+<link href="~/css/media.css" rel="stylesheet" />
+ 
+@* @await Component.InvokeAsync("QuestionsCount")  *@
+
+<div class="row" style="min-height:63vh;">
+    @if (Model.Any())
+    {
+        <P>
+            <a asp-action="Create" class="btn btn-primary mt-3">انشاء سؤال</a>
+        </P>
+        <table id="table1" class="display table  table-hover table-striped table-bordered w-100">
+            <thead class=" table-primary">
+                <tr>
+                    <th class="text-center">
+                        N
+                    </th>
+                    <th>
+                       @*  @Html.DisplayNameFor(model => model.State) *@
+                        السؤال
+                    </th>
+                    <th>
+                        اعلى درجة
+                    </th>
+                    <th>
+                        التصنيف
+                    </th>
+                    <th>
+                        تاريخ التعديل
+                    </th>
+
+                    <th>
+                        تاريخ الانشاء
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+                        <tr class="text-center">
+                            <td class="text-center">
+                                <span class="ms-3">@i</span>
+                            </td>
+                     
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id"  class="">
+                                    @item.Content
+                                </a>
+                            </td>
+                            <td>
+                                @item.MaxGrid
+                            </td>
+                            <td>
+                                @item.QuestionType.TypeName
+                            </td>
+                            <td>
+                                <small>@item.Modified?.ToString("dd-MM-yyyy hh:mm tt")</small>
+                            </td>
+                            <td>
+                                @*@Html.DisplayFor(modelItem => @item.CreatedDate.ToShortDateString()) سيعطي Error*@
+                                @* @item.Created.ToShortDateString()*@
+                                @*@Html.DisplayFor(modelItem => @item.Created)*@
+                                <small>@item.Created.ToString("dd-MM-yyyy hh:mm tt")</small>
+                            </td>
+                          
+                         
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                No Questions
+            </div>
+            <div class="card-body">
+                <a asp-action="Create" asp-controller="Question" asp-route-questionId="@ViewBag.SectionId" class="btn btn-primary"> انشاء سؤال</a>
+            </div>
+        </div>
+    }
+
+</div>
+
+<partial name="Partial/_datatables-js"></partial>
+
+
+<script>
+    var table = new DataTable('#table1', {
+        language: {
+               // url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/ar.json',
+        },
+    scrollX: true
+    });
+
+</script>

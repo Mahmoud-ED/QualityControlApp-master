@@ -1,0 +1,71 @@
+﻿.content {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 1.75rem;
+    color: #333;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group select,
+.form-group input {
+    border-radius: 5px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+    .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+/* ------------------------------------------------------------------------- */
+
+
+.table-responsive {
+    overflow-x: auto; /* يسمح بالتمرير الأفقي إذا كانت الأعمدة كبيرة */
+    -webkit-overflow-scrolling: touch; /* تحسين التمرير على الأجهزة المحمولة */
+}
+
+/* تخصيص حقل السؤال ليأخذ مساحة أكبر */
+.table td.form-control.row-id {
+    font-size: 16px; /* حجم الخط داخل الخلية */
+    width: 60%; /* حقل السؤال يأخذ 60% من عرض الجدول */
+    word-wrap: break-word; /* كسر الكلمات الطويلة */
+    white-space: normal; /* لضمان تدفق النص داخل الخلية */
+}
+
+/* تخصيص حقل الدرجة ليأخذ مساحة أصغر (25% من عرض الجدول) */
+.table td input.form-control.row-value {
+    width: 25%; /* حقل الدرجة يأخذ 25% من عرض الجدول */
+    font-size: 16px; /* حجم الخط داخل حقل الدرجة */
+}
+
+/* تخصيص حقل الدرجة الكبرى */
+.table td {
+    text-align: center; /* محاذاة النص في الخلايا */
+}
+
+/* تخصيص رؤوس الأعمدة */
+.table th {
+    font-size: 18px; /* تغيير حجم الخط في رؤوس الأعمدة */
+    text-align: center; /* محاذاة النص في رؤوس الأعمدة */
+}
+
+/* تخصيص عرض الجدول */
+.table {
+    width: 100%; /* الجدول يأخذ العرض الكامل */
+}

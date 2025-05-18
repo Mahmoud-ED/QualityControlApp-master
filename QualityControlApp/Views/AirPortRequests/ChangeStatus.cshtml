@@ -1,0 +1,236 @@
+﻿@model QualityControlApp.Models.Entities.AirPortRequest
+
+@{
+    ViewData["Title"] = "تغيير حالة الطلب";
+}
+
+<div class="card shadow-lg mt-10">
+    <div class="card-header bg-warning text-dark py-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h2 class="card-title mb-0 text-center">
+                <i class="fas fa-edit me-2"></i>@ViewData["Title"]
+            </h2>
+
+            <div>
+                <label class="form-label fw-bold me-2 mb-0">حالة الطلب الحالية:</label>
+                @{
+                    string statusClass = Model.RequestStatus switch
+                    {
+                        "Approved" => "text-success",
+                        "Pending" => "text-warning",
+                        "Rejected" => "text-danger",
+                        _ => "text-secondary"
+                    };
+
+                    string statusText = Model.RequestStatus switch
+                    {
+                        "Approved" => "تمت الموافقة",
+                        "Pending" => "قيد الانتظار",
+                        "Rejected" => "مرفوض",
+                        _ => "غير معروف"
+                    };
+                }
+                <button class="fw-bold @statusClass fs-5">@statusText</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="card-body p-4">
+        <div class="row g-3">
+            @* عرض الحقول *@
+            <div class="col-md-6">
+                <label class="form-label fw-bold">الإدارة</label>
+                <div class="form-control-plaintext">@Model.Department</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">وقت الإدخال</label>
+                <div class="form-control-plaintext">@Model.EntryTime</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">وقت الطلب</label>
+                <div class="form-control-plaintext">@Model.RequestTime</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">البريد الإلكتروني</label>
+                <div class="form-control-plaintext">@Model.Email</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">اسم المرسل</label>
+                <div class="form-control-plaintext">@Model.SenderName</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">اسم الشركة</label>
+                <div class="form-control-plaintext">@Model.CompanyName</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">تاريخ الرحلة</label>
+                <div class="form-control-plaintext">@Model.FlightDate.ToString("yyyy-MM-dd")</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">نوع الطائرة</label>
+                <div class="form-control-plaintext">@Model.AircraftType</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">تسجيل الطائرة</label>
+                <div class="form-control-plaintext">@Model.AircraftRegistration</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">نداء الرحلة</label>
+                <div class="form-control-plaintext">@Model.CallSign</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">مسار الرحلة</label>
+                <div class="form-control-plaintext">@Model.FlightPath</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">وقت الهبوط/الإقلاع</label>
+                <div class="form-control-plaintext">@Model.LandingTakeoffTime</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">غرض الرحلة</label>
+                <div class="form-control-plaintext">@Model.FlightPurpose</div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">نقاط الدخول/الخروج</label>
+                <div class="form-control-plaintext">@Model.EntryExitPoints</div>
+            </div>
+
+        <!-- إضافة الحقول الجديدة -->
+        <div class="col-md-6">
+            <label class="form-label fw-bold">اسم الطيار</label>
+            <div class="form-control-plaintext">@Model.PilotName</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">رقم الرحلة</label>
+            <div class="form-control-plaintext">@Model.FlightNumber</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">نقطة الدخول</label>
+            <div class="form-control-plaintext">@Model.EntryPoint</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">نقطة الخروج</label>
+            <div class="form-control-plaintext">@Model.ExitPoint</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">وقت الدخول المتوقع</label>
+            <div class="form-control-plaintext">@Model.EstimatedEntryTime?.ToString("yyyy-MM-dd HH:mm")</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">وقت الخروج المتوقع</label>
+            <div class="form-control-plaintext">@Model.EstimatedExitTime?.ToString("yyyy-MM-dd HH:mm")</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">تفاصيل الشحنة</label>
+            <div class="form-control-plaintext">@Model.CargoDetails</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">عدد أفراد الطاقم</label>
+            <div class="form-control-plaintext">@Model.CrewCount</div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label fw-bold">جنسيات الطاقم</label>
+            <div class="form-control-plaintext">@Model.CrewNationalities</div>
+        </div>
+
+            <div class="col-12">
+                <label class="form-label fw-bold">ملاحظات</label>
+                <div class="form-control-plaintext">@Model.Notes</div>
+            </div>
+
+            @* المرفقات *@
+            @if (Model.RequestFiles != null && Model.RequestFiles.Any())
+            {
+            <div class="col-12 mt-4">
+                <h5 class="fw-bold">المرفقات:</h5>
+                <ul class="list-group">
+                    @foreach (var file in Model.RequestFiles)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank">
+                                <i class="bi bi-file-earmark-pdf"></i> @file.FileName
+                            </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+
+    <div class="container">
+        <!-- تغيير حالة الطلب -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-8">
+                <form asp-action="Approve" asp-controller="AirPortRequests" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-white text-center">
+                            <h5 class="mb-0">تغيير حالة الطلب</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label fw-bold">تغيير حالة الطلب</label>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="newStatus" id="pendingStatus" value="Pending" @(Model.RequestStatus == "Pending" ? "checked" : "")>
+                                    <label class="form-check-label" for="pendingStatus">
+                                        قيد الانتظار
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="newStatus" id="approvedStatus" value="Approved" @(Model.RequestStatus == "Approved" ? "checked" : "")>
+                                    <label class="form-check-label" for="approvedStatus">
+                                        تمت الموافقة
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="newStatus" id="rejectedStatus" value="Rejected" @(Model.RequestStatus == "Rejected" ? "checked" : "")>
+                                    <label class="form-check-label" for="rejectedStatus">
+                                        مرفوض
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-check me-2"></i>تغيير الحالة
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- حذف الطلب -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <form asp-action="Delete" asp-controller="AirPortRequests" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟');">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger btn-lg w-100">
+                        <i class="fas fa-trash-alt me-2"></i>حذف الطلب
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>

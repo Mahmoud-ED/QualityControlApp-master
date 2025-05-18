@@ -1,0 +1,385 @@
+﻿@model QualityControlApp.Models.Entities.AirPortRequest
+
+@{
+    ViewData["Title"] = "تعديل الطلب";
+}
+
+<div class="card shadow-lg mt-10">
+    <div class="card-header bg-warning text-dark py-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h2 class="card-title mb-0 text-center">
+                <i class="fas fa-edit me-2"></i>@ViewData["Title"]
+            </h2>
+
+            <div>
+                <label class="form-label fw-bold me-2 mb-0">حالة الطلب:</label>
+                @{
+                    string statusClass = Model.RequestStatus switch
+                    {
+                        "Approved" => "text-success",
+                        "Pending" => "text-warning",
+                        "Rejected" => "text-danger",
+                        _ => "text-secondary"
+                    };
+
+                    string statusText = Model.RequestStatus switch
+                    {
+                        "Approved" => "تمت الموافقة",
+                        "Pending" => "قيد الانتظار",
+                        "Rejected" => "مرفوض",
+                        _ => "غير معروف"
+                    };
+                }
+                <button class="fw-bold @statusClass fs-5">@statusText</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <form asp-controller="AirPortRequests" asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Email" />
+            <input type="hidden" asp-for="RequestStatus" />
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="Department" class="form-control" placeholder=" " required />
+                        <label asp-for="Department"></label>
+                        <span asp-validation-for="Department" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="EntryTime" class="form-control" type="datetime-local" placeholder=" " required />
+                        <label asp-for="EntryTime"></label>
+                        <span asp-validation-for="EntryTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="RequestTime" class="form-control" type="datetime-local" placeholder=" " required />
+                        <label asp-for="RequestTime"></label>
+                        <span asp-validation-for="RequestTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <div class="form-control-plaintext">@Model.Email</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="SenderName" class="form-control" placeholder=" " required />
+                        <label asp-for="SenderName"></label>
+                        <span asp-validation-for="SenderName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CompanyName" class="form-control" placeholder=" " required />
+                        <label asp-for="CompanyName"></label>
+                        <span asp-validation-for="CompanyName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="FlightDate" class="form-control" type="date" placeholder=" " required />
+                        <label asp-for="FlightDate"></label>
+                        <span asp-validation-for="FlightDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="AircraftType" class="form-select" required>
+                            <option value="">اختر نوع الطائرة</option>
+                            <option value="Commercial">طائرة تجارية</option>
+                            <option value="Private">طائرة خاصة</option>
+                            <option value="Cargo">طائرة شحن</option>
+                            <option value="Military">طائرة عسكرية</option>
+                        </select>
+                        <label asp-for="AircraftType"></label>
+                        <span asp-validation-for="AircraftType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AircraftRegistration" class="form-control" placeholder=" " required />
+                        <label asp-for="AircraftRegistration"></label>
+                        <span asp-validation-for="AircraftRegistration" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CallSign" class="form-control" placeholder=" " required />
+                        <label asp-for="CallSign"></label>
+                        <span asp-validation-for="CallSign" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="FlightPath" class="form-control" placeholder=" " required />
+                        <label asp-for="FlightPath"></label>
+                        <span asp-validation-for="FlightPath" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="LandingTakeoffTime" class="form-control" placeholder=" " required />
+                        <label asp-for="LandingTakeoffTime"></label>
+                        <span asp-validation-for="LandingTakeoffTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="FlightPurpose" class="form-select" required>
+                            <option value="">اختر الغرض من الرحلة</option>
+                            <option value="Commercial">رحلة تجارية</option>
+                            <option value="Private">رحلة خاصة</option>
+                            <option value="Cargo">شحن بضائع</option>
+                            <option value="Military">رحلة عسكرية</option>
+                        </select>
+                        <label asp-for="FlightPurpose"></label>
+                        <span asp-validation-for="FlightPurpose" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="EntryExitPoints" class="form-control" placeholder=" " required />
+                        <label asp-for="EntryExitPoints"></label>
+                        <span asp-validation-for="EntryExitPoints" class="text-danger"></span>
+                    </div>
+                </div>
+
+
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="PilotName" class="form-control" placeholder=" " required />
+                        <label asp-for="PilotName"></label>
+                        <span asp-validation-for="PilotName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="FlightNumber" class="form-control" placeholder=" " required />
+                        <label asp-for="FlightNumber"></label>
+                        <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="EntryPoint" class="form-control" placeholder=" " required />
+                        <label asp-for="EntryPoint"></label>
+                        <span asp-validation-for="EntryPoint" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="ExitPoint" class="form-control" placeholder=" " required />
+                        <label asp-for="ExitPoint"></label>
+                        <span asp-validation-for="ExitPoint" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="EstimatedEntryTime" class="form-control" type="datetime-local" placeholder=" " required />
+                        <label asp-for="EstimatedEntryTime"></label>
+                        <span asp-validation-for="EstimatedEntryTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="EstimatedExitTime" class="form-control" type="datetime-local" placeholder=" " required />
+                        <label asp-for="EstimatedExitTime"></label>
+                        <span asp-validation-for="EstimatedExitTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CargoDetails" class="form-control" placeholder=" " required />
+                        <label asp-for="CargoDetails"></label>
+                        <span asp-validation-for="CargoDetails" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CrewCount" class="form-control" type="number" placeholder=" " required />
+                        <label asp-for="CrewCount"></label>
+                        <span asp-validation-for="CrewCount" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CrewNationalities" class="form-control" placeholder=" " required />
+                        <label asp-for="CrewNationalities"></label>
+                        <span asp-validation-for="CrewNationalities" class="text-danger"></span>
+                    </div>
+                </div>
+
+
+                <div class="col-12">
+                    <div class="form-floating">
+                        <textarea asp-for="Notes" class="form-control" placeholder=" " style="height: 100px"></textarea>
+                        <label asp-for="Notes"></label>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+
+           
+               
+
+                <!-- تحديث المرفقات -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">تحديث المرفقات (اختياري)</label>
+                        <input type="file" name="files" class="form-control" multiple />
+                        <small class="text-muted">يمكنك رفع ملفات جديدة أو ترك الحقل فارغًا للاحتفاظ بالمرفقات الحالية</small>
+                        @if (ViewData["FileError"] != null)
+                        {
+                            <span class="text-danger">@ViewData["FileError"]</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة الملفات المختارة -->
+            <ul id="fileList" class="list-group mt-3"></ul>
+
+            <!-- عرض الصورة عند النقر -->
+            <div id="imagePreview" class="mt-3 d-none">
+                <img id="previewImg" src="" class="img-fluid rounded border" style="max-height: 300px;" />
+            </div>
+
+            <!-- أزرار الإرسال -->
+            <div class="d-flex justify-content-center gap-3 mt-5">
+                <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
+                    تحديث الطلب
+                </button>
+            </div>
+        </form>
+
+        @if (Model.RequestFiles != null && Model.RequestFiles.Any())
+        {
+            <div class="mt-4">
+                <h5>المرفقات الحالية:</h5>
+                <ul class="list-group">
+                    @foreach (var file in Model.RequestFiles)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank">
+                                <i class="bi bi-file-earmark-pdf"></i> @file.FileName
+                            </a>
+                            <form asp-action="DeleteFile" asp-controller="AirPortRequests" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@file.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">❌</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            border-radius: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .form-floating > label {
+            right: unset;
+            left: 0;
+            transform-origin: right top;
+        }
+
+        .form-control, .form-select {
+            padding: 16px 12px 4px 12px;
+            height: calc(3.5rem + 2px);
+        }
+
+        .text-danger {
+            font-size: 0.85rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const fileInput = document.querySelector('input[name="files"]');
+        const fileList = document.getElementById('fileList');
+        const previewImg = document.getElementById('previewImg');
+        const imagePreview = document.getElementById('imagePreview');
+
+        let filesArray = [];
+
+        fileInput.addEventListener('change', function () {
+            filesArray = Array.from(this.files);
+            updateFileList();
+        });
+
+        function updateFileList() {
+            filesArray.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                const nameLink = document.createElement('a');
+                nameLink.href = '#';
+                nameLink.textContent = file.name;
+                nameLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn btn-sm btn-danger';
+                removeBtn.innerHTML = '❌';
+                removeBtn.addEventListener('click', () => {
+                    filesArray.splice(index, 1);
+                    updateFileList();
+                    if (filesArray.length === 0) {
+                        imagePreview.classList.add('d-none');
+                    }
+                });
+
+                li.appendChild(nameLink);
+                li.appendChild(removeBtn);
+                fileList.appendChild(li);
+            });
+
+            // تحديث ملفات الـ input
+            const dataTransfer = new DataTransfer();
+            filesArray.forEach(f => dataTransfer.items.add(f));
+            fileInput.files = dataTransfer.files;
+        }
+    </script>
+}

@@ -1,0 +1,197 @@
+﻿/* لتوسيع مربع الملاحظات */
+.wide-textarea {
+    width: 100%; /* اجعل عرضه يأخذ 100% من مساحة الحاوية بتاعته */
+    min-height: 80px; /* تحديد حد أدنى للارتفاع عشان يكون فيه مساحة أكبر للكتابة */
+    padding: 0.5rem; /* إضافة مساحة داخلية بسيطة */
+    font-size: 0.9rem; /* تعديل حجم الخط لو محتاج */
+}
+
+.styled-select {
+    width: 130px; /* أو العرض اللي اخترته */
+    padding: 0.3rem 1.2rem 0.3rem 0.6rem; /* زودنا الـ padding-right هنا */
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    /* إضافة ستايل عشان مكان السهم يكون واضح */
+    appearance: none; /* لإزالة السهم الافتراضي */
+    -webkit-appearance: none; /* للمتصفحات اللي بتستخدم WebKit */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position-x: calc(100% - 0.5rem);
+    background-position-y: center;
+    background-size: 0.8rem;
+}
+
+/* عشان السهم ميتغطاش لما القائمة تكون مركزة */
+.styled-select:focus {
+    outline: none; /* لإزالة الإطار الافتراضي عند التركيز لو مش عايزينه */
+    border-color: #007bff; /* تغيير لون الإطار عند التركيز */
+    /* ممكن تزود padding-right أكتر لو لسه فيه تغطية */
+}
+
+.question-inspect-layout {
+    display: grid;
+    grid-template-columns: auto 1fr; /* عمود تلقائي للعlabel وعمود ياخد باقي المساحة للملاحظات والمستوى */
+    grid-template-rows: auto auto auto; /* صف لكل جزء: label، ملاحظات، مستوى */
+    gap: 0.5rem; /* مسافة بين العناصر */
+    padding: 0.5rem; /* مساحة داخلية */
+}
+
+.inspect-label {
+    font-weight: bold;
+    text-align: center;
+    /* ممكن تضيف ألوان أو خلفيات مميزة للـ N و Ns */
+    /* مثال: */
+    /* &.inspect-n { color: green; } */
+    /* &.inspect-ns { color: orange; } */
+}
+
+.notes-section {
+    grid-column: 1 / 3; /* ياخد كامل العرض */
+}
+
+.level-section {
+    grid-column: 1 / 3; /* ياخد كامل العرض */
+}
+
+.notes-section .form-label {
+    display: block; /* عشان يكون الليبل فوق التيكستاريا */
+    margin-bottom: 0.2rem;
+}
+
+.level-section .form-label {
+    display: block; /* عشان يكون الليبل فوق قيمة المستوى */
+    margin-bottom: 0.2rem;
+}
+
+.wide-textarea {
+    width: 100%;
+    min-height: 60px; /* ممكن تقلل الارتفاع شوية */
+    padding: 0.3rem;
+    font-size: 0.85rem;
+}
+
+
+.card-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 cards per row */
+    gap: 20px;
+}
+
+.question-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.nots-container {
+    display: none;
+}
+
+.card select,
+.card input,
+.card textarea {
+    width: 100%;
+}
+
+.card .row {
+    margin-bottom: 10px;
+}
+.question-type-card-enhanced {
+    max-width: 280px; /* تم تصغير أقصى عرض للبطاقة */
+    margin-left: auto; /* لتوسيط البطاقة داخل العمود */
+    margin-right: auto; /* لتوسيط البطاقة داخل العمود */
+    border: none; /* إزالة الحدود الافتراضية للبطاقة */
+    border-radius: 8px; /* زوايا مستديرة أقل قليلاً */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* إضافة انتقال سلس للحركة والظل */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* ظل أقل قليلاً ليناسب الحجم الأصغر */
+    position: relative; /* للسماح بوضع عناصر داخلها بشكل مطلق إذا لزم الأمر */
+    overflow: hidden; /* للتأكد من أن الزوايا المستديرة تعمل بشكل صحيح مع المحتوى */
+    text-decoration: none; /* التأكد من إزالة خط تحت الرابط */
+    color: inherit; /* وراثة لون الخط ليكون التغيير على البطاقة فقط */
+}
+
+    /* تأثير عند تمرير الفأرة (hover effect) */
+    .question-type-card-enhanced:hover {
+        transform: translateY(-5px); /* رفع البطاقة أقل قليلاً للأعلى */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* زيادة الظل أقل من السابق */
+    }
+
+/* تحسين مظهر الأيقونة - تصغير حجم الدائرة والأيقونة قليلاً */
+.icon-circle {
+    width: 40px; /* حجم دائرة الأيقونة أصغر */
+    height: 40px;
+    background-color: #e9ecef; /* لون خلفية خفيف للدائرة */
+    border-radius: 50%; /* لجعلها دائرة كاملة */
+    display: flex;
+    justify-content: center; /* توسيط الأيقونة أفقياً */
+    align-items: center; /* توسيط الأيقونة عمودياً */
+    flex-shrink: 0; /* منع الدائرة من التقلص */
+}
+
+    .icon-circle i {
+        color: #007bff; /* لون الأيقونة الأساسي (يمكن تغييرها) */
+        font-size: 1.4rem; /* حجم الأيقونة أصغر قليلاً */
+    }
+
+/* تحسين الخطوط والمسافات */
+.question-type-card-enhanced .card-body {
+    padding: 1.2rem; /* تم تصغير الـ padding الداخلي للبطاقة (كان p-3 في الأصل، الآن 1.2rem) */
+}
+
+.question-type-card-enhanced .card-title {
+    font-size: 1rem; /* حجم خط العنوان أصغر قليلاً */
+    margin-bottom: 0.4rem; /* مسافة أقل أسفل العنوان */
+}
+
+.question-type-card-enhanced .card-text {
+    font-size: 0.85rem; /* حجم خط النقاط أصغر قليلاً */
+    margin-bottom: 0.8rem; /* مسافة أقل أسفل نص النقاط */
+}
+
+/* تحسين شريط التقدم - تصغير الارتفاع */
+.question-type-card-enhanced .progress {
+    height: 8px; /* جعل شريط التقدم أنحف */
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.question-type-card-enhanced .progress-bar {
+    /* الألوان تبقى كما هي أو حسب اختيارك */
+    /* background-color: #28a745; */ /* لون افتراضي إذا لم يتم التغيير بالـ Razor */
+    transition: width 0.6s ease; /* إضافة انتقال لعرض شريط التقدم عند التحميل/التحديث */
+}
+
+/* انميشن الظهور */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    /* تكبير أقل قليلاً */
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* تطبيق الانميشن على العمود للحصول على تأثير متتالي لكل بطاقة */
+.col-lg-3 .question-type-card-enhanced,
+.col-md-4 .question-type-card-enhanced,
+.col-sm-6 .question-type-card-enhanced {
+    animation: fadeInScale 0.4s ease-out forwards; /* انميشن أسرع قليلاً */
+    opacity: 0; /* إخفاء العنصر في البداية */
+    /* استخدام خاصية مخصصة لإنشاء تأخير الانميشن بناءً على الـ index */
+    animation-delay: calc(var(--animation-index) * 0.05s); /* تأخير 50 مللي ثانية لكل بطاقة إضافية */
+}

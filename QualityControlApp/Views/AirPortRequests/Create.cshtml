@@ -1,0 +1,393 @@
+﻿@model QualityControlApp.ViewModels.AirPortReqeustVM
+
+@{
+    ViewData["Title"] = "إنشاء طلب جديد";
+}
+
+
+
+<div class="card shadow-lg">
+    <div class="card-header bg-primary text-white py-3">
+        <h2 class="card-title mb-0 text-center">
+            <i class="fas fa-plane-departure me-2"></i>@ViewData["Title"]
+        </h2>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <div class="row g-3">
+                <!-- الصف الأول -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.Department" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.Department"></label>
+                        <span asp-validation-for="AirPortRequest.Department" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.Email" class="form-control" type="email" placeholder=" " required />
+                        <label asp-for="AirPortRequest.Email"></label>
+                        <span asp-validation-for="AirPortRequest.Email" class="text-danger"></span>
+                    </div>
+                </div>
+              
+                <!-- الصف الثاني -->
+              
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.EntryTime" class="form-control" type="datetime-local" placeholder=" " required />
+                        <label asp-for="AirPortRequest.EntryTime"></label>
+                        <span asp-validation-for="AirPortRequest.EntryTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.FlightDate" class="form-control" type="date" placeholder=" " required />
+                        <label asp-for="AirPortRequest.FlightDate"></label>
+                        <span asp-validation-for="AirPortRequest.FlightDate" class="text-danger"></span>
+                    </div>
+                </div>
+           
+
+                <!-- الصف الثالث -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.SenderName" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.SenderName"></label>
+                        <span asp-validation-for="AirPortRequest.SenderName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.CompanyName" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.CompanyName"></label>
+                        <span asp-validation-for="AirPortRequest.CompanyName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف الرابع -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.EntryExitPoints" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.EntryExitPoints"></label>
+                        <span asp-validation-for="AirPortRequest.EntryExitPoints" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="AirPortRequest.AircraftType" class="form-select" required>
+                            <option value="">اختر نوع الطائرة</option>
+                            <option value="Commercial">طائرة تجارية</option>
+                            <option value="Private">طائرة خاصة</option>
+                            <option value="Cargo">طائرة شحن</option>
+                            <option value="Military">طائرة عسكرية</option>
+                        </select>
+                        <label asp-for="AirPortRequest.AircraftType"></label>
+
+                        <span asp-validation-for="AirPortRequest.AircraftType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف الخامس -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.AircraftRegistration" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.AircraftRegistration"></label>
+                        <span asp-validation-for="AirPortRequest.AircraftRegistration" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.CallSign" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.CallSign"></label>
+                        <span asp-validation-for="AirPortRequest.CallSign" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف السادس -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.FlightPath" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.FlightPath"></label>
+                        <span asp-validation-for="AirPortRequest.FlightPath" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.LandingTakeoffTime" class="form-control" placeholder=" " required />
+                        <label asp-for="AirPortRequest.LandingTakeoffTime"></label>
+                        <span asp-validation-for="AirPortRequest.LandingTakeoffTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف السابع -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="AirPortRequest.FlightPurpose" class="form-select" required>
+                            <option value="">اختر الغرض من الرحلة</option>
+                            <option value="Commercial">رحلة تجارية</option>
+                            <option value="Private">رحلة خاصة</option>
+                            <option value="Cargo">شحن بضائع</option>
+                            <option value="Military">رحلة عسكرية</option>
+                        </select>
+                        <label asp-for="AirPortRequest.FlightPurpose"></label>
+                        <span asp-validation-for="AirPortRequest.FlightPurpose" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف الثامن - معلومات الطاقم -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.PilotName" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.PilotName">اسم الطيّار</label>
+                        <span asp-validation-for="AirPortRequest.PilotName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.FlightNumber" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.FlightNumber">رقم الرحلة</label>
+                        <span asp-validation-for="AirPortRequest.FlightNumber" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف التاسع - نقاط الدخول والخروج -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.EntryPoint" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.EntryPoint">نقطة الدخول</label>
+                        <span asp-validation-for="AirPortRequest.EntryPoint" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.ExitPoint" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.ExitPoint">نقطة الخروج</label>
+                        <span asp-validation-for="AirPortRequest.ExitPoint" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف العاشر - التوقيتات المتوقعة -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.EstimatedEntryTime" class="form-control" type="datetime-local" placeholder=" " />
+                        <label asp-for="AirPortRequest.EstimatedEntryTime">وقت الدخول المتوقع</label>
+                        <span asp-validation-for="AirPortRequest.EstimatedEntryTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.EstimatedExitTime" class="form-control" type="datetime-local" placeholder=" " />
+                        <label asp-for="AirPortRequest.EstimatedExitTime">وقت الخروج المتوقع</label>
+                        <span asp-validation-for="AirPortRequest.EstimatedExitTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- الصف الحادي عشر - معلومات الحمولة والطاقم -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.CargoDetails" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.CargoDetails">تفاصيل الحمولة</label>
+                        <span asp-validation-for="AirPortRequest.CargoDetails" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.CrewCount" class="form-control" type="number" min="0" placeholder=" " />
+                        <label asp-for="AirPortRequest.CrewCount">عدد الطاقم</label>
+                        <span asp-validation-for="AirPortRequest.CrewCount" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="form-floating">
+                        <input asp-for="AirPortRequest.CrewNationalities" class="form-control" placeholder=" " />
+                        <label asp-for="AirPortRequest.CrewNationalities">جنسيات الطاقم</label>
+                        <span asp-validation-for="AirPortRequest.CrewNationalities" class="text-danger"></span>
+                    </div>
+                </div>
+
+              
+
+                <!-- حقل الملاحظات -->
+                <div class="col-12">
+                    <div class="form-floating">
+                        <textarea asp-for="AirPortRequest.Notes" class="form-control" placeholder=" " style="height: 100px"></textarea>
+                        <label asp-for="AirPortRequest.Notes"></label>
+                        <span asp-validation-for="AirPortRequest.Notes" class="text-danger"></span>
+                    </div>
+                </div>
+<div id="attachmentsContainer"></div>
+
+<button type="button" class="btn btn-primary mt-2" onclick="addAttachmentRow()">➕ إضافة مرفق</button>
+</div>
+
+
+                <!-- مربع عرض الصورة -->
+                <div id="imagePreview" class="text-center my-3" style="display: none;">
+                    <img id="previewImage" src="" alt="معاينة" class="img-thumbnail" style="max-width: 100%; max-height: 300px;" />
+                </div>
+
+
+            <!-- أزرار الإرسال -->
+            <div class="d-flex justify-content-center gap-3 mt-5">
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-save me-2"></i>حفظ الطلب
+                </button>
+                <button type="reset" class="btn btn-outline-secondary btn-lg px-5">
+                    <i class="fas fa-undo me-2"></i>إعادة تعيين
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            border-radius: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .form-floating > label {
+            right: unset;
+            left: 0;
+            transform-origin: right top;
+        }
+        .form-control, .form-select {
+            padding: 16px 12px 4px 12px;
+            height: calc(3.5rem + 2px);
+        }
+        .text-danger {
+            font-size: 0.85rem;
+        }
+    </style>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let selectedFiles = [];
+        let attachmentIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+
+            fileInput.addEventListener('change', (event) => {
+                const files = Array.from(event.target.files);
+                selectedFiles = [...selectedFiles, ...files];
+                renderFileList();
+            });
+
+            function renderFileList() {
+                fileList.innerHTML = '';
+
+                selectedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'd-flex align-items-center justify-content-between mb-2 border p-2 rounded bg-light';
+
+                    const fileName = document.createElement('span');
+                    fileName.textContent = file.name;
+                    fileName.style.cursor = 'pointer';
+                    fileName.classList.add('me-2', 'text-primary', 'file-link');
+                    fileName.onclick = () => previewFile(file);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-sm btn-danger';
+                    deleteBtn.textContent = '✖';
+                    deleteBtn.onclick = () => {
+                        selectedFiles.splice(index, 1);
+                        renderFileList();
+                    };
+
+                    fileItem.appendChild(fileName);
+                    fileItem.appendChild(deleteBtn);
+                    fileList.appendChild(fileItem);
+                });
+
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(f => dataTransfer.items.add(f));
+                fileInput.files = dataTransfer.files;
+            }
+
+            function previewFile(file) {
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.style.display = 'none';
+                    previewImage.src = '';
+                }
+            }
+        });
+
+        function addAttachmentRow() {
+            const container = document.getElementById('attachmentsContainer');
+
+            const row = document.createElement('div');
+            row.className = 'row align-items-end mb-3';
+            row.dataset.index = attachmentIndex;
+
+            const fileTypeCol = document.createElement('div');
+            fileTypeCol.className = 'col-md-5';
+            fileTypeCol.innerHTML = `
+                <label class="form-label">نوع الملف</label>
+                <select name="FileTypes[${attachmentIndex}].FileTypeId" class="form-select" required>
+                    <option value="">اختر نوع الملف</option>
+                    ${getFileTypeOptions()}
+                </select>
+            `;
+
+            const fileInputCol = document.createElement('div');
+            fileInputCol.className = 'col-md-5';
+            fileInputCol.innerHTML = `
+                <label class="form-label">المرفق</label>
+                <input type="file" name="FileTypes[${attachmentIndex}].File" class="form-control" required />
+            `;
+
+            const deleteCol = document.createElement('div');
+            deleteCol.className = 'col-md-2 text-end';
+            deleteCol.innerHTML = `
+                <button type="button" class="btn btn-danger" onclick="removeAttachmentRow(this)">✖</button>
+            `;
+
+            row.appendChild(fileTypeCol);
+            row.appendChild(fileInputCol);
+            row.appendChild(deleteCol);
+
+            container.appendChild(row);
+            attachmentIndex++;
+        }
+
+        function removeAttachmentRow(button) {
+            const row = button.closest('.row');
+            row.remove();
+        }
+
+        function getFileTypeOptions() {
+            return `
+                @foreach (var type in ViewBag.FileTypes)
+                {
+                    <text><option value="@type.Id">@type.TypeName</option></text>
+                }
+            `;
+        }
+    </script>
+}

@@ -1,0 +1,62 @@
+﻿@model ClosingVM
+
+@{
+    ViewBag.Title = "Closing";
+    Layout = null;
+}
+
+<link href="~/lib/twitter-bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/template.css" rel="stylesheet" />
+
+<div class="container" style="margin-top:100px;text-align:center;">
+    <div class="card border-success shadow">
+        <div class="card-header d-flex align-content-center ">
+            @if (Model.SiteInfo != null)
+            {
+                @if (Model.SiteInfo.CoverImageUrl != null)
+                {
+                    <img id="imgAttach" src="~/pictures/@Model.SiteInfo.LogoUrl" alt="no img" style="width:50px;height:50px;" class="img-thumbnail me-3" />
+                }
+                else
+                {
+                    <img id="imgAttach" src="~/img/logo.png" alt="no img" style="width:50px;height:50px;" class="img-thumbnail me-3" />
+                }
+
+
+                <h2 class="mt-2 text-black-50"><b>@Model.SiteInfo.Name</b></h2>
+            }
+            else
+            {
+                <h4><b>Professional Company</b></h4>
+                <img id="imgAttach" src="~/img/logo.png" alt="no img" style="width:200px;height:200px" class="img-thumbnail" />
+            }
+        </div>
+        <div class="card-body text-black-50" style="background-color:#F2F2F2">
+            @if (Model.SiteState != null)
+            {
+                <h5 class="card-title">@Model.SiteState.ClosingMessage</h5>
+            }
+            else
+            {
+                <h5 class="card-title">The site is temporarily closed for development</h5>
+            }
+
+
+        </div>
+        <div class="card-footer alert alert-success m-0">
+            @if (Model.Contact != null)
+            {
+                <div class="">
+                    <small class="card-title">@Model.Contact.Email</small>
+                    <br />
+                    <small class="card-title">@Model.Contact.Phone</small>
+                </div>
+            }
+            else
+            {
+                <h5 class="card-title">The site is temporarily closed for development</h5>
+            }
+        </div>
+    </div>
+</div>
+

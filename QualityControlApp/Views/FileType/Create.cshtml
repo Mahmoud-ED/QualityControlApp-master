@@ -1,0 +1,27 @@
+﻿@model QualityControlApp.Models.Entities.FileType
+
+@{
+    ViewBag.Title = "إضافة نوع ملف جديد";
+}
+
+<h2 class="mb-4">إضافة نوع ملف جديد</h2>
+
+<form asp-action="Create" method="post" class="row g-3">
+
+    <div class="col-md-6">
+        <div class="form-floating">
+            <input asp-for="TypeName" class="form-control" placeholder="نوع الملف" />
+            <label asp-for="TypeName">نوع الملف</label>
+            <span asp-validation-for="TypeName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-success">حفظ</button>
+        <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

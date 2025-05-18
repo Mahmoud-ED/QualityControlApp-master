@@ -1,0 +1,180 @@
+﻿@model QualityControlApp.ViewModels.CompanyQuestionVM
+@{
+    ViewData["Title"] = "Company Questions";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+@* Optional: Add some custom CSS for refined card appearance *@
+<style>
+    .card-enhanced {
+        border: none; /* Remove default border */
+        border-radius: 0.5rem; /* Add rounded corners */
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+    .card-enhanced:hover {
+        transform: translateY(-5px); /* Subtle lift effect on hover */
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important; /* Slightly larger shadow on hover */
+    }
+
+    .card-enhanced .card-body {
+        padding: 1.5rem; /* Slightly more padding */
+    }
+
+    .card-enhanced .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-enhanced .card-subtitle {
+        font-size: 0.9rem;
+        color: #6c757d; /* Bootstrap muted text color */
+    }
+
+    .card-enhanced .card-text strong {
+        font-weight: 500;
+    }
+
+     .status-badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+        vertical-align: middle;
+    }
+
+    .category-btn {
+         font-size: 0.8rem;
+         padding: 0.25rem 0.5rem;
+    }
+     /* Add a bottom border to the body to separate from the footer */
+    .card-enhanced .card-body-divider {
+        border-bottom: 1px solid #dee2e6; /* Bootstrap border color */
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="top-container d-flex justify-content-between align-items-center mb-4">
+        <div class="btn-group">
+            <a asp-action="Create" asp-route-Type="@ViewBag.Type" class="btn btn-primary">انشاء</a>
+            <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">رجوع الى القائمة</a>
+        </div>
+        <div class="select-container">
+            <input type="hidden" id="Type" value="@ViewBag.Type">
+            <select id="companyFilter" class="form-select" onchange="filterByCompany()">
+                <option value="">اختر الشركة</option>
+                @if (Model != null)
+                {
+                    foreach (var vm in Model.Company)
+                    {
+                        <option value="@vm.Id">@vm.Name</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="row" id="questionsCards">
+        @if (Model != null && Model.CompanyQuestion != null)
+        {
+            foreach (var question in Model.CompanyQuestion)
+            {
+                <div class="col-md-4 mb-4">
+                    @* Applying enhanced card classes *@
+                    <div class="card card-enhanced shadow h-100 border-start border-primary">
+                        <div class="card-body card-body-divider"> @* Added card-body-divider class *@
+                            <h5 class="card-title">@question.Company?.Name</h5>
+                            <h6 class="card-subtitle mb-3">تاريخ: @question.Created.ToString("yyyy-MM-dd")</h6> @* mb-3 for more space *@
+
+                            <p class="card-text">
+                                <strong>المستخدم:</strong> @question.ApplicationUser?.UserName<br />
+                                <strong>الحالة:</strong>
+                                @* Using Bootstrap Badges for Status *@
+                                <span class="badge status-badge @(question.Active ? "bg-success" : "bg-danger")">
+                                    @(question.Active ? "مكتمل" : "غير مكتمل")
+                                </span>
+                            </p>
+
+                        </div> @* End of card-body-divider *@
+
+                        <div class="card-body pt-0"> @* New body for categories, padding top 0 *@
+                             <div class="mb-3"> @* mb-3 for space below category buttons *@
+                                @if (question != null && Model.QuestionCategoryType != null)
+                                {
+                                    foreach (var categoryType in Model.QuestionCategoryType)
+                                    {
+                                        <a asp-controller="CompanyQuestion"
+                                           asp-action="Details"
+                                           asp-route-id="@question.Id"
+                                           asp-route-CategoryId="@categoryType.Id"
+                                           class="btn btn-outline-info btn-sm category-btn mb-1 me-1"> @* Added category-btn and me-1 *@
+                                            @categoryType.CategoryName
+                                        </a>
+                                    }
+
+                                    if (question.Type == "Old")
+                                    {
+                                        <p class="mt-2 text-muted"> @* Added text-muted class *@
+                                            <small>SPL (@question.SaftyGrid) : OCL (@question.SqurtyGrid)</small> @* Used small tag *@
+                                        </p>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">لا توجد أنواع تقييم</span> @* Added text-muted class *@
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light border-top d-flex justify-content-between align-items-center"> @* Changed bg-white to bg-light and added align-items-center *@
+                             <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-outline-secondary btn-sm">طباعة <i class="fas fa-print"></i></a> @* Added Print Icon *@
+                             <div class="btn-group"> @* Group edit/delete buttons *@
+                                <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> تعديل</a> @* Added Edit Icon *@
+                                <form asp-controller="CompanyQuestion" asp-action="Delete" asp-route-id="@question.Id" method="post" class="d-inline">
+                                     @Html.AntiForgeryToken()
+                                     <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا العنصر؟');"><i class="fas fa-trash-alt"></i> حذف</button> @* Added Delete Icon *@
+                                </form>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-warning text-center">لا توجد أسئلة شركات.</div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    function filterByCompany() {
+        var companyId = document.getElementById('companyFilter').value;
+        var Type = document.getElementById('Type').value;
+        console.log("Company ID: " + companyId);
+
+        $.ajax({
+            url: '@Url.Action("FilterByCompany", "CompanyQuestion")',
+            data: { companyId: companyId, Type: Type },
+            success: function (data) {
+                $('#questionsCards').html(data); // Update the cards area
+            },
+            error: function () {
+                alert("حدث خطأ أثناء محاولة تحميل البيانات");
+            }
+        });
+    }
+
+     // Optional: Keep the selected company in the filter dropdown after AJAX update
+    $(document).ajaxSuccess(function() {
+        var selectedCompanyId = $('#companyFilter').val();
+        $('#companyFilter').val(selectedCompanyId);
+    });
+</script>

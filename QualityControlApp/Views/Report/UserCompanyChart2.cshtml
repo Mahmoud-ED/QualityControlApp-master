@@ -1,0 +1,55 @@
+﻿@using Newtonsoft.Json
+@model RepUserCompanyQuestionVM
+@{
+  
+}
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير موظف شركة</title>
+    <style>
+        html, body {
+            font-family: Arial, sans-serif;
+            font-size: 1em;
+            margin-top: 50px;
+            margin-left: 30px;
+            margin-right: 30px;
+            height: 100%;
+        }
+
+        body {
+            overflow-x: hidden; 
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div style="    display: flex;
+    align-items: center;  
+    flex-direction: column;">
+        <div style="text-align: center;">
+            <h3>مخطط النسبة المئوية اجابات الموظف</h3>
+        </div>
+        <br /><br />
+    <br /><br />
+
+        <img src="@Model.ChartImg2" />
+
+
+    </div>
+
+   
+
+
+</body>
+</html>
+

@@ -1,0 +1,29 @@
+﻿@model IEnumerable<CompanyQuestion>
+
+@foreach (var question in Model)
+{
+    <tr>
+        <td>@question.Created.ToString("yyyy-MM-dd")</td>
+        <td>@question.Company?.Name</td>
+        <td>@question.ApplicationUser?.UserName</td>
+        <td class="@(question.Active ? "completed" : "incomplete")">
+            @(question.Active ? "مكتمل" : "غير مكتمل")
+        </td>
+
+        <td>
+            <a asp-controller="CompanyQuestion" asp-action="Details" asp-route-id="@question.Id" asp-route-CategoryId="ad536151-9d1c-42ff-a337-313c27423992" class="btn btn-info">SPL @question.SaftyGrid</a>
+        </td>
+
+        <td>
+            <a asp-controller="CompanyQuestion" asp-action="Details" asp-route-id="@question.Id" asp-route-CategoryId="669d4587-6a9b-42f9-9e14-c40d834dde5a" class="btn btn-info">COL @question.SqurtyGrid</a>
+        </td>
+
+        <td>
+            <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-info">
+                طباعة
+            </a>
+            <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-warning">تعديل</a>
+            <a asp-action="Delete" asp-route-id="@question.Id" class="btn btn-danger" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا العنصر؟');">حذف</a>
+        </td>
+    </tr>
+}

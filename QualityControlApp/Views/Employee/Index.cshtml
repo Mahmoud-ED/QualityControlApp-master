@@ -1,0 +1,164 @@
+﻿@model QualityControlApp.ViewModels.CompanyQuestionVM
+@{
+    ViewData["Title"] = "Company Questions";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+
+<style>
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px; /* إضافة مسافة بين البطاقات */
+    }
+
+    .card-header {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .card-body {
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    .completed {
+        color: green;
+        font-weight: bold;
+    }
+
+    .incomplete {
+        color: red;
+        font-weight: bold;
+    }
+
+    .btn {
+        margin: 5px;
+    }
+
+    .card-footer {
+        text-align: center;
+        padding-top: 10px;
+    }
+</style>
+
+<div class="container mt-5">
+
+
+    <div class="row" id="questionsCards">
+        @if (Model != null && Model.CompanyQuestion != null)
+
+        {
+
+            foreach (var question in Model.CompanyQuestion)
+
+            {
+                <div class="col-md-4 mb-4">
+                    @* Applying enhanced card classes *@
+                    <div class="card card-enhanced shadow h-100 border-start border-primary">
+                        <div class="card-body card-body-divider">
+                            @* Added card-body-divider class *@
+                            <h5 class="card-title">@question.Company?.Name</h5>
+                            <h6 class="card-subtitle mb-3">تاريخ: @question.Created.ToString("yyyy-MM-dd")</h6> @* mb-3 for more space *@
+
+                            <p class="card-text">
+                                <strong>المستخدم:</strong> @question.ApplicationUser?.UserName<br />
+                                <strong>الحالة:</strong>
+                                @* Using Bootstrap Badges for Status *@
+                                <span class="badge status-badge @(question.Active ? "bg-success" : "bg-danger")">
+                                    @(question.Active ? "مكتمل" : "غير مكتمل")
+                                </span>
+                            </p>
+
+                        </div> @* End of card-body-divider *@
+
+                        <div class="card-body pt-0">
+                            @* New body for categories, padding top 0 *@
+                            <div class="mb-3">
+                                @* mb-3 for space below category buttons *@
+
+
+                                    <a asp-controller="CompanyQuestion"
+                                       asp-action="Details"
+                                       asp-route-id="@question.Id"
+                                       class="btn btn-outline-info btn-sm category-btn mb-1 me-1">
+                                       عرض
+                                    </a>
+
+
+                                   @if (question.Type == "Old")
+                                    {
+                                        <p class="mt-2 text-muted">
+                                            @* Added text-muted class *@
+                                            <small>SPL (@question.SaftyGrid) : OCL (@question.SqurtyGrid)</small> @* Used small tag *@
+                                        </p>
+                                    }
+                                else
+                                {
+                                }
+
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light border-top d-flex justify-content-between align-items-center">
+                            @* Changed bg-white to bg-light and added align-items-center *@
+                            <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-outline-secondary btn-sm">طباعة <i class="fas fa-print"></i></a> @* Added Print Icon *@
+                            <div class="btn-group">
+                                @* Group edit/delete buttons *@
+                                <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> تعديل</a> @* Added Edit Icon *@
+                                <form asp-controller="CompanyQuestion" asp-action="Delete" asp-route-id="@question.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا العنصر؟');"><i class="fas fa-trash-alt"></i> حذف</button> @* Added Delete Icon *@
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        }
+
+        else
+
+        {
+            <div class="col-12">
+                <div class="alert alert-warning text-center">لا توجد أسئلة شركات.</div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<!-- Bootstrap JS (اختياري، ولكن مفيد للتفاعلات مثل القوائم المنسدلة) -->
+<script src="https://cdn.jsdelivr.net/npm/popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    function filterByCompany() {
+        var companyId = document.getElementById('companyFilter').value;
+        var Type = document.getElementById('Type').value;
+        console.log("Company ID: " + companyId);
+
+        $.ajax({
+            url: '@Url.Action("FilterByCompany", "CompanyQuestion")',
+            data: { companyId: companyId, Type: Type },
+            success: function (data) {
+                $('#questionsCards').html(data); // Update the cards area
+            },
+            error: function () {
+                alert("حدث خطأ أثناء محاولة تحميل البيانات");
+            }
+        });
+    }
+
+     // Optional: Keep the selected company in the filter dropdown after AJAX update
+    $(document).ajaxSuccess(function() {
+        var selectedCompanyId = $('#companyFilter').val();
+        $('#companyFilter').val(selectedCompanyId);
+    });
+</script>

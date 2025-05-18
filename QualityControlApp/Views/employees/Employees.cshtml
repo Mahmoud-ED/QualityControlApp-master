@@ -1,0 +1,122 @@
+﻿@model IEnumerable<Employee>
+
+
+@{
+    ViewBag.Title = "Employees";
+}
+<partial name="Partial/_datatables-css"></partial>
+
+<style>
+    tr {
+        height: 50px;
+    }
+</style>
+
+<h4><b>@ViewContext.RouteData.Values["Action"]?.ToString()</b></h4>
+<hr />
+<div style="min-height:74vh;">
+    <form method="post">
+
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between">
+                <a asp-action="CreateEmployee" class="btn btn-primary mb-2">Create Employee</a>
+                <a asp-action="Users" asp-controller="Users" class="btn btn-primary mb-2 px-5">Users List</a>
+            </div>
+        </div>
+        <div style="min-height:200px;">
+            <table id="table1" class="table table-hover table-striped table-bordered w-100">
+                <thead style="background-color:#cee0ed">
+                    <tr>
+                        <th>
+                            N
+                        </th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Phone Number
+                        </th>
+                        <th>
+                            Address
+                        </th>
+                        <th>
+                            Experience
+                        </th>
+                        <th>
+                            Specialization
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                        <th>
+                            Request
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td style="text-align:center;">
+                                    @i
+                                </td>
+                                <td>
+                                    <a asp-action="EditEmployee" asp-route-id="@item.Id">
+                                        @item.Name
+                                    </a>
+                                </td>
+                                <td>
+                                    @item.PhoneNumber
+                                </td>
+                                <td>
+                                    @item.Address
+                                </td>
+                                <td>
+                                    @item.YearsOfExperience <span>  (Years)</span>
+                                </td>
+                                <td>
+                                    @item.Specialization
+                                </td>
+                                <td>
+                                    @item.ApplicationUser.Email
+                                </td>
+
+                                <td>
+                                    <input type="hidden" name="approval" value="Employees" />
+
+                                    @if (item.ApplicationUser.Approval == false)
+                                    {
+                                        <a asp-action="ApprovalEmployee" asp-route-userId="@item.UserId" class="btn btn-success">Approval</a>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </form>
+</div>
+
+<partial name="Partial/_datatables-js"></partial>
+
+@*-------------------------------------------------*@
+<script>
+    var table = new DataTable('#table1', {
+        language: {
+            /*  url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/ar.json', */ /* arabic */
+        },
+        // table.destroy();
+
+        scrollX: true
+    });
+
+</script>
+
+
