@@ -1,0 +1,244 @@
+﻿@model QualityControlApp.ViewModels.CompanyQuestionContentVM
+
+<form asp-controller="CompanyQuestion" id="questionDetailsFormPartial">
+    <div class="card shadow-sm mb-4 content-section" id="questionDetailsPartialContent">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 d-flex align-items-center"><i class="bi bi-list-check me-2 text-primary"></i>Question Details</h5>
+        </div>
+         
+            
+          <div class="card-body">
+            @if (Model.CompanyQuestionContent != null && Model.CompanyQuestionContent.Any())
+            {
+                // تجميع الأسئلة حسب SectionContent
+                // تأكد من أن SectionContent ليس null أو فارغًا إذا كنت لا تريد مجموعة للأسئلة بدون قسم
+                var groupedQuestions = Model.CompanyQuestionContent
+                                        .Where(q => q.Question != null) // ضمان وجود كائن السؤال
+                                        .GroupBy(q => q.Question.SectionContent ?? "Uncategorized Questions") // استخدم قيمة افتراضية إذا كان SectionContent فارغًا
+                                        .OrderBy(g => g.Key); // ترتيب الأقسام (اختياري)
+
+                foreach (var group in groupedQuestions)
+                {
+                    <div class="section-group mb-4">
+                        @if (!string.IsNullOrEmpty(group.Key) && group.Key != "Uncategorized Questions")
+                        {
+                            <h5 class="section-title mb-3 pb-2 border-bottom">
+                                <i class="bi bi-collection-fill me-2 text-secondary"></i>@group.Key
+                            </h5>
+                        }
+                        else if (group.Key == "Uncategorized Questions" && group.Any()) // عرض فقط إذا كان هناك أسئلة غير مصنفة
+                        {
+                             <h5 class="section-title mb-3 pb-2 border-bottom fst-italic text-muted">
+                                <i class="bi bi-collection me-2 text-secondary"></i>@group.Key
+                            </h5>
+                        }
+
+                        <div class="question-cards-container">
+                            @foreach (var questionContentItem in group.OrderBy(q => q.Question.SectionContent ?? "")) // ترتيب الأسئلة داخل كل قسم (افترض وجود خاصية Order)
+                            {
+                                // الـ questionContentItem هو CompanyQuestionContent
+                                <div class="card mb-3 question-card @(questionContentItem.Inspect == "Ns" ? "ns-highlight" : "border-light")" data-question-id="@questionContentItem.QuestionId">
+                                    <div class="card-body p-3">
+                                        <input type="hidden" class="row-id" value="@questionContentItem.Id" />
+                                        <div class="row g-3">
+                                            <div class="col-md-7 question-content-col">
+                                                <strong class="d-block mb-2"><i class="bi bi-question-circle me-1"></i>Question:</strong>
+                                                <div class="question-content-text">@Html.Raw(questionContentItem.Question?.Content)</div>
+                                            </div>
+                                            <div class="col-md-5 question-controls-col border-start ps-md-3">
+                                                @if (Model.CompanyQuestion.Type == "Old")
+                                                {
+                                                    <div class="row g-2 align-items-end">
+                                                        <div class="col">
+                                                            <label class="form-label small mb-1"><i class="bi bi-check2-circle me-1 text-success"></i>Points</label>
+                                                            <input type="number" value="@questionContentItem.Score" class="form-control form-control-sm text-center row-score score-input-visual" />
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <label class="form-label small mb-1"><i class="bi bi-bullseye me-1 text-secondary"></i>Max</label>
+                                                            @* MaxGrid من السؤال الأصلي *@
+                                                            <div class="text-center fw-bold p-1 border rounded bg-light">@(questionContentItem.Question?.MaxGrid)</div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else // النوع "New"
+                                                {
+                                                    <div class="inspect-notes-controls">
+                                                        <div class="mb-2">
+                                                            <label class="form-label small mb-1"><i class="bi bi-clipboard-check me-1 text-primary"></i>Inspection</label>
+                                                            <select class="form-select form-select-sm row-inspect inspect-select-visual">
+                                                                <option value="">Choose</option>
+                                                                <option value="S" selected="@(questionContentItem.Inspect == "S")">S</option>
+                                                                <option value="Ns" selected="@(questionContentItem.Inspect == "Ns")">Ns</option>
+                                                                <option value="Na" selected="@(questionContentItem.Inspect == "Na")">Na</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="nots-container mb-2" style="@(questionContentItem.Inspect == "Ns" ? "" : "display: none;")">
+                                                            <label class="form-label small mb-1"><i class="bi bi-pencil-square me-1 text-warning"></i>Nots</label>
+                                                            <textarea class="form-control form-control-sm nots-text notes-textarea-visual" placeholder="Enter notes..." rows="2">@questionContentItem.Nots</textarea>
+                                                        </div>
+                                                        <div class="level-container" style="@(questionContentItem.Inspect == "Ns" ? "" : "display: none;")">
+                                                            <label class="form-label small mb-1"><i class="bi bi-bar-chart-line me-1 text-danger"></i>Level</label>
+                                                            <select class="form-select form-select-sm nots-level level-select-visual">
+                                                                <option value="0" selected="@(questionContentItem.Level == 0)">Level 0</option>
+                                                                <option value="1" selected="@(questionContentItem.Level == 1)">Level 1</option>
+                                                                <option value="2" selected="@(questionContentItem.Level == 2)">Level 2</option>
+                                                                <option value="3" selected="@(questionContentItem.Level == 3)">Level 3</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            } @* نهاية حلقة الأسئلة داخل المجموعة *@
+                        </div> @* نهاية question-cards-container لكل مجموعة *@
+                    </div> @* نهاية section-group *@
+                } @* نهاية حلقة المجموعات *@
+            }
+            else
+            {
+                <div class="alert alert-info">No Question.</div>
+            }
+        </div> @* نهاية card-body *@
+ 
+    
+        
+        </div>
+
+    <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2 action-buttons-container content-section">
+           @if (Model.CompanyQuestion != null && !Model.CompanyQuestion.Active)
+        {
+            <div data-company-question-id="@Model.CompanyQuestion.Id">
+                <button id="saveButtonPartialView" type="button" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-save me-2"></i>
+                   Save
+                </button>
+            </div>
+        }
+        
+        @if (Model.CompanyQuestion != null)
+        {
+            <a asp-action="Index" asp-route-Type="@Model.CompanyQuestion.Type" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+               Back
+            </a>
+        }
+    </div>
+</form>
+// داخل _QuestionDetailsPartial.cshtml
+<script>
+    function initializeQuestionDetailsScripts() {
+        console.log('------------------------------------------------------');
+        console.log('STEP 1: initializeQuestionDetailsScripts CALLED.');
+        
+        // الحاوية التي يتم فيها .html(result) - هذا هو السياق الصحيح للبحث عن كل شيء داخل البارشل
+        var $partialHostContainer = $('#questionDetailsSection'); 
+        if ($partialHostContainer.length === 0) {
+            console.error('CRITICAL ERROR: Host container #questionDetailsSection NOT FOUND.');
+            return;
+        }
+        console.log('STEP 2: Host container #questionDetailsSection FOUND.');
+
+        // الحاوية الداخلية للأسئلة فقط (إذا كنت تحتاجها بشكل منفصل)
+        var $questionsContainer = $partialHostContainer.find('#questionDetailsPartialContent');
+        if ($questionsContainer.length === 0) {
+            // هذا ليس خطأً حرجًا إذا كان الزر خارجها، ولكنه مهم إذا كانت السكربتات الأخرى تعتمد عليها
+            console.warn('WARNING: Inner questions container #questionDetailsPartialContent NOT FOUND within #questionDetailsSection.');
+        } else {
+            console.log('INFO: Inner questions container #questionDetailsPartialContent FOUND.');
+        }
+
+        // --- الكود الخاص بـ UI updates (inspect, level, etc.) ---
+        // هذا الكود يجب أن يستخدم $questionsContainer إذا كان يستهدف عناصر الأسئلة فقط
+        try {
+            if ($questionsContainer.length > 0) { // نفذ فقط إذا وجدت حاوية الأسئلة
+                function updateNsDisplay(questionCard) {
+                    var inspectSelect = questionCard.find('.row-inspect');
+                    var selectedValue = inspectSelect.val();
+                    var notsContainer = questionCard.find('.nots-container');
+                    var levelContainer = questionCard.find('.level-container');
+                    if (selectedValue === 'Ns') { notsContainer.slideDown(200); levelContainer.slideDown(200); questionCard.addClass('ns-highlight'); }
+                    else { notsContainer.slideUp(200); levelContainer.slideUp(200); questionCard.removeClass('ns-highlight'); }
+                }
+                // ربط الأحداث بحاوية الأسئلة
+                $questionsContainer.off('change', '.row-inspect').on('change', '.row-inspect', function () {
+                    var questionCard = $(this).closest('.question-card');
+                    updateNsDisplay(questionCard);
+                });
+                $questionsContainer.find('.question-card').each(function () {
+                    var questionCard = $(this);
+                    if (questionCard.find('.row-inspect').val() === 'Ns') {
+                        questionCard.addClass('ns-highlight'); questionCard.find('.nots-container').show(); questionCard.find('.level-container').show();
+                    } else {
+                        questionCard.find('.nots-container').hide(); questionCard.find('.level-container').hide();
+                    }
+                });
+                console.log('STEP 3: UI update scripts for questions executed (using $questionsContainer).');
+            } else {
+                 console.log('STEP 3: Skipped UI update scripts for questions as #questionDetailsPartialContent was not found.');
+            }
+        } catch (e) {
+            console.error('ERROR in UI update scripts for questions:', e);
+            // لا تتوقف بالضرورة هنا، فقد يكون زر الحفظ لا يزال يعمل
+        }
+        // --- نهاية كود UI updates ---
+
+        // البحث عن زر الحفظ *داخل الحاوية المضيفة للبارشل بأكمله*
+        var $saveButton = $partialHostContainer.find('#saveButtonPartialView');
+
+        if ($saveButton.length === 0) {
+            console.error('ERROR (STEP 4): Save button #saveButtonPartialView NOT FOUND within #questionDetailsSection.');
+            console.log('HTML content of #questionDetailsSection:', $partialHostContainer.html());
+            return; 
+        }
+        
+        console.log('STEP 5: Save button #saveButtonPartialView FOUND within #questionDetailsSection. Attaching click handler.');
+        
+        $saveButton.off('click').on('click', function (event) {
+            event.preventDefault();
+            console.log('STEP 6: Save button CLICKED! Handler working.');
+            
+            var $button = $(this);
+            $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> جاري الحفظ...');
+            var dataToSend = [];
+
+            // جمع البيانات يجب أن يكون من داخل حاوية الأسئلة ($questionsContainer)
+            // أو إذا كانت بطاقات الأسئلة موجودة مباشرة تحت $partialHostContainer
+            var $cardsSearchContext = $questionsContainer.length > 0 ? $questionsContainer : $partialHostContainer;
+
+            $cardsSearchContext.find('.question-card').each(function () {
+                var card = $(this);
+                var id = card.find('.row-id').val();
+                var scoreInput = card.find('.row-score');
+                var inspectSelect = card.find('.row-inspect');
+                var notesText = card.find('.nots-text');
+                var levelSelect = card.find('.nots-level');
+                var scoreValue = scoreInput.length > 0 ? parseInt(scoreInput.val()) : null;
+                var inspectValue = inspectSelect.length > 0 ? inspectSelect.val() : null;
+                var notesValue = notesText.length > 0 ? notesText.val() : null;
+                var levelValue = levelSelect.length > 0 ? parseInt(levelSelect.val()) : null;
+                if (scoreInput.length > 0 && isNaN(scoreValue)) { scoreValue = null; }
+                if (levelSelect.length > 0 && isNaN(levelValue)) { levelValue = null; }
+                if (id) { dataToSend.push({ Id: id, Score: scoreValue, Inspect: inspectValue, Nots: notesValue, Level: levelValue }); } // Nots
+            });
+
+            console.log('Data to send for save:', JSON.stringify(dataToSend));
+            $.ajax({
+                type: 'POST', url: '/CompanyQuestion/UpdateQuestionContent', data: JSON.stringify(dataToSend), contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    console.log('Save AJAX successful.', response); alert('تم حفظ البيانات بنجاح ✅');
+                    var currentUrl = window.location.href;
+                    if (currentUrl.includes('#questionDetailsSection')) { window.location.reload(); }
+                    else { if (currentUrl.includes('?')) { window.location.href = currentUrl + "&anchor=questionDetailsSection#questionDetailsSection"; } else { window.location.href = currentUrl + "?anchor=questionDetailsSection#questionDetailsSection"; } }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Save AJAX failed.", status, error, xhr.responseText); alert('حدث خطأ أثناء الحفظ ❌');
+                    $button.prop('disabled', false).html('<i class="bi bi-save me-2"></i> حفظ التغييرات');
+                }
+            });
+        });
+        console.log('STEP 7: Click handler ATTACHED to #saveButtonPartialView.');
+        console.log('------------------------------------------------------');
+    }
+</script>

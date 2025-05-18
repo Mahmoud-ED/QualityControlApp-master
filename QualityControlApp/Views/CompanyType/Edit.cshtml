@@ -1,0 +1,62 @@
+﻿@model QualityControlApp.Models.Entities.CompanyType
+
+@{
+    ViewData["Title"] = "Edit Company Type";
+    // Layout = "_Layout"; // Uncomment if you have a main layout file
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Company Type</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        @* Adjust col-md-X for desired form width *@
+        <form asp-action="Edit" method="post">
+            @* asp-antiforgery="true" is added automatically by the form tag helper for POST methods *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div> @* Shows model-level errors *@
+
+            @* Hidden field for the ID. This is crucial for updating the correct entity. *@
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-3">
+                @* mb-3 for margin-bottom from Bootstrap 5 *@
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span> @* Shows validation errors for Name field *@
+            </div>
+
+            @*
+            Similar to Create, the 'Company' list is a navigation property.
+            If you need to manage associations (e.g., select companies belonging to this type),
+            that would typically be a more complex UI element like a multi-select list,
+            and the logic for handling it would be in the controller.
+            For a simple Edit page focused on CompanyType's own properties, we don't include it.
+            *@
+
+            <div class="form-group mt-4">
+                @* mt-4 for margin-top from Bootstrap 5 *@
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                @* Optional: Add a "Details" button if you have a Details view *@
+                @*
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info ms-2">
+                <i class="fas fa-info-circle"></i> Details
+                </a>
+                *@
+            </div>
+        </form>
+    </div>
+</div>
+
+@* This section is important for client-side validation *@
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

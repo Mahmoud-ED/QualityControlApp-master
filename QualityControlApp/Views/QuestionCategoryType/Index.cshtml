@@ -2,9 +2,9 @@
 
 @{
     ViewData["Title"] = ViewContext.RouteData.Values["controller"]?.ToString();
+
     // Layout = null;
 }
-
 
 <div style="min-height:80vh;">
     <h4>
@@ -13,16 +13,14 @@
     <hr />
 
     @if (Model.Any())
+
     {
         <p>
-            <a asp-action="Create" class="btn btn-primary">جديد</a>
+            <a asp-action="Create" class="btn btn-primary">New</a>
         </p>
         <span>QuestionCategoryCount Count: </span>
 
         @ViewData["QuestionCategoryCount"]
-        ;
-
-        @* @ViewBag.QuestionCategoryCount; *@
 
         <table id="table1" class="table table-hover table-striped table-bordered">
             <thead class=" table-primary">
@@ -31,10 +29,10 @@
                         N
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.CategoryName )
+                        @Html.DisplayNameFor(model => model.CategoryName)
                     </th>
                     <th>
-                        عدد الانواع
+                        Number of Types
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model.Created)
@@ -48,18 +46,21 @@
             <tbody>
                 @{
                     int i = 0;
+
                     foreach (var item in Model)
+
                     {
+
                         i++;
                         <tr>
                             <td>
                                 @i
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.CategoryName )
+                                @Html.DisplayFor(modelItem => item.CategoryName)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.QuestionType.Count )
+                                @Html.DisplayFor(modelItem => item.QuestionType.Count)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Created)
@@ -68,9 +69,9 @@
                                 @Html.DisplayFor(modelItem => item.Modified)
                             </td>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info">تعديل</a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-warning">تفاصيل</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">حذف</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info">Edit</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-warning">Details</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
                             </td>
                         </tr>
                     }
@@ -78,20 +79,20 @@
             </tbody>
         </table>
     }
+
     else
+
     {
         <div class="card">
             <div class="card-header">
-                لاتوجد تصنيفات
+                No Categories Available
             </div>
             <p>
-                <a asp-action="Create" class="btn btn-primary">جديد</a>
+                <a asp-action="Create" class="btn btn-primary">New</a>
             </p>
             <div class="card-body">
-                <a asp-controller="QuestionCategoryType" asp-action="Create" class="btn btn-primary">انشاء</a>
+                <a asp-controller="QuestionCategoryType" asp-action="Create" class="btn btn-primary">Create</a>
             </div>
         </div>
     }
 </div>
-
-

@@ -1,197 +1,512 @@
-﻿/* لتوسيع مربع الملاحظات */
-.wide-textarea {
-    width: 100%; /* اجعل عرضه يأخذ 100% من مساحة الحاوية بتاعته */
-    min-height: 80px; /* تحديد حد أدنى للارتفاع عشان يكون فيه مساحة أكبر للكتابة */
-    padding: 0.5rem; /* إضافة مساحة داخلية بسيطة */
-    font-size: 0.9rem; /* تعديل حجم الخط لو محتاج */
+﻿:root {
+    --qc-primary-blue: #005A9C;
+    --qc-secondary-blue: #E6F0F7;
+    --qc-accent-orange: #FF6F00;
+    --qc-gray-dark: #333;
+    --qc-gray-medium: #6c757d;
+    --qc-gray-light: #f8f9fa;
+    --qc-white: #ffffff;
+    --qc-success: #198754;
+    --qc-warning: #ffc107;
+    --qc-danger: #dc3545;
+    --qc-info: #0dcaf0; /* Added from potential usage */
+    --qc-border-radius: 0.375rem;
+    --qc-shadow-sm: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    --qc-shadow-md: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    --qc-shadow-lg: 0 1rem 3rem rgba(0,0,0,.175); /* Added for emphasis */
 }
 
-.styled-select {
-    width: 130px; /* أو العرض اللي اخترته */
-    padding: 0.3rem 1.2rem 0.3rem 0.6rem; /* زودنا الـ padding-right هنا */
-    font-size: 0.9rem;
-    border-radius: 0.25rem;
-    border: 1px solid #ced4da;
-    background-color: #fff;
-    /* إضافة ستايل عشان مكان السهم يكون واضح */
-    appearance: none; /* لإزالة السهم الافتراضي */
-    -webkit-appearance: none; /* للمتصفحات اللي بتستخدم WebKit */
-    background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
-    background-repeat: no-repeat;
-    background-position-x: calc(100% - 0.5rem);
-    background-position-y: center;
-    background-size: 0.8rem;
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--qc-secondary-blue);
+    color: var(--qc-gray-dark);
 }
 
-/* عشان السهم ميتغطاش لما القائمة تكون مركزة */
-.styled-select:focus {
-    outline: none; /* لإزالة الإطار الافتراضي عند التركيز لو مش عايزينه */
-    border-color: #007bff; /* تغيير لون الإطار عند التركيز */
-    /* ممكن تزود padding-right أكتر لو لسه فيه تغطية */
+/* --- Page Header (from first view, slightly adapted) --- */
+.page-header {
+    background-color: var(--qc-white);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 1rem; /* Space between items when wrapped */
 }
 
-.question-inspect-layout {
-    display: grid;
-    grid-template-columns: auto 1fr; /* عمود تلقائي للعlabel وعمود ياخد باقي المساحة للملاحظات والمستوى */
-    grid-template-rows: auto auto auto; /* صف لكل جزء: label، ملاحظات، مستوى */
-    gap: 0.5rem; /* مسافة بين العناصر */
-    padding: 0.5rem; /* مساحة داخلية */
-}
-
-.inspect-label {
-    font-weight: bold;
-    text-align: center;
-    /* ممكن تضيف ألوان أو خلفيات مميزة للـ N و Ns */
-    /* مثال: */
-    /* &.inspect-n { color: green; } */
-    /* &.inspect-ns { color: orange; } */
-}
-
-.notes-section {
-    grid-column: 1 / 3; /* ياخد كامل العرض */
-}
-
-.level-section {
-    grid-column: 1 / 3; /* ياخد كامل العرض */
-}
-
-.notes-section .form-label {
-    display: block; /* عشان يكون الليبل فوق التيكستاريا */
-    margin-bottom: 0.2rem;
-}
-
-.level-section .form-label {
-    display: block; /* عشان يكون الليبل فوق قيمة المستوى */
-    margin-bottom: 0.2rem;
-}
-
-.wide-textarea {
-    width: 100%;
-    min-height: 60px; /* ممكن تقلل الارتفاع شوية */
-    padding: 0.3rem;
-    font-size: 0.85rem;
-}
-
-
-.card-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr; /* 3 cards per row */
-    gap: 20px;
-}
-
-.question-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.card-body {
-    padding: 20px;
-}
-
-.card-title {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.nots-container {
-    display: none;
-}
-
-.card select,
-.card input,
-.card textarea {
-    width: 100%;
-}
-
-.card .row {
-    margin-bottom: 10px;
-}
-.question-type-card-enhanced {
-    max-width: 280px; /* تم تصغير أقصى عرض للبطاقة */
-    margin-left: auto; /* لتوسيط البطاقة داخل العمود */
-    margin-right: auto; /* لتوسيط البطاقة داخل العمود */
-    border: none; /* إزالة الحدود الافتراضية للبطاقة */
-    border-radius: 8px; /* زوايا مستديرة أقل قليلاً */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* إضافة انتقال سلس للحركة والظل */
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* ظل أقل قليلاً ليناسب الحجم الأصغر */
-    position: relative; /* للسماح بوضع عناصر داخلها بشكل مطلق إذا لزم الأمر */
-    overflow: hidden; /* للتأكد من أن الزوايا المستديرة تعمل بشكل صحيح مع المحتوى */
-    text-decoration: none; /* التأكد من إزالة خط تحت الرابط */
-    color: inherit; /* وراثة لون الخط ليكون التغيير على البطاقة فقط */
-}
-
-    /* تأثير عند تمرير الفأرة (hover effect) */
-    .question-type-card-enhanced:hover {
-        transform: translateY(-5px); /* رفع البطاقة أقل قليلاً للأعلى */
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* زيادة الظل أقل من السابق */
+    .page-header h1 {
+        font-size: 1.75rem; /* Standardized size */
+        font-weight: 700;
+        color: var(--qc-primary-blue);
+        margin: 0;
+    }
+    /* Generic back button if needed, specific page actions below */
+    .page-header .btn-back {
+        font-weight: 600;
+        color: var(--qc-gray-medium);
+        border-color: var(--qc-gray-medium);
     }
 
-/* تحسين مظهر الأيقونة - تصغير حجم الدائرة والأيقونة قليلاً */
-.icon-circle {
-    width: 40px; /* حجم دائرة الأيقونة أصغر */
-    height: 40px;
-    background-color: #e9ecef; /* لون خلفية خفيف للدائرة */
-    border-radius: 50%; /* لجعلها دائرة كاملة */
+        .page-header .btn-back:hover {
+            background-color: var(--qc-gray-light);
+            color: var(--qc-gray-dark);
+        }
+
+        .page-header .btn-back i {
+            margin-right: 0.5rem;
+        }
+
+
+/* --- Header Actions (from second view) --- */
+.header-actions .btn {
+    margin-left: 0.5rem; /* Space between buttons */
+    font-weight: 600;
+}
+
+    .header-actions .btn i {
+        margin-right: 0.5rem; /* Adjust for RTL if needed: margin-left */
+    }
+
+.header-actions .btn-primary { /* Ensure this uses theme variables if not default BS */
+    background-color: var(--qc-primary-blue);
+    border-color: var(--qc-primary-blue);
+}
+
+    .header-actions .btn-primary:hover {
+        background-color: #004a80; /* Darker shade of primary */
+        border-color: #004a80;
+    }
+
+.header-actions .btn-outline-secondary {
+    border-color: var(--qc-gray-medium);
+    color: var(--qc-gray-medium);
+}
+
+    .header-actions .btn-outline-secondary:hover {
+        background-color: var(--qc-gray-light);
+        color: var(--qc-gray-dark);
+    }
+
+
+/* --- Form Panel (from first view) --- */
+.form-panel {
+    background-color: var(--qc-white);
+    padding: 2rem 2.5rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-md);
+    border: 1px solid #dee2e6;
+    max-width: 700px;
+    margin: 0 auto 2rem auto; /* Added bottom margin */
+}
+
+    .form-panel .form-label,
+    .filter-panel .form-label { /* Apply also to filter panel labels */
+        font-weight: 600;
+        color: var(--qc-primary-blue);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.9rem; /* Standardized */
+    }
+
+        .form-panel .form-label i {
+            margin-right: 0.5rem;
+            width: 1.1em;
+            text-align: center;
+            color: var(--qc-accent-orange);
+        }
+
+    .form-panel .form-select,
+    .form-panel .form-check-input,
+    .filter-panel .form-control,
+    .filter-panel .form-select {
+        border-radius: var(--qc-border-radius);
+        font-size: 0.9rem; /* Standardized */
+    }
+
+    .form-panel .form-select {
+        padding: .5rem 1rem;
+    }
+
+        .form-panel .form-select:focus,
+        .form-panel .form-check-input:focus,
+        .filter-panel .form-control:focus,
+        .filter-panel .form-select:focus {
+            border-color: var(--qc-primary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 90, 156, 0.25);
+        }
+
+.form-select option[value=""] {
+    color: var(--qc-gray-medium);
+}
+
+.form-panel .btn-submit {
+    background-color: var(--qc-primary-blue);
+    border-color: var(--qc-primary-blue);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+    .form-panel .btn-submit:hover {
+        background-color: #004a80;
+        border-color: #004a80;
+    }
+
+    .form-panel .btn-submit i {
+        margin-right: 0.5rem;
+    }
+
+.form-panel .text-danger {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* --- Filter Panel (from second view) --- */
+.filter-panel {
+    background-color: var(--qc-white);
+    padding: 1.5rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-sm);
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    overflow: hidden;
+    max-height: 0; /* Start hidden */
+    opacity: 0; /* Start hidden */
+}
+
+    .filter-panel.show {
+        max-height: 500px; /* Adjust as needed */
+        opacity: 1;
+    }
+
+/* --- General Card Styling (enhanced from second view) --- */
+.question-card { /* This can be a generic .content-card or .data-card */
+    background-color: var(--qc-white);
+    border: 1px solid #e0e0e0;
+    border-radius: var(--qc-border-radius);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+    border-left: 5px solid var(--qc-primary-blue); /* Accent border */
     display: flex;
-    justify-content: center; /* توسيط الأيقونة أفقياً */
-    align-items: center; /* توسيط الأيقونة عمودياً */
-    flex-shrink: 0; /* منع الدائرة من التقلص */
+    flex-direction: column;
+}
+
+    .question-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--qc-shadow-md);
+    }
+
+.question-card-header {
+    padding: 0.75rem 1.25rem;
+    background-color: var(--qc-gray-light);
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.question-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--qc-primary-blue);
+    margin-bottom: 0;
+}
+
+.question-card-status { /* General status badge */
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3em 0.7em;
+    border-radius: 1rem; /* Pill shape */
+}
+
+    .question-card-status.status-active {
+        background-color: var(--qc-success);
+        color: var(--qc-white);
+    }
+
+    .question-card-status.status-inactive {
+        background-color: var(--qc-gray-medium);
+        color: var(--qc-white);
+    }
+
+    .question-card-status.status-pending {
+        background-color: var(--qc-warning);
+        color: var(--qc-gray-dark);
+    }
+/* Add more statuses as needed */
+
+.question-card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+}
+
+.question-details dl { /* For definition lists inside cards */
+    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.question-details dt {
+    font-weight: 600;
+    color: var(--qc-gray-medium);
+}
+
+    .question-details dt i {
+        margin-right: 0.4rem;
+        color: var(--qc-primary-blue);
+        width: 16px;
+        text-align: center;
+    }
+
+.question-details dd {
+    margin-bottom: 0;
+    color: var(--qc-gray-dark);
+}
+
+.question-card-footer {
+    padding: 0.75rem 1.25rem;
+    background-color: var(--qc-gray-light);
+    border-top: 1px solid #e0e0e0;
+    text-align: end;
+}
+
+    .question-card-footer .btn {
+        font-size: 0.85rem;
+        margin-left: 0.3rem;
+    }
+
+        .question-card-footer .btn i {
+            margin-right: 0.3rem;
+        }
+
+    .question-card-footer .btn-outline-primary {
+        color: var(--qc-primary-blue);
+        border-color: var(--qc-primary-blue);
+    }
+
+        .question-card-footer .btn-outline-primary:hover {
+            background-color: var(--qc-secondary-blue); /* Lighter blue for hover on outline */
+        }
+
+    .question-card-footer .btn-outline-secondary {
+        color: var(--qc-gray-medium);
+        border-color: var(--qc-gray-medium);
+    }
+
+        .question-card-footer .btn-outline-secondary:hover {
+            background-color: var(--qc-gray-light); /* Use a very light gray */
+        }
+
+/* --- Question Type Summary Card / Feature Card (from second view) --- */
+.question-type-card { /* Renamed from -enhanced for broader use if applicable, or keep specific name */
+    /* max-width: 280px; /* This might be too restrictive for a theme, consider column widths */
+    /* margin-left: auto; margin-right: auto; /* Better handled by grid/flex layout */
+    border: 1px solid #e0e0e0; /* Default border, can be overridden by shadow or active state */
+    border-radius: var(--qc-border-radius);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--qc-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    background-color: var(--qc-white); /* Ensure background for cards */
+    height: 100%; /* Good for consistent card height in a row */
+    display: flex; /* For flex-column content */
+    flex-direction: column;
+}
+
+    .question-type-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--qc-shadow-md);
+    }
+
+    .question-type-card .card-body { /* Assuming Bootstrap card structure */
+        padding: 1.2rem;
+        flex-grow: 1; /* Allow body to grow */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .question-type-card .card-title { /* Assuming Bootstrap card structure */
+        font-size: 1rem;
+        font-weight: 700; /* Added for emphasis */
+        color: var(--qc-primary-blue); /* Title color */
+        margin-bottom: 0.4rem;
+    }
+
+    .question-type-card .card-text { /* Assuming Bootstrap card structure */
+        font-size: 0.85rem;
+        color: var(--qc-gray-medium); /* Subdued text color */
+        margin-bottom: 0.8rem;
+    }
+
+    .question-type-card .progress {
+        height: 8px;
+        border-radius: 4px; /* Rounded progress bar */
+        background-color: #e9ecef; /* Light background for progress track */
+        margin-top: auto; /* Pushes progress bar to bottom if card body is flex */
+    }
+
+    .question-type-card .progress-bar {
+        transition: width 0.6s ease;
+    }
+    /* Active state for these cards */
+    .question-type-card.active-question-type-card {
+        border-width: 2px !important; /* Use !important carefully */
+        background-color: #fff8e1; /* Light yellow highlight */
+        border-color: var(--qc-warning) !important; /* Orange/Yellow border */
+        box-shadow: 0 4px 10px rgba(249, 200, 81, 0.4); /* var(--qc-shadow-md) with warning color hint */
+        transform: translateY(-3px); /* Slight lift */
+    }
+/* Icon circle for feature cards */
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    background-color: var(--qc-secondary-blue); /* Use theme color */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 0.75rem; /* Space next to title */
 }
 
     .icon-circle i {
-        color: #007bff; /* لون الأيقونة الأساسي (يمكن تغييرها) */
-        font-size: 1.4rem; /* حجم الأيقونة أصغر قليلاً */
+        color: var(--qc-primary-blue); /* Icon color */
+        font-size: 1.4rem;
     }
 
-/* تحسين الخطوط والمسافات */
-.question-type-card-enhanced .card-body {
-    padding: 1.2rem; /* تم تصغير الـ padding الداخلي للبطاقة (كان p-3 في الأصل، الآن 1.2rem) */
-}
-
-.question-type-card-enhanced .card-title {
-    font-size: 1rem; /* حجم خط العنوان أصغر قليلاً */
-    margin-bottom: 0.4rem; /* مسافة أقل أسفل العنوان */
-}
-
-.question-type-card-enhanced .card-text {
-    font-size: 0.85rem; /* حجم خط النقاط أصغر قليلاً */
-    margin-bottom: 0.8rem; /* مسافة أقل أسفل نص النقاط */
-}
-
-/* تحسين شريط التقدم - تصغير الارتفاع */
-.question-type-card-enhanced .progress {
-    height: 8px; /* جعل شريط التقدم أنحف */
-    border-radius: 4px;
-    background-color: #e9ecef;
-}
-
-.question-type-card-enhanced .progress-bar {
-    /* الألوان تبقى كما هي أو حسب اختيارك */
-    /* background-color: #28a745; */ /* لون افتراضي إذا لم يتم التغيير بالـ Razor */
-    transition: width 0.6s ease; /* إضافة انتقال لعرض شريط التقدم عند التحميل/التحديث */
-}
-
-/* انميشن الظهور */
+/* Animation for cards appearing */
 @keyframes fadeInScale {
     from {
         opacity: 0;
         transform: scale(0.97);
     }
-    /* تكبير أقل قليلاً */
+
     to {
         opacity: 1;
         transform: scale(1);
     }
 }
+/* Apply to columns containing animated cards for staggered effect if desired */
+/* Example: .col-lg-3 .question-type-card, etc. */
+/* [class*="col-"] > .question-type-card {  More generic selector
+    animation: fadeInScale 0.4s ease-out forwards;
+    opacity: 0;
+    animation-delay: calc(var(--animation-index, 0) * 0.05s); /* Set --animation-index inline in HTML for stagger
+} */
 
-/* تطبيق الانميشن على العمود للحصول على تأثير متتالي لكل بطاقة */
-.col-lg-3 .question-type-card-enhanced,
-.col-md-4 .question-type-card-enhanced,
-.col-sm-6 .question-type-card-enhanced {
-    animation: fadeInScale 0.4s ease-out forwards; /* انميشن أسرع قليلاً */
-    opacity: 0; /* إخفاء العنصر في البداية */
-    /* استخدام خاصية مخصصة لإنشاء تأخير الانميشن بناءً على الـ index */
-    animation-delay: calc(var(--animation-index) * 0.05s); /* تأخير 50 مللي ثانية لكل بطاقة إضافية */
+
+/* --- General Utilities & Other Styles --- */
+.list-group-item { /* From first view's form checkboxes */
+    border-color: #e9ecef;
+}
+
+.list-group-item-action:hover, .list-group-item-action:focus {
+    background-color: var(--qc-secondary-blue);
+    color: var(--qc-primary-blue);
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 0;
+    min-height: 200px;
+}
+
+    .loading-spinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: var(--qc-primary-blue);
+    }
+
+.content-section { /* Utility for spacing major sections */
+    margin-bottom: 2.5rem;
+}
+
+.question-content-text { /* General text styling for readability */
+    color: var(--qc-gray-dark); /* Slightly darker than default #495057 for body text */
+    line-height: 1.6;
+}
+
+/* Disabled/Readonly Form Controls */
+.form-control:disabled, .form-control[readonly],
+.form-select:disabled {
+    background-color: #e9ecef;
+    opacity: 0.8;
+    cursor: not-allowed; /* Indicate non-interactive state */
+}
+
+/* --- Responsive Adjustments (Integrated from second view's media queries) --- */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1rem 1.5rem; /* Smaller padding */
+    }
+
+        .page-header h1 {
+            font-size: 1.5rem; /* Smaller title */
+            width: 100%; /* Allow title to take full width before actions */
+            margin-bottom: 0.5rem; /* Space if actions wrap below */
+        }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-between; /* Space out buttons */
+    }
+
+        .header-actions .btn {
+            margin-left: 0; /* Remove left margin if they stack or space-between */
+            flex-grow: 1; /* Allow buttons to grow if fewer */
+            margin-top: 0.5rem; /* Space if buttons wrap */
+        }
+
+            .header-actions .btn:first-child {
+                margin-top: 0;
+            }
+
+
+    .filter-panel .row > div { /* Assuming Bootstrap grid for filters */
+        margin-bottom: 0.75rem;
+    }
+
+    .question-card-footer {
+        text-align: center; /* Center buttons on small screens */
+    }
+
+        .question-card-footer .btn {
+            margin: 0.2rem; /* Adjust margin for centered buttons */
+            min-width: 100px; /* Ensure buttons have decent tap area */
+        }
+
+    .form-panel {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .question-card-title {
+        font-size: 1rem;
+    }
+
+    .question-details dl {
+        grid-template-columns: 1fr; /* Stack dt/dd on very small screens */
+        gap: 0.25rem;
+    }
+
+    .question-details dt {
+        margin-bottom: 0.1rem;
+    }
 }

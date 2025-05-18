@@ -1,0 +1,29 @@
+{
+  "name": "Your Awesome ASP.NET App", // Full name
+  "short_name": "AwesomeApp", // Short name for icons/launcher
+  "description": "A description of your awesome application.",
+  "start_url": "/", // Entry point when launched from installed icon
+  "display": "standalone", // How the app UI is displayed (standalone, fullscreen, minimal-ui, browser)
+  "background_color": "#ffffff", // Splash screen background
+  "theme_color": "#007bff", // Toolbar/UI theme color
+  "orientation": "portrait-primary", // Preferred orientation
+  "icons": [
+    {
+      "src": "/img/icon.png", // Path relative to manifest location
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icon.png", // Optional: For adaptive icons
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+    // Add more sizes as needed (e.g., 72, 96, 128, 144, 256)
+  ]
+}

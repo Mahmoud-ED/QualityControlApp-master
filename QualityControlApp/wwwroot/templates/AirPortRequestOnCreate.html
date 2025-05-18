@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{SiteName} - Your Request Status</title>
+    <style type="text/css">
+        /* Basic Reset */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            background-color: #f4f4f4;
+            font-family: 'Tahoma', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        /* Ensure email client background color */
+        table {
+            border-collapse: collapse !important;
+        }
+
+        /* Button Hover (for clients that support it) */
+        .btn:hover {
+            background-color: #142060 !important; /* Darker shade on hover */
+        }
+    </style>
+</head>
+<body style="margin: 0 !important; padding: 0 !important; background-color: #f4f4f4; width: 100% !important;">
+
+    <!-- Main Email Table Container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center" style="background-color: #f4f4f4; padding: 20px 0;">
+                <!--[if (gte mso 9)|(IE)]>
+                <table role="presentation" align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+                <tr>
+                <td align="center" valign="top" width="600">
+                <![endif]-->
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden;">
+
+                    <!-- == HEADER SECTION == -->
+                    <tr>
+                        <td align="center" valign="top" style="padding: 20px 20px 10px 20px; background-color: #0D47A1; border-bottom: 3px solid #1976D2;">
+                            <!-- LOGO Placeholder -->
+                            <img src="../pictures/logo-removebg-preview.png" alt="{SiteName} Logo" width="180" style="display: block; font-family: Arial, sans-serif; color: #ffffff; font-size: 16px; max-width: 180px; height: auto;" border="0">
+                            <!-- OR Site Name if no logo -->
+                            <!-- <h1 style="font-size: 24px; font-weight: bold; color: #ffffff; margin: 0; font-family: 'Tahoma', 'Helvetica Neue', Helvetica, Arial, sans-serif;">{SiteName}</h1> -->
+                        </td>
+                    </tr>
+
+                    <!-- == BODY SECTION == -->
+                    <tr>
+                        <td align="left" valign="top" style="padding: 30px 20px; font-family: 'Tahoma', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333333; text-align: left;">
+                            <h2 style="font-size: 22px; font-weight: bold; color: #333333; margin-top: 0; margin-bottom: 15px;">
+                                Hello,
+                            </h2>
+
+                            <p style="margin: 0 0 25px 0; font-size: 18px; color: #555555; font-weight: normal; line-height: 1.7;">
+                                Your request is currently under review by the relevant department. We will notify you with updates soon.
+                            </p>
+
+                            <!-- Button -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0 20px 0;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td align="center" bgcolor="#0D47A1" style="border-radius: 5px;">
+                                                    <a href="{ActionUrl}" target="_blank" class="btn" style="font-size: 16px; font-family: 'Tahoma', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: bold; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; display: inline-block; background-color: #0D47A1;">
+                                                        View Request Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 15px 0 0 0;">
+                                Thank you,
+                                <br>
+                                The {SiteName} Team
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- == FOOTER SECTION == -->
+                    <tr>
+                        <td align="center" valign="top" style="padding: 20px; background-color: #eeeeee; border-top: 1px solid #dddddd; font-family: 'Tahoma', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #555555; text-align: center;">
+                            <p style="margin: 0 0 10px 0;"><strong>{SiteName}</strong></p>
+                            <p style="margin: 0 0 10px 0;">
+                                <span style="color: #555555;">{Mail}</span> | <span style="color: #555555;">{Phone}</span>
+                            </p>
+                            <p style="margin: 0 0 0 0; font-size: 12px; color: #888888;">
+                                © {CurrentYear} {SiteName}. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+                <!--[if (gte mso 9)|(IE)]>
+                </td>
+                </tr>
+                </table>
+                <![endif]-->
+            </td>
+        </tr>
+    </table>
+    <!-- End Main Email Table Container -->
+
+</body>
+</html>

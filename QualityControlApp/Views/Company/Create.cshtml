@@ -1,48 +1,114 @@
-﻿@model Company  
+﻿@model CompanyCreateVM
 
 @{
-    ViewData["Title"] = ViewContext.RouteData.Values["controller"]?.ToString() +
-    " - " + ViewContext.RouteData.Values["action"]?.ToString();
+    ViewData["Title"] = "Create New Company"; // عنوان أكثر وضوحًا
+
+                                              // Layout = "_Layout"; // تأكد من أن هذا يشير إلى ملف التخطيط الرئيسي الخاص بك
 }
-<h4>
-    <b>@ViewContext.RouteData.Values["controller"]?.ToString()</b>
-    - @ViewContext.RouteData.Values["action"]?.ToString()
-</h4>
-<hr />
 
+<div class="container py-4">
+    @* py-4 for vertical padding *@
 
-<div class="container" style="min-height:71.5vh;">
-    <div class="row">
-        @if (ViewBag.Message != null)
-        {
-            <h5 class="alert alert-danger">@ViewBag.Message</h5>
-        }
-        <div class="col-md-4">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Company">Company Directory</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold">@ViewData["Title"]</h1>
+            <p class="text-muted">Fill in the details below to add a new company to the directory.</p>
+        </div>
+    </div>
 
-                <div class="form-group">
-                    <label asp-for="Name" class="control-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+    @if (ViewBag.Message != null)
+
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @ViewBag.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        @* Center the form column on larger screens *@
+        <div class="col-lg-8 col-md-10">
+            @* Control the width of the form *@
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Company Details</h5>
                 </div>
+                <div class="card-body p-4">
+                    @* Add more padding inside the card body *@
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken() @* Make sure AntiForgeryToken is present for POST *@
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
 
-                <input type="hidden" name="Type" value="@ViewBag.Type" />
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+                        <div class="row g-3">
+                            @* g-3 for gutters between form elements in the row *@
+                            <!-- Company Name -->
+                            <div class="col-md-12">
+                                <label asp-for="Company.Name" class="form-label fw-semibold"></label>
+                                <input asp-for="Company.Name" class="form-control form-control-lg" placeholder="e.g., Acme Corporation" /> @* form-control-lg for larger input *@
+                                <span asp-validation-for="Company.Name" class="text-danger small mt-1"></span>
+                            </div>
+
+                            <!-- AOC Number -->
+                            <div class="col-md-6">
+                                <label asp-for="Company.AocNum" class="form-label fw-semibold"></label>
+                                <input asp-for="Company.AocNum" class="form-control" placeholder="Enter AOC Number" />
+                                <span asp-validation-for="Company.AocNum" class="text-danger small mt-1"></span>
+                            </div>
+
+                            <!-- Company Type -->
+                            <div class="col-md-6">
+                                <label asp-for="Company.CompanyTypeId" class="form-label fw-semibold">Company Type</label>
+                                <select asp-for="Company.CompanyTypeId" class="form-select" asp-items="@(new SelectList(Model.CompanyTypes, "Id", "Name"))">
+                                    <option value="">-- Select Company Type --</option>
+                                </select>
+                                <span asp-validation-for="Company.CompanyTypeId" class="text-danger small mt-1"></span>
+                            </div>
+                        </div>
+
+                        @* Hidden input for Type if still needed *@
+                        @if (ViewBag.Type != null)
+
+                        {
+                            <input type="hidden" name="Type" value="@ViewBag.Type" />
+                        }
+
+                        <hr class="my-4"> @* A thematic break before action buttons *@
+
+                        <div class="d-flex justify-content-end gap-2">
+                            @* Align buttons to the right with a gap *@
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                @* Larger primary button *@
+                                <i class="fas fa-save me-2"></i>Create Company
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-            
-
+            </div>
         </div>
     </div>
 </div>
 
+@* Removed the fixed min-height from the container, let content define height *@
 
 @section Scripts {
     @{
-         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        // You can add any page-specific JavaScript here if needed
+        // For example, to initialize a select2 dropdown if you were using one:
+        // $(document).ready(function() {
+        //     $('#Company_CompanyTypeId').select2();
+        // });
+    </script>
 }
-

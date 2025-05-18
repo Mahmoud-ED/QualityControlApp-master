@@ -1,0 +1,277 @@
+﻿.sidebar {
+    min-height: calc(100vh - 64px); // Assuming 64px navbar height
+    background: $db-sidebar-bg;
+    font-family: $font-family-nunito-medium;
+    padding: 0;
+    width: 258px;
+    z-index: 1031; // Ensure it's above content but below modals etc.
+    transition: width 0.25s ease, background 0.25s ease;
+    border-right: 1px solid $db-sidebar-border; // Subtle border
+
+    .nav {
+        overflow: hidden;
+        flex-wrap: nowrap;
+        flex-direction: column;
+        margin-bottom: 20px; // Space at the bottom
+
+        .nav-item {
+            padding: 0 1.5rem; // Consistent padding
+            transition: background 0.2s ease-in-out;
+            position: relative;
+
+            .nav-link {
+                display: flex;
+                align-items: center;
+                white-space: nowrap;
+                padding: 0.8rem 0; // Vertical padding
+                color: $db-sidebar-text;
+                transition: color 0.2s ease-in-out;
+                height: auto; // Remove fixed height from original theme if present
+
+                .icon-bg { // Removing the colored circle background
+                    background: transparent;
+                    margin-right: 0.875rem;
+                    width: auto;
+                    height: auto;
+                    // Resetting flex properties if any were added by original theme
+                    display: inline-flex; // Keep icon and text on same line
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                i.menu-icon {
+                    font-size: 1.125rem; // Adjust as needed
+                    line-height: 1;
+                    color: $db-sidebar-icon;
+                    width: 24px; // Ensure consistent width for alignment
+                    text-align: center;
+                    margin-right: 0.875rem;
+                }
+
+                .menu-title {
+                    color: inherit;
+                    display: inline-block;
+                    font-size: 0.9rem;
+                    line-height: 1;
+                    vertical-align: middle;
+                }
+
+                i.menu-arrow {
+                    font-family: "Material Design Icons"; // Ensure MDI is loaded
+                    font-size: 1.1rem;
+                    margin-left: auto;
+                    color: $db-sidebar-icon;
+                    transition: transform 0.25s ease;
+
+                    &:before {
+                        content: "\F141"; // Chevron right
+                    }
+                }
+
+                &[aria-expanded="true"] {
+                    i.menu-arrow {
+                        transform: rotate(90deg);
+                    }
+                }
+            }
+            // Active State
+            &.active {
+                background: $db-sidebar-active-bg;
+
+                > .nav-link {
+                    color: $db-sidebar-active-text;
+                    font-weight: 600; // Slightly bolder for active
+
+                    &:before { // Active indicator line
+                        content: "";
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        background: $db-primary;
+                        height: 28px; // Adjust height
+                        width: 4px;
+                        border-radius: 0 2px 2px 0;
+                    }
+
+                    i.menu-icon {
+                        color: $db-sidebar-active-icon;
+                    }
+
+                    .menu-title {
+                        color: $db-sidebar-active-text; // Already inherited, but for clarity
+                    }
+
+                    i.menu-arrow {
+                        color: $db-sidebar-active-icon;
+                    }
+                }
+            }
+            // Hover State (only if not active)
+            &:not(.active):hover {
+                background: $db-sidebar-hover-bg;
+
+                > .nav-link {
+                    color: $db-sidebar-hover-text;
+
+                    i.menu-icon, i.menu-arrow {
+                        color: $db-sidebar-hover-text;
+                    }
+                }
+            }
+
+            &.nav-profile { // Keep original profile styling or adjust as needed
+                // ...
+            }
+
+            &.nav-category {
+                color: darken($db-text-muted, 10%);
+                font-size: 0.75rem;
+                line-height: 1;
+                padding: 1.5rem 0 0.5rem 0; // Pushed to padding of nav-item
+                text-transform: uppercase;
+                font-family: $font-family-nunito-bold;
+                letter-spacing: .5px;
+            }
+        }
+        // Sub Menu
+        &.sub-menu {
+            margin-bottom: 0;
+            margin-top: 0.25rem;
+            padding: 0.5rem 0 0.5rem 1.5rem; // Indent sub-menu
+            list-style: none;
+            border-left: 1px solid $db-sidebar-border; // Guide line for sub-menu
+            margin-left: 1.2rem; // Align with icon area
+
+            .nav-item {
+                padding: 0;
+
+                .nav-link {
+                    color: $db-text-muted;
+                    padding: 0.5rem 1rem;
+                    font-size: 0.85rem; // Slightly smaller
+                    position: relative;
+
+                    &:before {
+                        content: ""; // Using CSS circle for submenu bullet
+                        display: inline-block;
+                        width: 5px;
+                        height: 5px;
+                        background-color: $db-sidebar-icon;
+                        border-radius: 50%;
+                        margin-right: 0.75rem;
+                        vertical-align: middle;
+                        position: relative;
+                        top: -1px; // Fine-tune alignment
+                    }
+
+                    &.active {
+                        color: $db-primary;
+                        background: transparent;
+                        font-weight: 500;
+
+                        &:before {
+                            background-color: $db-primary;
+                        }
+                    }
+
+                    &:hover {
+                        color: $db-primary;
+                        background: transparent;
+
+                        &:before {
+                            background-color: $db-primary;
+                        }
+                    }
+                }
+
+                &:hover { // No special background for sub-menu item hover
+                    background: transparent;
+                }
+            }
+        }
+    }
+}
+
+// Sidebar Toggles for Icon Only & Mini
+@media (min-width: 992px) {
+    .sidebar-icon-only {
+        .sidebar {
+            width: 70px;
+
+            .nav .nav-item {
+                padding: 0;
+
+                .nav-link {
+                    justify-content: center;
+                    padding: 1rem 0; // Adjust padding for icon-only
+                    .menu-title, .menu-arrow, .badge {
+                        display: none;
+                    }
+
+                    i.menu-icon {
+                        margin-right: 0; // Center icon
+                    }
+                }
+                // Hover behavior for icon-only sidebar to show full menu item
+                &.hover-open {
+                    width: 258px; // Expand width on hover
+                    position: absolute;
+                    background: $db-sidebar-bg;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    z-index: 1032;
+
+                    .nav-link {
+                        justify-content: flex-start;
+                        padding: 0.8rem 1.5rem;
+
+                        .menu-title, .menu-arrow {
+                            display: inline-block;
+                        }
+
+                        i.menu-icon {
+                            margin-right: 0.875rem;
+                        }
+                    }
+
+                    .collapse, .collapsing {
+                        display: block !important; // Ensure sub-menu shows
+                        padding-left: 0;
+                        margin-left: 0;
+                        border-left: none;
+
+                        .nav-item .nav-link {
+                            padding-left: 2.5rem; // Indent sub-items
+                        }
+                    }
+                }
+            }
+        }
+
+        .main-panel {
+            width: calc(100% - 70px);
+        }
+    }
+    // Add .sidebar-mini styles if you use that class, similar logic
+}
+
+// Off-canvas for mobile
+@media screen and (max-width: 991px) {
+    .sidebar-offcanvas {
+        position: fixed;
+        max-height: calc(100vh - 64px);
+        top: 64px;
+        bottom: 0;
+        overflow: auto;
+        right: -258px; // Start off-screen
+        transition: right 0.25s ease-out;
+
+        &.active {
+            right: 0; // Slide in
+        }
+    }
+
+    .main-panel {
+        width: 100%;
+    }
+}

@@ -62,6 +62,7 @@ namespace QualityControlApp.Controllers
 
         // GET: AirPortRequests
         [Authorize(Roles = "Prog,Admin")]
+        [ViewLayout("_LayoutDashboard")]
 
         public async Task<IActionResult> Index(string email, DateTime? requestDateFrom, DateTime? requestDateTo, DateTime? flightDateFrom, DateTime? flightDateTo, string? status)
         {
@@ -121,10 +122,14 @@ namespace QualityControlApp.Controllers
                 return NotFound();
             }
 
+           
+
+
             var airPortRequest = await _airportrequest.Entity
-                .Include(r => r.ApplicationUser)
-                .Include(r => r.RequestFiles)
-                .FirstOrDefaultAsync(m => m.Id == id);
+    .Include(r => r.ApplicationUser)
+    .Include(r => r.RequestFiles)
+        .ThenInclude(f => f.FileType)
+    .FirstOrDefaultAsync(m => m.Id == id);
 
             if (airPortRequest == null)
             {
@@ -206,6 +211,8 @@ namespace QualityControlApp.Controllers
                         var attachment = new AirPortRequestFiles
                         {
                             FileName = uniqueName,
+                            Inspect = "",
+                            Nots = "",
                             FilePath = filePath,
                             FileTypeId = item.FileTypeId,
                             AirPortRequestId = AirPortRequestViewModel.AirPortRequest.Id
@@ -250,11 +257,13 @@ namespace QualityControlApp.Controllers
                 content = content.Replace("{ActionUrl}", editUrl);
                 content = content.Replace("{Mail}", contact.Email);
 
-                var message = new Message(new string[] { EmailInfo.Email }, AirPortRequestViewModel.AirPortRequest.Email, content, null);
+                var message = new Message(new string[] { AirPortRequestViewModel.AirPortRequest.Email },"Air Request", content, null);
+                var message2 = new Message(new string[] { EmailInfo.Email }, "Air Request" + AirPortRequestViewModel.AirPortRequest.Email, content, null);
 
                 try
                 {
                     await _emailSender.SendEmailAsync(message);
+                    await _emailSender.SendEmailAsync(message2);
                     TempData["SuccessMessage"] = "The email has been sent successfully";
                 }
                 catch
@@ -279,10 +288,14 @@ namespace QualityControlApp.Controllers
             {
                 return NotFound();
             }
+            ViewData["FileTypes"] = _filetype.Entity.GetAll();
+
 
             var airPortRequest = await _airportrequest.Entity
-                .Include(r => r.RequestFiles)
-                .FirstOrDefaultAsync(m => m.Id == id);
+    .Include(r => r.ApplicationUser)
+    .Include(r => r.RequestFiles)
+        .ThenInclude(f => f.FileType)
+    .FirstOrDefaultAsync(m => m.Id == id);
 
             if (airPortRequest == null)
             {
@@ -295,7 +308,7 @@ namespace QualityControlApp.Controllers
         // POST: AirPortRequests/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, AirPortRequest airPortRequest, List<IFormFile> files)
+        public async Task<IActionResult> Edit(Guid id, AirPortRequest airPortRequest, AirPortReqeustVM AirPortRequestViewModel)
         {
             if (id != airPortRequest.Id)
             {
@@ -317,7 +330,9 @@ namespace QualityControlApp.Controllers
                 _airportrequest.Entity.Update(airPortRequest);
 
                 // معالجة الملفات المرفقة الجديدة إذا وجدت
-                if (files != null && files.Count > 0)
+
+
+                if (AirPortRequestViewModel.FileTypes != null && AirPortRequestViewModel.FileTypes.Count > 0)
                 {
                     string uploadsFolder = Path.Combine(_host.WebRootPath, "pictures/requestfiles");
 
@@ -327,37 +342,37 @@ namespace QualityControlApp.Controllers
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    foreach (var file in files)
+                    foreach (var item in AirPortRequestViewModel.FileTypes)
                     {
-                        if (file.Length > 0)
+                        if (item.File != null && item.File.Length > 0)
                         {
-                            // إنشاء اسم فريد للملف
-                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-                            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                            var fileName = Path.GetFileNameWithoutExtension(item.File.FileName);
+                            var extension = Path.GetExtension(item.File.FileName);
+                            var uniqueName = $"{fileName}_{Guid.NewGuid()}{extension}";
+                            var filePath = Path.Combine("wwwroot/pictures/requestfiles", uniqueName);
 
-                            // حفظ الملف
-                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            using (var stream = new FileStream(filePath, FileMode.Create))
                             {
-                                await file.CopyToAsync(fileStream);
+                                await item.File.CopyToAsync(stream);
                             }
 
-                            // إنشاء سجل للملف في قاعدة البيانات
-                            AirPortRequestFiles fileRecord = new AirPortRequestFiles
+                            var attachment = new AirPortRequestFiles
                             {
-                                FileName = file.FileName,
-                                Created = DateTime.Now,
-                                FilePath = "/pictures/requestfiles/" + uniqueFileName,
-                                AirPortRequestId = airPortRequest.Id
+                                FileName = uniqueName,
+                                Inspect = "",
+                                Nots = "",
+                                FilePath = filePath,
+                                FileTypeId = item.FileTypeId,
+                                AirPortRequestId = id
                             };
 
-                            _airportrequestfiles.Entity.Insert(fileRecord);
+                            _airportrequestfiles.Entity.Insert(attachment);
                         }
                     }
 
 
+                    await _airportrequestfiles.SaveAsync();
                 }
-
-                await _airportrequestfiles.SaveAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -393,156 +408,125 @@ namespace QualityControlApp.Controllers
             return View(airPortRequest);
         }
 
-        // POST: AirPortRequests/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var airPortRequest = await _airportrequest.Entity
-                .Include(r => r.RequestFiles)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (airPortRequest != null)
-            {
-                // حذف الملفات المرفقة من المجلد
-                foreach (var file in airPortRequest.RequestFiles)
-                {
-                    string filePath = Path.Combine(_host.WebRootPath, file.FilePath.TrimStart('/'));
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                    }
-                }
-
-                _airportrequest.Entity.Delete(airPortRequest);
-                await _airportrequest.SaveAsync();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // GET: AirPortRequests/Approve/5
-        [Authorize(Roles = "Prog,Admin")]
-        public async Task<IActionResult> Approve(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var airPortRequest = await _airportrequest.Entity
-                .GetByIdAsync(id);
-
-            if (airPortRequest == null)
-            {
-                return NotFound();
-            }
-
-            return View(airPortRequest);
-        }
-
-        [Authorize(Roles = "Prog,Admin")]
-        // POST: AirPortRequests/Approve/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(Guid id, string newStatus)
-        {
-            var airPortRequest = await _airportrequest.Entity.GetByIdAsync(id);
-
-            if (airPortRequest == null)
-            {
-                return NotFound();
-            }
-
-            // التحقق من إذا كانت قيمة newStatus موجودة وغير فارغة
-            if (!string.IsNullOrEmpty(newStatus))
-            {
-                // تحديث حالة الطلب بناءً على الحالة المختارة
-                airPortRequest.RequestStatus = newStatus;
-            }
-
-            // تعيين المستخدم الحالي كموافق
-            airPortRequest.ApproverUserId = _userManager.GetUserId(User);
-
-            await _airportrequest.SaveAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-
-        // GET: AirPortRequests/Reject/5
-        public async Task<IActionResult> Reject(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var airPortRequest = await _airportrequest.Entity
-                .GetByIdAsync(id);
-
-            if (airPortRequest == null)
-            {
-                return NotFound();
-            }
-
-            return View(airPortRequest);
-        }
-
-        // POST: AirPortRequests/Reject/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reject(Guid id)
-        {
-            var airPortRequest = await _airportrequest.Entity.GetByIdAsync(id);
-
-            if (airPortRequest == null)
-            {
-                return NotFound();
-            }
-
-            // تحديث حالة الطلب
-            airPortRequest.RequestStatus = "مرفوض";
-
-            await _airportrequest.SaveAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // GET: AirPortRequests/DeleteFile/5
-        public async Task<IActionResult> DeleteFile(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var file = await _airportrequestfiles.Entity
-                .GetByIdAsync(id);
-
-            if (file == null)
-            {
-                return NotFound();
-            }
-
-            // حذف الملف من المجلد
-            string filePath = Path.Combine(_host.WebRootPath, file.FilePath.TrimStart('/'));
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
-
-            // حذف السجل من قاعدة البيانات
-            _airportrequestfiles.Entity.Delete(file);
-            await _airportrequestfiles.SaveAsync();
-
-            return RedirectToAction(nameof(Edit), new { id = file.AirPortRequestId });
-        }
-
+       
         private async Task<bool> AirPortRequestExists(Guid id)
         {
             var entity = await _airportrequest.Entity.GetByIdAsync(id);
             return entity != null;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        // إذا كنت تستخدم AntiForgeryToken، أضف: [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAttachmentDetails(Guid requestFileId, string inspect, string nots)
+        {
+            // يمكنك إضافة التحقق من صلاحيات المستخدم هنا
+
+            // البحث عن الملف في قاعدة البيانات
+            // تأكد من استبدال RequestFile بالاسم الصحيح للموديل و Id بالاسم الصحيح للـ Primary Key
+            var fileToUpdate = await _airportrequestfiles .Entity.GetByIdAsync( requestFileId);
+
+            if (fileToUpdate == null)
+            {
+                return NotFound(new { message = "Attachment not found." });
+            }
+
+            // تحديث الخصائص
+            fileToUpdate.Inspect = inspect; // تأكد من أن نوع البيانات متوافق أو قم بالتحويل اللازم
+
+            // تحديث الملاحظات فقط إذا كانت Inspect هي 'Ns' أو حسب منطقك
+            // إذا كانت Inspect ليست 'Ns'، قد ترغب في مسح الملاحظات
+            if (inspect?.ToLower() == "ns")
+            {
+                fileToUpdate.Nots = nots;
+            }
+            else
+            {
+                fileToUpdate.Nots = null; // أو string.Empty حسب تصميم قاعدة البيانات
+            }
+
+
+            try
+            {
+                _airportrequestfiles.Entity.Update(fileToUpdate); // أو _context.Entry(fileToUpdate).State = EntityState.Modified;
+                await _airportrequestfiles.SaveAsync();
+
+                // إرجاع رد ناجح (يمكن أن يكون فارغًا أو يحتوي على رسالة)
+                return Ok(new { message = "Attachment updated successfully." });
+            }
+            catch (DbUpdateException ex)
+            {
+                // التعامل مع أخطاء قاعدة البيانات
+                // تسجيل الخطأ (Logging)
+                Console.WriteLine($"Error updating attachment {requestFileId}: {ex.Message}"); // مثال بسيط للتسجيل
+                return BadRequest(new { message = "Database error occurred while updating." });
+            }
+            catch (Exception ex)
+            {
+                // التعامل مع أي أخطاء أخرى غير متوقعة
+                Console.WriteLine($"Unexpected error updating attachment {requestFileId}: {ex.Message}"); // مثال بسيط للتسجيل
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An unexpected error occurred." });
+            }
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeStatus(Guid id, string newStatus)
+        {
+            var validStatuses = new[] { "Pending", "Approved", "Rejected" };
+            if (string.IsNullOrEmpty(newStatus) || !validStatuses.Contains(newStatus))
+            {
+                TempData["ErrorMessage"] = "Invalid status value provided.";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+
+            var requestToUpdate = await _airportrequest.Entity.GetByIdAsync(id);
+
+            if (requestToUpdate == null)
+            {
+                TempData["ErrorMessage"] = "Request not found.";
+                return NotFound($"Unable to find request with ID {id}.");
+            }
+
+            requestToUpdate.RequestStatus = newStatus;
+
+            try
+            {
+                _airportrequest.Entity.Update(requestToUpdate);
+                await _airportrequest.SaveAsync();
+
+                TempData["SuccessMessage"] = "Request status updated successfully.";
+                return RedirectToAction(nameof(Details), new { id = requestToUpdate.Id });
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating the status. Please try again.";
+                // Consider logging the exception details: _logger.LogError(ex, "Error updating status for request ID {RequestId}", id);
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An unexpected error occurred.";
+                // Consider logging the exception details: _logger.LogError(ex, "Unexpected error changing status for request ID {RequestId}", id);
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
         }
 
     }

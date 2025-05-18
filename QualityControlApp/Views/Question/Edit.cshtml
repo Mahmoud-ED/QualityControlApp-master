@@ -1,86 +1,123 @@
-﻿@model Question 
+﻿@model Question
 
 @{
-    ViewData["Title"] = ViewContext.RouteData.Values["controller"]?.ToString()
-    + "-" + ViewContext.RouteData.Values["action"]?.ToString();
+    ViewData["Title"] = "Edit Question"; // عنوان أوضح
+
+    var themeColor = "primary"; // يمكنك تغييره ليطابق لون السمة في صفحة Index
+
+                                // Layout = "_LayoutDashboard"; // تأكد من أن هذا صحيح
 }
 
-<div class="container" style="min-height:71.5vh;">
-    <div class="row">
-        @if (ViewBag.Message != null)
-        {
-            <h5 class="alert alert-danger">@ViewBag.Message</h5>
-        }
-        <div class="col-md-4">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="container py-5">
+    @* py-5 for more vertical padding *@
 
+    <!-- Page Header with Breadcrumbs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Question" class="text-@themeColor text-decoration-none">Questions List</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold text-@themeColor">
+                <i class="fas fa-edit me-2"></i>@ViewData["Title"]
+            </h1>
+            <p class="text-muted lead">Modify the details of the question below.</p>
+        </div>
+    </div>
 
+    @if (ViewBag.Message != null)
 
-                <div type="hidden" class="form-group">
-                    <label  asp-for="Id" class="control-label"></label>
-                    <input asp-for="Id" class="form-control" type="hidden" />
-                    <span asp-validation-for="Id" class="text-danger"></span>
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3" role="alert">
+            @ViewBag.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            @* عمود أعرض قليلاً للنموذج *@
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-@themeColor bg-opacity-75 text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-file-signature me-2"></i>Question Information</h5>
                 </div>
-                
-                
-                
-                
-                
-                
-                <div class="form-group">
-                    <label asp-for="Content " class="control-label"></label>
-                    <input asp-for="Content" class="form-control" />
-                    <span asp-validation-for="Content" class="text-danger"></span>
+                <div class="card-body p-4 p-md-5">
+                    @* padding أكبر *@
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                        @* حقول مخفية للمعرفات والتواريخ *@
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Created" />
+                        @* لا تقم بتعيين Modified هنا، الكنترولر يجب أن يفعل ذلك عند الحفظ الفعلي *@
+                        @* <input type="hidden" asp-for="Modified" value="@DateTime.Now" /> *@
+
+
+                        <!-- Question Content (Textarea for larger input) -->
+                        <div class="mb-4">
+                            <label asp-for="Content" class="form-label fs-5 fw-semibold text-@themeColor"></label>
+                            <textarea asp-for="Content" class="form-control form-control-lg" rows="4" placeholder="Enter the full question text here..."></textarea>
+                            <span asp-validation-for="Content" class="text-danger small mt-1 d-block"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Max Grid -->
+                            <div class="col-md-6">
+                                <label asp-for="MaxGrid" class="form-label fw-semibold"></label>
+                                <input asp-for="MaxGrid" type="number" class="form-control" placeholder="e.g., 4" />
+                                <span asp-validation-for="MaxGrid" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <!-- Question Type -->
+                            <div class="col-md-6">
+                                <label asp-for="QuestionTypeId" class="form-label fw-semibold">Question Type</label>
+                                <select asp-for="QuestionTypeId" class="form-select" asp-items="ViewBag.QuestionType">
+                                    <option value="">-- Select Type --</option>
+                                </select>
+                                <span asp-validation-for="QuestionTypeId" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <!-- Section Content -->
+                            <div class="col-md-12">
+                                <label asp-for="SectionContent" class="form-label fw-semibold"></label>
+                                <input asp-for="SectionContent" class="form-control" placeholder="Enter section or context" />
+                                <span asp-validation-for="SectionContent" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+
+                        <!-- Audit Information -->
+                        <div class="mb-4 p-3 bg-light border rounded-3">
+                            <h6 class="text-muted fw-semibold mb-2"><i class="fas fa-history me-2"></i>Audit Trail</h6>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <small class="d-block"><strong>@Html.DisplayNameFor(model => model.Created):</strong></small>
+                                    <small class="d-block text-muted">@Model.Created.ToString("dd MMM yyyy, hh:mm tt")</small>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="d-block"><strong>@Html.DisplayNameFor(model => model.Modified):</strong></small>
+                                    <small class="d-block text-muted">@(Model.Modified?.ToString("dd MMM yyyy, hh:mm tt") ?? "Not modified yet")</small>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel & Back
+                            </a>
+                            <button type="submit" value="Save" class="btn btn-@themeColor btn-lg rounded-pill px-5 py-2 shadow-sm">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="form-group">
-                    <label asp-for="MaxGrid  " class="control-label"></label>
-                    <input asp-for="MaxGrid" class="form-control" />
-                    <span asp-validation-for="MaxGrid" class="text-danger"></span>
-                </div>
-
-
-
-
-                <div class="form-group">
-                          <label asp-for="QuestionTypeId " class="control-label"></label>
-                          <select asp-for="QuestionTypeId" class="form-control" asp-items="ViewBag.QuestionType">
-                       
-                        <option value="" disabled selected>---------Select Type---------</option>
-                       
-                    </select>
-                           <span asp-validation-for="QuestionTypeId" class="text-danger"></span>
-                   
-                </div>
-
-                <div class="alert alert-info" role="alert" style="width:max-content">
-                    <p>
-                        <b>@Html.DisplayNameFor(model => model.Created):</b>
-                        @Html.DisplayFor(model => model.Created)
-
-                    </p>
-                    <p>
-                        <b>@Html.DisplayNameFor(model => model.Modified):</b>
-                        @Html.DisplayFor(model => model.Modified)
-                    </p>
-                </div>
-
-
-                <input type="hidden" asp-for="Created" />
-                <input type="hidden" asp-for="Modified" value="@DateTime.Now" />
-
-                <div class="form-group">
-                   
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
-                </div>
-
-
-
-            </form>
-
-
+            </div>
         </div>
     </div>
 </div>
@@ -89,5 +126,57 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        // أي سكربتات JavaScript إضافية إذا لزم الأمر
+        // مثال: تهيئة محرر نصوص غني (Rich Text Editor) لحقل Content
+        // if (typeof tinymce !== 'undefined') {
+        //     tinymce.init({
+        //         selector: 'textarea#Content', // استهدف الـ textarea بالـ ID
+        //         height: 300,
+        //         menubar: false,
+        //         plugins: [
+        //             'advlist autolink lists link image charmap print preview anchor',
+        //             'searchreplace visualblocks code fullscreen',
+        //             'insertdatetime media table paste code help wordcount'
+        //         ],
+        //         toolbar: 'undo redo | formatselect | ' +
+        //             'bold italic backcolor | alignleft aligncenter ' +
+        //             'alignright alignjustify | bullist numlist outdent indent | ' +
+        //             'removeformat | help'
+        //     });
+        // }
+    </script>
 }
 
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa; /* لون خلفية متناسق */
+        }
+
+        .display-5 {
+            font-size: 2.5rem;
+        }
+
+        .lead {
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .form-label.fs-5 { /* لجعل عنوان حقل السؤال أكبر */
+            font-size: 1.25rem !important;
+        }
+
+        .bg-opacity-75 {
+            --bs-bg-opacity: .75;
+        }
+
+        .rounded-pill {
+            border-radius: 50rem !important;
+        }
+
+        .card.shadow-lg {
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important; /* ظل أكبر للبطاقة الرئيسية */
+        }
+    </style>
+}

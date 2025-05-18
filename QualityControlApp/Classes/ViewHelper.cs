@@ -25,6 +25,7 @@ namespace QualityControlApp.Classes
             _tempDataProvider = dataProvider;
             _httpContextAccessor = httpContextAccessor;
         }
+
         public string RenderViewToString(string viewName, object model)
         {
             var httpContext = _httpContextAccessor.HttpContext;

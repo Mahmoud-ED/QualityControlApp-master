@@ -1,0 +1,68 @@
+﻿
+
+
+
+/*sm - applies to x-small devices (portrait phones, less than 576px)*/
+@media(max-width:767px) {
+    .hiddinCol {
+        display: none; 
+    }
+
+}
+
+/*md - applies to small devices (landscape phones, less than 768px)*/
+@media(min-width:768px) and (max-width:991px) {
+     .hiddinCol {
+        display: none; 
+    }
+  
+}
+
+/*lg - applies to medium devices (tablets, less than 992px)*/
+@media(min-width:992px) and (max-width:1199px) {
+    .hiddinCol {
+        display: block; /*سيطبق الإظهار لهذا الحجم والأحجام الأكبر*/
+    }
+ 
+   
+}
+
+/*xl - applies to large devices (desktops, less than 1200px)*/
+@media(min-width:1200px) and (max-width:1399px) {
+    
+}
+
+/*xxl - applies to x-large devices (large desktops, less than 1400px)*/
+@media(min-width:1400px) {
+   
+}
+@media (max-width: 768px) {
+    .table td.form-control.row-id {
+        font-size: 14px; /* تصغير حجم الخط في الشاشات الصغيرة */
+        width: 50%; /* تقليص عرض حقل السؤال ليأخذ 50% من العرض */
+    }
+
+    .table td input.form-control.row-value {
+        width: 30%; /* تقليص عرض حقل الدرجة ليأخذ 30% من العرض */
+    }
+
+    .table th {
+        font-size: 16px; /* تصغير حجم الخط في رؤوس الأعمدة للشاشات الصغيرة */
+    }
+}
+
+/* التأكد من أن الجدول يعمل بشكل جيد جدًا على الشاشات الأصغر من 480px */
+@media screen and (max-width: 480px) {
+    .table td.form-control.row-id {
+        font-size: 12px; /* تصغير حجم الخط بشكل أكبر */
+        width: 100%; /* حقل السؤال يأخذ 100% من العرض */
+    }
+
+    .table td input.form-control.row-value {
+        width: 100%; /* حقل الدرجة يأخذ 100% من العرض */
+    }
+
+    .table th {
+        font-size: 14px; /* تقليص حجم الخط في رؤوس الأعمدة */
+    }
+}

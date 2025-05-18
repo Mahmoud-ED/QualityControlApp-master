@@ -1,61 +1,94 @@
 ﻿@model LoginVM
-
 @{
     ViewBag.Title = "Login";
+
+    // لا نضع layout مؤقتًا إذا أردنا خلفية تغطي الصفحة بالكامل بسهولة
+
+    // Layout = null; // يمكنك تفعيل هذا إذا أردت صفحة بدون الـ Layout الأساسي
 }
 
-<div class="container mt-5 pt-5">
-    <div class="row d-flex justify-content-center">
-        <div class="col-lg-5 ">
-            <div class="card shadow">
-                <div class="card-header text-center border-bottom-0">
-                    <h4><b>Login</b></h4>
-                </div>
-                <div class="card-body text-black-50">
-                    <form asp-action="Login">
-                        <div asp-validation-summary="All" class="text-danger"></div>
-                        <div class="form-group">
-                            <label asp-for="Email" class="control-label"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="Password" class="control-label"></label>
-                            <input asp-for="Password" class="form-control" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
+@* تضمين ملف CSS الخاص بصفحة الدخول *@
+<link href="~/css/login.css" rel="stylesheet" />
+@* تأكد من تضمين Font Awesome في _Layout.cshtml أو هنا مباشرة لو Layout = null *@
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" /> *@
 
-                        <div class="mt-4 mb-4 d-flex">
-                            <input type="submit" class="btn btn-primary w-100" value="Login" />
-                        </div>
-                        <div class="form-group">
-                            <div class="radio">
-                                <label>
-                                    <input asp-for="RememberMe" />
-                                    @Html.DisplayNameFor(m => m.RememberMe)
-                                </label>
+<div class="login-page-wrapper">
+    @* غلاف لتطبيق خلفية الصفحة *@
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            @* توسيط عمودي وأفقي *@
+            <div class="col-lg-5 col-md-7 col-sm-9">
+                <div class="card shadow-lg login-card border-0 overflow-hidden">
+                    @* ظل أكبر، بدون حدود، overflow للـ radius *@
+
+                    <div class="card-header login-header text-center border-0">
+                       <img src="/img/LOGO.png" alt="Your Logo" class="login-logo mb-3" /> 
+                        <h3 class="mb-0 login-title"><i class="fas fa-plane-departure me-2"></i>Welcome Back!</h3> @* تغيير الأيقونة والعنوان *@
+                        @* <p class="login-subtitle text-muted">Login to access your account</p> *@
+                    </div>
+
+                    <div class="card-body login-body p-4 p-md-5">
+                        @* زيادة الحشو الداخلي *@
+                        <form asp-action="Login" novalidate>
+                            @* novalidate لمنع التحقق المبدئي للمتصفح *@
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3" role="alert"></div>
+
+                            @* Input Group لتحسين شكل الحقول مع أيقونات *@
+                            <div class="form-group mb-4 position-relative">
+                                <label asp-for="Email" class="form-label visually-hidden"></label> @* إخفاء الـ Label بصريًا مع بقائه للـ accessibility *@
+                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control form-control-lg login-input" placeholder="Email Address" />
+                                <span asp-validation-for="Email" class="text-danger invalid-feedback"></span> @* لتوافق أفضل مع Bootstrap validation styling *@
                             </div>
-                        </div>
-                    </form>
-                    <div class="mt-3">
-                        <a asp-action="ForgotPassword">Forgot password</a>
+
+                            <div class="form-group mb-4 position-relative">
+                                <label asp-for="Password" class="form-label visually-hidden"></label>
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control form-control-lg login-input" placeholder="Password" /> @* تحديد type="password" صراحةً *@
+                                <span asp-validation-for="Password" class="text-danger invalid-feedback"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check remember-me-label">
+                                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck" />
+                                    <label asp-for="RememberMe" class="form-check-label" for="rememberMeCheck">
+                                        @Html.DisplayNameFor(m => m.RememberMe)
+                                    </label>
+                                </div>
+                                <a asp-action="ForgotPassword" class="forgot-password-link">Forgot password?</a>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                @* استخدام d-grid لجعل الزر يملأ العرض بسهولة *@
+                                <button type="submit" class="btn btn-primary btn-lg btn-login">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-4 registration-link">
+                                Don't have an account? <a asp-action="Register" asp-controller="Account">Create one now</a>
+                            </div>
+
+                        </form>
                     </div>
-
-                    <div class="text-center mt-4 font-weight-light">
-                        Don't have an account? <a asp-action="Register" asp-controller="Account" class="text-primary">Create</a>
-
-                    </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // إضافة بسيطة لتحسين عرض الأخطاء مع Bootstrap (اختياري)
+        (function () {
+            'use strict'
+            // إضافة is-invalid class للحقول التي بها أخطاء عند تحميل الصفحة
+             document.querySelectorAll('.input-validation-error').forEach(function (input) {
+                 input.classList.add('is-invalid');
+            });
+
+             // يمكنك إضافة المزيد من التفاعلات هنا إذا أردت
+        }());
+    </script>
 }
-
-

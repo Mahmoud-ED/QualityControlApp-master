@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Models.Entities;
-using QualityControlApp.Models;
 
 
 namespace QualityControlApp.Models
@@ -30,11 +29,16 @@ namespace QualityControlApp.Models
         public DbSet<SiteState> SiteState { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<BookingAppointment> BookingAppointment { get; set; }
         public object Company { get; internal set; }
 
         public DbSet<AirPortRequest> AirPortRequests { get; set; }
+        public DbSet<Landing> Landing { get; set; }
         public DbSet<AirPortRequestFiles> AirPortRequestFiles { get; set; }
+        public DbSet<CompanyTypeCategoryAvailable> CompanyTypeCategoryAvailable { get; set; }
         public DbSet<FileType> FileType { get; set; }
+        public DbSet<CompanyType> CompanyType { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,8 +55,13 @@ namespace QualityControlApp.Models
             modelBuilder.Entity<CompanyQuestionContent>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<QuestionCategoryType>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<AirPortRequest >().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<Landing>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<AirPortRequestFiles >().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<FileType >().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<BookingAppointment >().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<Location>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<CompanyType>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<CompanyTypeCategoryAvailable>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
 
             modelBuilder.Seed(_serviceProvider);
 
@@ -68,23 +77,25 @@ namespace QualityControlApp.Models
                 .HasForeignKey<Employee>(b => b.UserId)
                 .OnDelete(DeleteBehavior.NoAction);  // منع الحذف التلقائي
 
-            modelBuilder.Entity<ApplicationUser>()
-                .HasOne(a => a.CompanyQuestion)
-                .WithOne(b => b.ApplicationUser)
-                .HasForeignKey<CompanyQuestion>(b => b.UserId)
-                .OnDelete(DeleteBehavior.NoAction);  // منع الحذف التلقائي
 
-            modelBuilder.Entity<CompanyQuestion>()
-                .HasOne(a => a.Company)
-                .WithMany(b => b.CompanyQuestions)
-                .HasForeignKey(a => a.CompanyId)
-                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<BookingAppointment>()
+              .HasOne(a => a.Company)
+              .WithMany(b => b.BookingAppointment)
+              .HasForeignKey(a => a.CompanyId)
+              .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<AirPortRequest>()
     .HasMany(r => r.RequestFiles)
     .WithOne(f => f.AirPortRequest)
     .HasForeignKey(f => f.AirPortRequestId)
     .OnDelete(DeleteBehavior.Cascade);
+
+ //           modelBuilder.Entity<Landing>()
+ //.HasMany(r => r.RequestFiles)
+ //.WithOne(f => f.Landing)
+ //.HasForeignKey(f => f.AirPortRequestId)
+ //.OnDelete(DeleteBehavior.Cascade);
 
             // تكوين العلاقة بين AirPortRequest و ApplicationUser
             modelBuilder.Entity<AirPortRequest>()
@@ -95,6 +106,21 @@ namespace QualityControlApp.Models
                 .OnDelete(DeleteBehavior.SetNull);
 
 
+
+            modelBuilder.Entity<CompanyTypeCategoryAvailable>()
+                           .HasOne(cta => cta.CompanyType)
+                           .WithMany(ct => ct.AvailableCategories)
+                           .HasForeignKey(cta => cta.CompanyTypeId)
+                           .OnDelete(DeleteBehavior.Cascade);
+
+          
+
+
+            modelBuilder.Entity<Company>()
+       .HasOne(c => c.CompanyType)
+       .WithMany(ct => ct.Company)
+       .HasForeignKey(c => c.CompanyTypeId)
+       .OnDelete(DeleteBehavior.SetNull); // أو DeleteBehavior.Restrict حسب ما يناسبك
         }
     }
 }

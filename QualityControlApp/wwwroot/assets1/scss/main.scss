@@ -1,0 +1,42 @@
+﻿// 1. Variables & Global Settings
+@import 'variables';
+@import 'base';
+
+// 2. Core Layout Components
+@import 'navbar';
+@import 'sidebar';
+
+// 3. UI Components
+@import 'buttons';
+@import 'cards';
+// @import 'forms'; // Create and import for form elements
+// @import 'tables'; // Create and import for tables
+// @import 'modals'; // etc.
+// @import 'animations'; // If you decide to keep your animations file
+
+// 4. Utility Classes (if any custom ones)
+// @import 'utilities';
+
+// 5. Page Specific Styles (if any)
+// @import 'pages/auth';
+// @import 'pages/dashboard-specific';
+
+// Add any remaining styles from the original "NEW" section here,
+// but try to categorize them into the partials above.
+// For example, .page-title styling could go into _base.scss or a _typography.scss
+
+// Example from your /*---------NEW---------*/ to categorize:
+// This should go into _base.scss or _typography.scss
+.page-title {
+    color: var(--db-text-color); // Use your theme variable
+    font-size: 1.25rem; // Adjust size
+    margin-bottom: 1.5rem; // Spacing
+    font-weight: 600;
+    // ... other .page-title styles
+}
+
+// This would go into _forms.scss or related
+.form-control:focus, .select2-container--default .select2-selection--single:focus, .typeahead:focus, .tt-hint:focus {
+    border-color: var(--db-primary); // Use theme primary
+    box-shadow: 0 0 0 0.2rem rgba(var(--db-primary-rgb), 0.25);
+}

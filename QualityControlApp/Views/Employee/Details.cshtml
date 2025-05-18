@@ -1,52 +1,70 @@
 ﻿@model QualityControlApp.ViewModels.CompanyQuestionContentVM
 
 @* --- ملفات CSS --- *@
-@* لنفترض أنك تستخدم Bootstrap 5 *@
-@* <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" /> *@ @* تأكد من تضمين Bootstrap *@
-<link href="~/css/company-question-visual-only.css" rel="stylesheet" asp-append-version="true" /> @* ملف CSS مخصص للتصميم فقط *@
-<link href="~/css/media.css" rel="stylesheet" /> @* ملف media الأصلي *@
-@* يمكنك إزالة الرابط إلى employee.css إذا كانت الأنماط ستوضع في الملف الجديد *@
-@* <link href="~/css/employee.css" rel="stylesheet" />  *@
+@* تأكد من تضمين Bootstrap 5 و Bootstrap Icons في _Layout.cshtml أو هنا *@
+@* <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" /> *@
+@* <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"> *@ @* <-- مهم للأيقونات *@
+<link href="~/css/company-question-visual-only.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/media.css" rel="stylesheet" />
+<link href="~/css/company-question-styles.css" rel="stylesheet" />
+@* --- CSS مخصص إضافي للتحسينات --- *@
 
-
-<div class="container mt-4 content-wrapper"> @* Added container and wrapper class *@
-    <h1 class="mb-4">@ViewData["Title"]</h1>
+<div class="container mt-4 content-wrapper">
+    <h1 class="mb-4 text-center fw-bold text-primary">@ViewData["Title"]</h1> @* عنوان مركزي وجريء *@
 
     @* --- قسم المعلومات الأساسية (داخل Card) --- *@
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">المعلومات الأساسية</h5>
+    <div class="card shadow-sm mb-5 content-section">
+        @* Added content-section class *@
+        <div class="card-header bg-light">
+            <h5 class="mb-0 d-flex align-items-center"><i class="bi bi-info-circle-fill me-2 text-primary"></i>المعلومات الأساسية</h5>
         </div>
         <div class="card-body">
-            <div class="row g-3 align-items-end"> @* Use Bootstrap grid with gutters and alignment *@
+            <div class="row g-3 align-items-center">
+                @* align-items-center for better vertical alignment *@
                 @* Active Status Form *@
                 <div class="col-md-auto">
-                    <form asp-action="UpdateActive" asp-route-companyQuestionId="@Model.CompanyQuestion.Id" method="post" id="activeStatusForm">
-                        <input type="hidden" name="Id" value="@Model.CompanyQuestion.Id" />
-                        <div class="form-check form-switch mb-0"> @* Use Bootstrap switch style *@
-                             <input class="form-check-input" type="checkbox" role="switch" id="Active" name="Active" value="true"
-                                   @(Model.CompanyQuestion.Active ? "checked" : "")
-                                   onchange="this.form.submit();" />
-                            <label class="form-check-label" for="Active">الحالة (نشط)</label>
-                        </div>
-                    </form>
-                </div>
+    @if (!Model.CompanyQuestion.Active)
+    {
+        <form asp-action="UpdateActive" asp-route-newActiveValue="true" asp-route-companyQuestionId="@Model.CompanyQuestion.Id" method="post">
+            <input type="hidden" name="Id" value="@Model.CompanyQuestion.Id" />
+            <input type="hidden" name="Active" value="true" />
+            <button type="submit" class="btn btn-sm btn-success">
+                غير مكتمل
+            </button>
+        </form>
+    }
+    else
+    {
+        <span class="badge bg-success">مكتمل</span>
+    }
+</div>
+
 
                 @* Company Name Dropdown *@
-                <div class="col-md-3">
-                    <label asp-for="CompanyQuestion.CompanyId" class="form-label small mb-1">اسم الشركة</label>
-                    <select asp-for="CompanyQuestion.CompanyId" class="form-select form-select-sm" asp-items="ViewBag.Companies" disabled> @* Added form-select, form-select-sm, disabled *@
-                         <option value="">@Model.CompanyQuestion.Company?.Name</option>
+                <div class="col-md">
+                    @* Adjusted column width distribution *@
+                    <label asp-for="CompanyQuestion.CompanyId" class="form-label small mb-1"><i class="bi bi-building me-1"></i>اسم الشركة</label>
+                    <select asp-for="CompanyQuestion.CompanyId" class="form-select form-select-sm" asp-items="ViewBag.Companies" disabled>
+                        <option value="">@Model.CompanyQuestion.Company?.Name</option>
                     </select>
                     <span asp-validation-for="CompanyQuestion.CompanyId" class="text-danger small"></span>
                 </div>
 
-             
+                @* User Name Dropdown *@
+                <div class="col-md">
+                    @* Adjusted column width distribution *@
+                    <label asp-for="CompanyQuestion.UserId" class="form-label small mb-1"><i class="bi bi-person me-1"></i>اسم الموظف</label>
+                    <select asp-for="CompanyQuestion.UserId" class="form-select form-select-sm" asp-items="ViewBag.Users" disabled>
+                        <option value="">@Model.CompanyQuestion.ApplicationUser?.UserName</option>
+                    </select>
+                    <span asp-validation-for="CompanyQuestion.UserId" class="text-danger small"></span>
+                </div>
 
                 @* Creation Date *@
-                <div class="col-md-3">
-                    <label asp-for="CompanyQuestion.Created" class="form-label small mb-1">تاريخ الإنشاء</label>
-                    <input asp-for="CompanyQuestion.Created" class="form-control form-control-sm" readonly /> @* Added form-control, form-control-sm *@
+                <div class="col-md">
+                    @* Adjusted column width distribution *@
+                    <label asp-for="CompanyQuestion.Created" class="form-label small mb-1"><i class="bi bi-calendar-event me-1"></i>تاريخ الإنشاء</label>
+                    <input asp-for="CompanyQuestion.Created" class="form-control form-control-sm" readonly />
                     <span asp-validation-for="CompanyQuestion.Created" class="text-danger small"></span>
                 </div>
             </div>
@@ -57,212 +75,231 @@
     @* --- قسم روابط فئات الأسئلة --- *@
     @if (Model?.QuestionCategoryType?.Any() == true)
     {
-        <div class="mb-4">
-            <h5 class="mb-3">فئات الأسئلة</h5>
-            <div class="d-flex flex-wrap gap-2"> @* Use flexbox for better wrapping and spacing *@
+        <div class="mb-5 content-section">
+            @* Added content-section class *@
+            <h5 class="mb-3 fw-semibold"><i class="bi bi-tags me-2 text-info"></i>فئات الأسئلة</h5>
+            <div class="d-flex flex-wrap gap-2">
                 @foreach (var categoryType in Model.QuestionCategoryType)
                 {
-                     <a asp-action="Details"
-                           asp-route-id="@Model.CompanyQuestion.Id"
-                           asp-route-CategoryId="@categoryType.Id"
-                             asp-route-anchor="questionDetailsSection"
-                           class="btn btn-outline-info btn-sm category-link"> @* Use Bootstrap button style *@
-                            @categoryType.CategoryName
-                            @* يمكنك إضافة معلومات إضافية مثل الكود هنا: @categoryType.Code *@
-                     </a>
+                    <a asp-action="Details"
+                       asp-route-id="@Model.CompanyQuestion.Id"
+                       asp-route-CategoryId="@categoryType.Id"
+                       asp-route-anchor="questionDetailsSection"
+                       class="btn btn-sm btn-outline-info category-link rounded-pill px-3">
+                        @* Changed style *@
+                        <i class="bi bi-filter-circle me-1"></i> @* Changed Icon *@
+                        @categoryType.CategoryName
+                    </a>
                 }
             </div>
         </div>
     }
     else
     {
-        <div class="alert alert-secondary" role="alert">
+        <div class="alert alert-secondary content-section" role="alert">
+            @* Added content-section class *@
             لا توجد أنواع فئات أسئلة للعرض.
         </div>
     }
 
 
     @* --- قسم ملخص أنواع الأسئلة (داخل Cards) --- *@
-    <div class="mb-4">
-        <h5 class="mb-3">ملخص أنواع الأسئلة</h5>
-        <div class="row g-3"> @* Bootstrap grid with gutters *@
-       @if (Model.QuestionType != null)
-       {
-            @foreach (var question in Model.QuestionType)
+    <div class="mb-5 content-section">
+        @* Added content-section class *@
+        <h5 class="mb-3 fw-semibold"><i class="bi bi-bar-chart-steps me-2 text-success"></i>ملخص أنواع الأسئلة</h5>
+        <div class="row g-3">
+            @if (Model.QuestionType != null)
             {
-                var totalScore = Model.CompanyQuestionContent?
+                @foreach (var question in Model.QuestionType)
+                {
+                    var totalScore = Model.CompanyQuestionContent?
                     .Where(q => q.Question.QuestionTypeId == question.Id)
                     .Sum(q => (int?)q.Score) ?? 0;
 
-                var maxScore = Model.CompanyQuestionContent?
+                    var maxScore = Model.CompanyQuestionContent?
                     .Where(q => q.Question.QuestionTypeId == question.Id)
                     .Sum(q => (int?)q.Question.MaxGrid) ?? 0;
 
-                var percentage = maxScore > 0 ? (int)Math.Round((double)totalScore / maxScore * 100) : 0;
+                    var percentage = maxScore > 0 ? (int)Math.Round((double)totalScore / maxScore * 100) : 0;
+                    var progressBarClass = "bg-danger"; // أقل من 50%
+                    if (percentage >= 75) progressBarClass = "bg-success"; // 75%+
+                    else if (percentage >= 50) progressBarClass = "bg-warning"; // 50-74%
 
-                <div class="col-lg-3 col-md-4 col-sm-6"> 
-                     <a asp-action="GetQuestionType" asp-route-TypeId="@question.Id" asp-route-id="@Model.CompanyQuestion.Id"   asp-route-anchor="questionDetailsSection" class="text-decoration-none question-type-link">
-                         <div class="card h-100 shadow-sm question-type-card"> 
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6 class="card-title mb-0 text-primary fw-bold">@question.TypeName</h6> 
-                                    <i class="bi bi-tag fs-4 text-muted"></i>
-                                </div>
-                                <p class="card-text small text-muted mb-2">
-                                    النقاط: @totalScore / @maxScore
-                                </p>
-                                <div class="progress" style="height: 8px;"> @* Progress bar *@
-                                    @* <div class="progress-bar bg-success" role="progressbar" style="width: @percentage%;" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div> *@
-                               
-                                @{
-    var progressBarClass = "bg-danger"; // أقل من 50%
-    if (percentage >= 50) progressBarClass = "bg-warning"; // 50-75%
-    if (percentage >= 75) progressBarClass = "bg-success"; // 75%+
-    // يمكنك إضافة bg-info أو ألوان أخرى حسب الحاجة
-}
-<div class="progress-bar @progressBarClass" role="progressbar" style="width: @percentage%;" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
-    @* يمكنك إضافة النسبة المئوية هنا إذا أردت *@
-    @* @percentage% *@
-</div>
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <a asp-action="GetQuestionType" asp-route-TypeId="@question.Id" asp-route-id="@Model.CompanyQuestion.Id" asp-route-anchor="questionDetailsSection" class="text-decoration-none question-type-link">
+                            <div class="card h-100 shadow-sm question-type-card border-light">
+                                @* Added subtle border *@
+                                <div class="card-body p-3 d-flex flex-column">
+                                    @* Flex column for spacing *@
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="card-title mb-0 text-primary fw-bold"><i class="bi bi-clipboard-data me-1"></i>@question.TypeName</h6>
+                                    </div>
+                                    <p class="card-text small text-muted mb-2">
+                                        النقاط: <span class="fw-bold text-dark">@totalScore</span> / @maxScore
+                                    </p>
+                                    <div class="progress mt-auto" style="height: 10px;">
+                                        @* Increased height & margin-top auto *@
+                                        <div class="progress-bar @progressBarClass progress-bar-striped progress-bar-animated" role="progressbar" style="width: @percentage%;" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
+                                            <span class="visually-hidden">@percentage%</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                     </a>
-                </div>
-            }
+                        </a>
+                    </div>
+                }
             }
         </div>
     </div>
 
 
-    @* --- قسم جدول تفاصيل الأسئلة (داخل Card) --- *@
-    <form asp-controller="CompanyQuestion"> @* Form tag kept as in original *@
-    <div class="card shadow-sm mb-4" id="questionDetailsSection">
-        <div class="card-header">
-            <h5 class="mb-0">تفاصيل الأسئلة</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-               
-                
-                <table class="table table-striped table-hover table-bordered mb-0 align-middle question-details-table">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 50%;">السؤال</th>
+    @* --- قسم تفاصيل الأسئلة (محول إلى Cards) --- *@
+    <form asp-controller="Employee">
+        <div class="card shadow-sm mb-4 content-section" id="questionDetailsSection">
+            @* Added content-section class *@
+            <div class="card-header bg-light">
+                <h5 class="mb-0 d-flex align-items-center"><i class="bi bi-list-check me-2 text-primary"></i>تفاصيل الأسئلة</h5>
+            </div>
 
-                            @if (ViewBag.Type == "Old")
-                            {
-                                <th class="text-center" style="width: 25%;">النقاط</th>
-                                <th class="text-center" style="width: 25%;">الحد الأقصى</th>
-                            }
-                            else
-                            {
-                                <th class="text-center" style="width: 35%;">الفحص والملاحظات</th>
-                                <th class="text-center" style="width: 15%;">المستوى</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.CompanyQuestionContent != null && Model.CompanyQuestionContent.Any())
-                        {
-                            @foreach (var question in Model.CompanyQuestionContent)
-                            {
-                                <tr class="question-row" data-id="@question.QuestionId">
-                                    <td>@Html.Raw(question.Question.Content)</td>
 
-                                    @if (Model.CompanyQuestion.Type =="Old")
-                                    {
-                                        <td class="text-center">
-                                            <input type="hidden" class="row-id" value="@question.Id" />
-                                            <input type="number"
-                                                   value="@question.Score"
-                                                   class="form-control form-control-sm text-center row-score score-input-visual" />
-                                        </td>
-                                        <td class="text-center">@question.Question.MaxGrid</td>
-                                    }
-                                    else
-                                    {
-                                        <td class="inspect-notes-td-visual">
-                                            <input type="hidden" class="row-id" value="@question.Id" />
-                                            <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-2">
-                                                <select class="form-select form-select-sm row-inspect inspect-select-visual">
-                                                    <option value="">اختر</option>
-                                                    <option value="N" selected="@(question.Inspect == "N" ? "selected" : null)">N</option>
-                                                    <option value="Ns" selected="@(question.Inspect == "Ns" ? "selected" : null)">Ns</option>
-                                                </select>
-                                                <div class="nots-container flex-grow-1" style="display: none;">
-                                                    <textarea class="form-control form-control-sm nots-text notes-textarea-visual"
-                                                                  placeholder="ملاحظات...">@question.Nots</textarea>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="inspect-level-td-visual">
-                                            <select class="form-select form-select-sm nots-level level-select-visual"
-                                                    style="display: none;">
-                                                <option value="0" selected="@(question.Level == 0)">مستوى</option>
+
+<div class="card-body">
+    <div class="question-cards-container">
+        @if (Model.CompanyQuestionContent != null && Model.CompanyQuestionContent.Any())
+        {
+            @* --- Check the Active status ONCE before the loop for efficiency --- *@
+            var isReadOnly = Model.CompanyQuestion.Active;
+
+            @foreach (var question in Model.CompanyQuestionContent)
+            {
+                <div class="card mb-3 question-card @(question.Inspect == "Ns" ? "ns-highlight" : "border-light") @(isReadOnly ? "read-only-mode" : "")" data-question-id="@question.QuestionId">
+                    @* Added optional 'read-only-mode' class for potential custom styling *@
+                    <div class="card-body p-3">
+                        <input type="hidden" class="row-id" value="@question.Id" />
+                        <div class="row g-3">
+                            @* --- Question Content --- *@
+                            <div class="col-md-7 question-content-col">
+                                <strong class="d-block mb-2"><i class="bi bi-question-circle me-1"></i>السؤال:</strong>
+                                <div class="question-content-text">@Html.Raw(question.Question.Content)</div>
+                            </div>
+
+                            @* --- Controls Column --- *@
+                            <div class="col-md-5 question-controls-col border-start ps-md-3">
+                                @if (Model.CompanyQuestion.Type == "Old")
+                                {
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col">
+                                            <label class="form-label small mb-1"><i class="bi bi-check2-circle me-1 text-success"></i>النقاط</label>
+                                            @* --- Add disabled attribute if isReadOnly is true --- *@
+                                            <input type="number" value="@question.Score" class="form-control form-control-sm text-center row-score score-input-visual" @(isReadOnly ? "disabled" : null) />
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="form-label small mb-1"><i class="bi bi-bullseye me-1 text-secondary"></i>الحد الأقصى</label>
+                                            <div class="text-center fw-bold p-1 border rounded bg-light">@question.Question.MaxGrid</div>
+                                        </div>
+                                    </div>
+                                }
+                                else // New Type
+                                {
+                                    <div class="inspect-notes-controls">
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1"><i class="bi bi-clipboard-check me-1 text-primary"></i>الفحص</label>
+                                            @* --- Add disabled attribute if isReadOnly is true --- *@
+                                            <select class="form-select form-select-sm row-inspect inspect-select-visual" @(isReadOnly ? "disabled" : null)>
+                                                <option value="">اختر</option>
+                                                <option value="S" selected="@(question.Inspect == "S" ? "selected" : null)">S</option>
+                                                            <option value="Ns" selected="@(question.Inspect == "Ns" ? "selected" : null)">Ns</option>
+                                                            <option value="NA" selected="@(question.Inspect == "NA" ? "selected" : null)">NA</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="nots-container mb-2" style="@(question.Inspect == "Ns" ? "" : "display: none;")">
+                                            <label class="form-label small mb-1"><i class="bi bi-pencil-square me-1 text-warning"></i>الملاحظات</label>
+                                            @* --- Add disabled attribute if isReadOnly is true --- *@
+                                            <textarea class="form-control form-control-sm nots-text notes-textarea-visual" placeholder="ادخل الملاحظات هنا..." rows="2" @(isReadOnly ? "disabled" : null)>@question.Nots</textarea>
+                                        </div>
+
+                                        <div class="level-container" style="@(question.Inspect == "Ns" ? "" : "display: none;")">
+                                            <label class="form-label small mb-1"><i class="bi bi-bar-chart-line me-1 text-danger"></i>المستوى</label>
+                                            @* --- Add disabled attribute if isReadOnly is true --- *@
+                                            <select class="form-select form-select-sm nots-level level-select-visual" @(isReadOnly ? "disabled" : null)>
+                                                <option value="0" selected="@(question.Level == 0)">-- اختر المستوى --</option>
                                                 <option value="1" selected="@(question.Level == 1)">1</option>
                                                 <option value="2" selected="@(question.Level == 2)">2</option>
                                                 <option value="3" selected="@(question.Level == 3)">3</option>
                                             </select>
-                                        </td>
-                                    }
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="@(ViewBag.Type == "Old" ? 3 : 3)" class="text-center p-4 text-muted">
-                                    لا توجد أسئلة لعرضها.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                        </div>
 
 
-
-
-
-
-
-
-
-
-
-
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-warning text-center" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i> لا توجد أسئلة لعرضها في هذه الفئة أو النوع.
             </div>
-        </div>
+        }
     </div>
+</div>
+
+@* --- Optional CSS for better visual feedback in read-only mode --- *@
+<style>
+    .read-only-mode .form-control:disabled,
+    .read-only-mode .form-select:disabled {
+        background-color: #e9ecef; /* Lighter grey background */
+        opacity: 0.7;           /* Slightly faded */
+        cursor: not-allowed;    /* Indicate non-interactive */
+    }
+    .read-only-mode .score-input-visual:disabled {
+         /* You might want specific styles for the score input if needed */
+    }
+     .read-only-mode .notes-textarea-visual:disabled {
+         /* You might want specific styles for the notes textarea if needed */
+    }
+</style>
+        
+        
+        </div>
 
 
         @* --- قسم أزرار الإجراءات --- *@
-         <div class="mt-4 d-flex justify-content-end gap-2 action-buttons-container">
-            <div data-company-question-id="@Model.CompanyQuestion.Id"> @* Keep data attribute if needed elsewhere *@
-                 @* --- IMPORTANT: Keeping original id "saveButton" --- *@
-                <button id="saveButton" type="button" class="btn btn-primary"> @* Bootstrap button style *@
-                    <i class="bi bi-save me-1"></i> @* Optional Icon *@
-                    حفظ
-                </button>
-            </div>
-          
+        <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2 action-buttons-container content-section">
+            @* Added border-top, padding, section class *@
+          @if (!Model.CompanyQuestion.Active)
+{
+    <div data-company-question-id="@Model.CompanyQuestion.Id">
+        <button id="saveButton" type="button" class="btn btn-primary btn-lg px-4">
+            <i class="bi bi-save me-2"></i>
+            حفظ التغييرات
+        </button>
+    </div>
+}
+
+            <a asp-action="Index" asp-route-Type="@Model.CompanyQuestion.Type" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                رجوع
+            </a>
         </div>
 
     </form> @* End Form *@
-      <a asp-controller="Index" asp-action="Index" asp-route-Id="@Model.CompanyQuestion.UserId" asp-route-Type="@Model.CompanyQuestion.Type" class="btn btn-secondary"> @* Bootstrap button style *@
-                 <i class="bi bi-arrow-left me-1"></i> @* Optional Icon *@
-                رجوع إلى القائمة
-            </a>
+
 
     @* --- قسم الرسم البياني (تصميم فقط) --- *@
-    <div class="mt-5 chart-container">
-        <h5 class="mb-3">الرسم البياني</h5>
+    <div class="mt-5 chart-container content-section">
+        @* Added content-section class *@
+        <h5 class="mb-3 fw-semibold"><i class="bi bi-graph-up me-2 text-info"></i>الرسم البياني</h5>
         <div class="card shadow-sm">
             <div class="card-body">
-                 <div id="apexLineChart" style="min-height: 350px;" class="d-flex justify-content-center align-items-center bg-light text-muted">
-                     @* Chart will be rendered here by ApexCharts if configured *@
-                     <span>سيتم عرض الرسم البياني هنا...</span>
-                 </div>
+                <div id="apexLineChart" style="min-height: 350px;" class="d-flex justify-content-center align-items-center bg-light text-muted rounded">
+                    @* Added rounded *@
+                    <span><i class="bi bi-hourglass-split me-2"></i> سيتم عرض الرسم البياني هنا عند توفره...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -272,115 +309,148 @@
 
 @* --- قسم السكربتات --- *@
 @section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
-    @* --- IMPORTANT: Including the ORIGINAL JavaScript --- *@
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> @* Ensure jQuery is loaded if original script uses it *@
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> @* Keep ApexCharts if used *@
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> @* تأكد من وجود jQuery *@
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> @* إذا كنت تستخدم ApexCharts *@
+    @* <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> *@ @* مثال: تضمين SweetAlert للحصول على تنبيهات أفضل *@
+
 
     <script>
-        // --- PASTE THE ORIGINAL JAVASCRIPT CODE HERE ---
-        // (The code provided in your very first message that uses jQuery)
-
         $(document).ready(function () {
-            // JS for showing/hiding notes based on 'Ns' selection
-            $('.row-inspect').on('change', function () {
-                var selectedValue = $(this).val();
-                var parentTd = $(this).closest('td'); // The TD containing the dropdown
-                var row = $(this).closest('tr');      // The entire table row (tr)
-                var notsContainer = parentTd.find('.nots-container'); // Find notes container within the same TD
-                var notesLevelSelect = row.find('.nots-level');    // Find level select within the same row
+
+            // --- الكود الخاص بالبطاقات (مع تصحيح اسم الحقل إلى Notes) ---
+
+            function updateNsDisplay(questionCard) {
+                var inspectSelect = questionCard.find('.row-inspect');
+                var selectedValue = inspectSelect.val();
+                var notsContainer = questionCard.find('.nots-container');
+                var levelContainer = questionCard.find('.level-container');
 
                 if (selectedValue === 'Ns') {
-                    notsContainer.show();
-                    notesLevelSelect.show(); // Show the level dropdown itself
-                    row.css('background-color', '#f8d7da'); // Apply light red background directly
+                    notsContainer.slideDown(200);
+                    levelContainer.slideDown(200);
+                    questionCard.addClass('ns-highlight'); // استخدام الكلاس الجديد للتمييز
                 } else {
-                    notsContainer.hide();
-                    notesLevelSelect.hide(); // Hide the level dropdown
-                    row.css('background-color', ''); // Remove background color
-                    // Optionally clear values when hiding
-                    //notsContainer.find('.nots-text').val('');
-                    //notesLevelSelect.val('0');
+                    notsContainer.slideUp(200);
+                    levelContainer.slideUp(200);
+                    questionCard.removeClass('ns-highlight'); // إزالة كلاس التمييز
                 }
+            }
+
+            // ربط الحدث باستخدام تفويض الأحداث
+            $('.question-cards-container').on('change', '.row-inspect', function () {
+                var questionCard = $(this).closest('.question-card');
+                updateNsDisplay(questionCard);
             });
 
-            // Initialize state on page load
-            $('.row-inspect').each(function () {
-                var selectedValue = $(this).val();
-                var parentTd = $(this).closest('td');
-                var row = $(this).closest('tr');
-                var notsContainer = parentTd.find('.nots-container');
-                var notesLevelSelect = row.find('.nots-level'); // Find the level select
-
-                // Initial check to show/hide elements and set background
-                if (selectedValue === 'Ns') {
-                    notsContainer.show();
-                    notesLevelSelect.show();
-                    row.css('background-color', '#f8d7da');
+            // تهيئة الحالة عند تحميل الصفحة لكل بطاقة
+            $('.question-card').each(function () {
+                var questionCard = $(this);
+                // التحقق الأولي وتطبيق الحالة الصحيحة (مهم إذا كان هناك Ns عند التحميل)
+                if (questionCard.find('.row-inspect').val() === 'Ns') {
+                    questionCard.addClass('ns-highlight');
+                    questionCard.find('.nots-container').show();
+                    questionCard.find('.level-container').show();
                 } else {
-                    notsContainer.hide();
-                    notesLevelSelect.hide();
-                    row.css('background-color', '');
+                    questionCard.removeClass('ns-highlight');
+                    questionCard.find('.nots-container').hide();
+                    questionCard.find('.level-container').hide();
                 }
+                // لا حاجة لاستدعاء updateNsDisplay هنا لأن الحالة تطبق مباشرة
             });
 
-            // JS for the Save Button
+
+            // JS لزر الحفظ - مع تصحيح Notes
             $('#saveButton').click(function () {
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> جاري الحفظ...'); // تعطيل الزر وإظهار مؤشر تحميل
+
                 var dataToSend = [];
+                var isValid = true;
 
-                $('tr.question-row').each(function () {
-                    var row = $(this);
-                    var id = row.find('.row-id').val();
-                    var scoreInput = row.find('.row-score'); // Find score input
-                    var inspectSelect = row.find('.row-inspect'); // Find inspect select
-                    var notesText = row.find('.nots-text'); // Find notes text
-                    var levelSelect = row.find('.nots-level'); // Find level select
+                $('.question-card').each(function () {
+                    var card = $(this);
+                    var id = card.find('.row-id').val();
+                    var scoreInput = card.find('.row-score');
+                    var inspectSelect = card.find('.row-inspect');
+                    var notesText = card.find('.nots-text');
+                    var levelSelect = card.find('.nots-level');
 
-                    // Determine values based on existence
                     var scoreValue = scoreInput.length > 0 ? scoreInput.val() : null;
                     var inspectValue = inspectSelect.length > 0 ? inspectSelect.val() : null;
-                    var notesValue = notesText.length > 0 ? notesText.val() : null;
+                    var notesValue = notesText.length > 0 ? notesText.val() : null; // Corrected: was nots-text previously used for value, now using variable.
                     var levelValue = levelSelect.length > 0 ? levelSelect.val() : null;
 
-                    // Only add rows that have an ID
+                    // مثال للتحقق: إذا كان Ns محددًا، يجب إدخال ملاحظة ومستوى
+                    if (inspectValue === 'Ns' && (!notesValue || levelValue === '0')) {
+                        // alert('يرجى إدخال الملاحظات واختيار المستوى للأسئلة المحددة بـ Ns.');
+                        card.addClass('border-warning'); // تمييز البطاقة التي بها خطأ
+                        // $(this).find('.nots-text, .nots-level').addClass('is-invalid'); // إضافة كلاس خطأ للحقول
+                        isValid = false;
+                        // لا نوقف الحلقة لنتمكن من تمييز كل البطاقات الخاطئة
+                    } else {
+                        card.removeClass('border-warning');
+                        // $(this).find('.nots-text, .nots-level').removeClass('is-invalid');
+                    }
+
+
                     if (id) {
                         dataToSend.push({
                             Id: id,
                             Score: scoreValue,
                             Inspect: inspectValue,
-                            Notes: notesValue,
+                            Notes: notesValue, // *** تم التأكد من أن الاسم هنا Notes ***
                             Level: levelValue
                         });
                     }
                 });
 
-                // console.log("Data to send:", dataToSend); // For debugging
+                if (!isValid) {
+                    alert('الرجاء مراجعة الحقول المطلوبة (الملاحظات والمستوى) للأسئلة المحددة بـ Ns والمميزة باللون الأصفر.');
+                    $('#saveButton').prop('disabled', false).html('<i class="bi bi-save me-2"></i> حفظ التغييرات'); // إعادة تفعيل الزر
+                    return;
+                }
 
-                // Original AJAX call
+                // console.log("Data to send:", dataToSend);
+
                 $.ajax({
                     type: 'POST',
-                    url: '/CompanyQuestion/UpdateQuestionContent', // Ensure URL is correct
+                    url: '/CompanyQuestion/UpdateQuestionContent', // تأكد من أن الرابط صحيح
                     data: JSON.stringify(dataToSend),
                     contentType: 'application/json; charset=utf-8',
-                     // Add headers like AntiForgeryToken if needed
-                    // headers: {
-                    //     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                    // },
                     success: function (response) {
-                        // alert('تم حفظ البيانات بنجاح ✅');
-                        location.reload(); // Reload page on success
+                        // استخدام SweetAlert مثال:
+                        // Swal.fire({
+                        //     title: 'نجاح!',
+                        //     text: 'تم حفظ البيانات بنجاح.',
+                        //     icon: 'success',
+                        //     confirmButtonText: 'حسناً'
+                        // }).then((result) => {
+                        //     if (result.isConfirmed) {
+                        //         location.reload();
+                        //     }
+                        // });
+                        // أو استخدام alert بسيط:
+                        alert('تم حفظ البيانات بنجاح ✅');
+                        location.reload(); // إعادة تحميل الصفحة
                     },
                     error: function (xhr, status, error) {
+                        // Swal.fire({
+                        //     title: 'خطأ!',
+                        //     text: 'حدث خطأ أثناء الحفظ. الرجاء المحاولة مرة أخرى.',
+                        //     icon: 'error',
+                        //     confirmButtonText: 'حسناً'
+                        // });
                         alert('حدث خطأ أثناء الحفظ ❌');
-                        console.log("Save Error:", error, status, xhr); // Log detailed error
+                        console.log("Save Error:", error, status, xhr);
+                        $('#saveButton').prop('disabled', false).html('<i class="bi bi-save me-2"></i> حفظ التغييرات'); // إعادة تفعيل الزر عند الخطأ
                     }
                 });
             });
-        });
 
-        // --- END OF ORIGINAL JAVASCRIPT ---
+        });
     </script>
 
-    @* <script src="~/js/SaveContent.js"></script> *@ @* Remove link to external JS if using inline original script *@
 }

@@ -1,0 +1,102 @@
+﻿// Import Google Fonts (Nunito) - or use @font-face if self-hosting
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap');
+
+// Your @font-face definitions if you are self-hosting Nunito
+// Example:
+// @font-face {
+//   font-family: 'nunito-regular';
+//   src: url('../fonts/Nunito/Nunito-Regular.woff2') format('woff2'),
+//        url('../fonts/Nunito/Nunito-Regular.woff') format('woff');
+//   font-weight: 400;
+//   font-style: normal;
+// }
+// ... and so on for nunito-medium, nunito-bold
+
+body {
+    font-family: $font-family-nunito-regular; // Using SCSS variable that references CSS var
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6; // Improved line height for readability
+    color: var(--db-body-color);
+    background-color: var(--db-main-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: $font-family-nunito-medium; // Medium for headings
+    color: var(--db-text-color);
+    font-weight: 600; // Bootstrap's default is 500, 600 is a bit bolder
+}
+
+p {
+    font-size: 0.9rem; // Slightly smaller p for balance
+    line-height: 1.7;
+    color: var(--db-text-muted);
+}
+
+a {
+    color: $db-primary;
+    text-decoration: none;
+
+    &:hover {
+        color: darken($db-primary, 10%);
+        text-decoration: underline;
+    }
+}
+
+// General layout helper
+.page-body-wrapper {
+    min-height: calc(100vh - 64px); // Assuming navbar height is 64px
+    display: flex;
+    flex-direction: row;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.main-panel {
+    transition: width 0.25s ease, margin 0.25s ease;
+    width: calc(100% - 258px); // Default sidebar width
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.content-wrapper {
+    background: var(--db-main-bg);
+    padding: 1.875rem; // Consistent padding
+    width: 100%;
+    flex-grow: 1;
+}
+
+.footer {
+    background: var(--db-main-bg);
+    color: var(--db-text-muted);
+    border-top: 1px solid var(--db-card-border);
+    padding: 1.25rem 1.875rem;
+    font-size: 0.875rem;
+}
+
+// Remove Bootstrap's default padding on containers if they cause issues with full-width elements
+.container, .container-fluid {
+    // padding-right: 9px; // Original Bootstrap
+    // padding-left: 9px;  // Original Bootstrap
+}
+
+.row {
+    // margin-right: -9px; // Original Bootstrap
+    // margin-left: -9px;  // Original Bootstrap
+}
+
+.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col,
+.col-auto /* ... all col classes ... */ {
+    // padding-right: 9px; // Original Bootstrap
+    // padding-left: 9px;  // Original Bootstrap
+}
+
+// Override Bootstrap's card border if it's too harsh
+.card {
+    border: 1px solid var(--db-card-border);
+}

@@ -1,0 +1,91 @@
+﻿// Theme Variables (Airline/Professional)
+
+// Base Colors
+:root {
+    // Bootstrap overrides (if not using Bootstrap SCSS variables directly)
+    --blue: #0B4F6C; // Primary
+    --indigo: #6610f2; // Keep or adjust
+    --purple: #6f42c1; // Keep or adjust
+    --pink: #e83e8c; // Keep or adjust
+    --red: #dc3545; // Danger
+    --orange: #fd7e14; // Keep or adjust
+    --yellow: #ffc107; // Warning
+    --green: #28a745; // Success
+    --teal: #20c997; // Keep or adjust
+    --cyan: #17a2b8; // Info
+    --white: #ffffff;
+    --gray: #6c757d;
+    --gray-dark: #343a40;
+    // Theme specific color variables
+    --db-primary: #0B4F6C; // Deep Cerulean Blue
+    --db-primary-rgb: 11, 79, 108;
+    --db-secondary: #708090; // Slate Gray
+    --db-secondary-rgb: 112, 128, 144;
+    --db-success: #28a745;
+    --db-success-rgb: 40, 167, 69;
+    --db-info: #17a2b8;
+    --db-info-rgb: 23, 162, 184;
+    --db-warning: #ffc107;
+    --db-warning-rgb: 255, 193, 7;
+    --db-danger: #dc3545;
+    --db-danger-rgb: 220, 53, 69;
+    --db-light: #f8f9fa; // Very Light Gray
+    --db-dark: #343a40; // Dark Gray
+    // Layout & Component Specific
+    --db-sidebar-bg: #ffffff;
+    --db-sidebar-text: #495057;
+    --db-sidebar-icon: #6c757d;
+    --db-sidebar-active-bg: rgba(var(--db-primary-rgb), 0.07);
+    --db-sidebar-active-text: var(--db-primary);
+    --db-sidebar-active-icon: var(--db-primary);
+    --db-sidebar-hover-bg: rgba(0, 0, 0, 0.03);
+    --db-sidebar-hover-text: var(--db-primary);
+    --db-sidebar-border: rgba(0, 0, 0, 0.08);
+    --db-navbar-bg: #ffffff;
+    --db-navbar-border: rgba(0, 0, 0, 0.08);
+    --db-navbar-text: var(--db-text-muted);
+    --db-navbar-brand-text: var(--db-primary);
+    --db-main-bg: #f4f7f9;
+    --db-card-bg: #ffffff;
+    --db-card-border: rgba(0, 0, 0, 0.08);
+    --db-text-color: #343a40;
+    --db-text-muted: #6c757d;
+    --db-body-color: var(--db-text-color);
+    // Font Families
+    --db-font-sans-serif: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --db-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --db-font-nunito-regular: "nunito-regular", sans-serif; // Ensure these map to actual @font-face names
+    --db-font-nunito-medium: "nunito-medium", sans-serif;
+    --db-font-nunito-bold: "nunito-bold", sans-serif;
+}
+
+// SCSS variables (can be used for more complex logic, mixins, etc.)
+$db-primary: var(--db-primary);
+$db-secondary: var(--db-secondary);
+$db-sidebar-bg: var(--db-sidebar-bg);
+$db-sidebar-text: var(--db-sidebar-text);
+$db-sidebar-icon: var(--db-sidebar-icon);
+$db-sidebar-active-bg: var(--db-sidebar-active-bg);
+$db-sidebar-active-text: var(--db-sidebar-active-text);
+$db-sidebar-active-icon: var(--db-sidebar-active-icon);
+$db-sidebar-hover-bg: var(--db-sidebar-hover-bg);
+$db-sidebar-hover-text: var(--db-sidebar-hover-text);
+$db-sidebar-border: var(--db-sidebar-border);
+
+$db-navbar-bg: var(--db-navbar-bg);
+$db-navbar-border: var(--db-navbar-border);
+$db-navbar-text: var(--db-navbar-text);
+$db-navbar-brand-text: var(--db-navbar-brand-text);
+
+$db-main-bg: var(--db-main-bg);
+$db-card-bg: var(--db-card-bg);
+$db-card-border: var(--db-card-border);
+$db-text-color: var(--db-text-color);
+$db-text-muted: var(--db-text-muted);
+
+// Font Families
+$font-family-sans-serif: var(--db-font-sans-serif);
+$font-family-base: $font-family-sans-serif;
+$font-family-nunito-regular: var(--db-font-nunito-regular);
+$font-family-nunito-medium: var(--db-font-nunito-medium);
+$font-family-nunito-bold: var(--db-font-nunito-bold);

@@ -10,7 +10,7 @@
         public Question Question { get; set; }
 
         public int? Score { get; set; } // الدرجة المتحصل عليها
-        public string? Inspect { get; set; } // Ns Or s
+        public string? Inspect { get; set; } // Ns Or s or NA
         public string? Nots { get; set; } // ملاحظات في حالة Ns
         public int? Level { get; set; } // درجة الخطورة
     }

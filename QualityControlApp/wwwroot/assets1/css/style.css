@@ -14291,3 +14291,308 @@ dl {
     color: #b1b1b1; }
 
 /*# sourceMappingURL=style.css.map */
+
+
+
+
+/*---------NEW---------*/
+
+
+/* custom-dashboard.css */
+
+/* 1. Override Root Variables for Theming (Airline/Professional Theme) */
+:root {
+    --primary: #0B4F6C; /* Deep Cerulean Blue (Professional/Sky) */
+    --secondary: #708090; /* Slate Gray (Neutral) */
+    --success: #28a745; /* Standard Green (Keep Bootstrap's?) */
+    --info: #17a2b8; /* Standard Teal/Info (Keep Bootstrap's?) */
+    --warning: #ffc107; /* Standard Amber (Keep Bootstrap's?) */
+    --danger: #dc3545; /* Standard Red (Keep Bootstrap's?) */
+    --light: #f8f9fa; /* Very Light Gray (Almost White) */
+    --dark: #343a40; /* Dark Gray (Instead of near-black) */
+    /* Custom Variables for Easier Management */
+    --sidebar-bg: #ffffff; /* White Sidebar Background */
+    --sidebar-text: #495057; /* Darker Gray Text for Sidebar */
+    --sidebar-icon-color: #6c757d; /* Muted Icon Color */
+    --sidebar-active-bg: rgba(11, 79, 108, 0.08); /* Faint Primary Background on Active */
+    --sidebar-active-text: var(--primary); /* Primary Color for Active Text */
+    --sidebar-active-icon: var(--primary); /* Primary Color for Active Icon */
+    --sidebar-hover-bg: rgba(0, 0, 0, 0.03); /* Subtle Hover BG */
+    --sidebar-hover-text: var(--primary); /* Primary Color on Hover */
+    --navbar-bg: #ffffff; /* White Navbar */
+    --navbar-brand-bg: #ffffff; /* White Brand Area */
+    --main-bg: #f4f7f9; /* Slightly off-white main background */
+    --card-bg: #ffffff; /* White cards */
+    --card-border: rgba(0, 0, 0, 0.1); /* Softer card border */
+    --text-color: #343a40; /* Default text color */
+    --text-muted-color: #6c757d; /* Muted text color */
+    /* Override Bootstrap's default body color if needed */
+    --body-color: var(--text-color);
+}
+
+/* 2. Apply Custom Backgrounds */
+body {
+    background-color: var(--main-bg); /* Use the custom main background color */
+    color: var(--body-color);
+}
+
+.sidebar {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--card-border); /* Add a subtle border */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Optional subtle shadow */
+}
+
+.navbar.default-layout-navbar {
+    background: var(--navbar-bg);
+    border-bottom: 1px solid var(--card-border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Optional subtle shadow */
+}
+
+.navbar .navbar-brand-wrapper {
+    background: var(--navbar-brand-bg); /* Match navbar background */
+    /* Remove the default border if it exists from style.css */
+    border-right: none;
+    /* Adjust logo alignment if needed after background change */
+}
+
+    /* Ensure brand link colors work on new background */
+    .navbar .navbar-brand-wrapper .navbar-brand {
+        color: var(--primary); /* Or your brand's specific color */
+    }
+
+        .navbar .navbar-brand-wrapper .navbar-brand:hover {
+            color: darken(var(--primary), 10%);
+        }
+
+.main-panel {
+    background: var(--main-bg); /* Ensure main panel uses the new BG */
+}
+
+.content-wrapper {
+    background: var(--main-bg); /* Ensure content wrapper uses the new BG */
+    padding: 1.5rem; /* Adjust padding if needed */
+}
+
+.footer {
+    background: var(--main-bg);
+    color: var(--text-muted-color);
+    border-top: 1px solid var(--card-border);
+}
+
+/* 3. Sidebar Navigation Styling Overrides */
+.sidebar .nav .nav-item .nav-link {
+    color: var(--sidebar-text);
+}
+
+    .sidebar .nav .nav-item .nav-link i.menu-icon {
+        color: var(--sidebar-icon-color);
+        /* Remove the default green background/color from .icon-bg */
+    }
+
+    .sidebar .nav .nav-item .nav-link .icon-bg {
+        background: transparent; /* Remove the light green background */
+        width: auto; /* Adjust if needed */
+        height: auto;
+    }
+
+    .sidebar .nav .nav-item .nav-link i.menu-arrow {
+        color: var(--sidebar-icon-color);
+    }
+
+/* Sidebar Active State */
+.sidebar .nav .nav-item.active {
+    background: var(--sidebar-active-bg); /* Use the faint background */
+}
+
+    .sidebar .nav .nav-item.active > .nav-link {
+        /* Remove the default green left border */
+        border-left: 4px solid var(--primary); /* Use primary color border */
+        padding-left: calc(2.375rem - 4px); /* Adjust padding to account for border */
+    }
+
+        .sidebar .nav .nav-item.active > .nav-link:before {
+            content: none; /* Remove the default ::before border */
+        }
+
+        .sidebar .nav .nav-item.active > .nav-link .menu-title {
+            color: var(--sidebar-active-text);
+            font-family: "nunito-bold", sans-serif; /* Make active slightly bolder */
+        }
+
+        .sidebar .nav .nav-item.active > .nav-link i {
+            color: var(--sidebar-active-icon); /* Use primary color for icons too */
+        }
+
+/* Sidebar Hover State */
+.sidebar .nav .nav-item:not(.active):hover {
+    background: var(--sidebar-hover-bg);
+}
+
+.sidebar .nav .nav-item:not(.active) > .nav-link:hover {
+    color: var(--sidebar-hover-text);
+}
+
+    .sidebar .nav .nav-item:not(.active) > .nav-link:hover i {
+        color: var(--sidebar-hover-text); /* Color icons on hover too */
+    }
+
+/* Sidebar Sub-menu */
+.sidebar .nav.sub-menu {
+    background: var(--sidebar-bg); /* Ensure sub-menu matches */
+    padding: 0.5rem 0 0.5rem 2.5rem; /* Adjust indentation */
+    border-left: 1px solid #eee;
+    margin-left: 1rem;
+}
+
+    .sidebar .nav.sub-menu .nav-item .nav-link {
+        color: var(--text-muted-color);
+        padding: 0.5rem 1rem;
+    }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link:hover,
+        .sidebar .nav.sub-menu .nav-item .nav-link.active {
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link:before {
+            color: var(--sidebar-icon-color); /* Adjust bullet color */
+            font-size: 6px; /* Smaller bullet */
+            left: -15px; /* Adjust position */
+            content: "\F052"; /* Circle bullet */
+        }
+
+/* 4. Navbar Text & Icons */
+.navbar .navbar-menu-wrapper .navbar-toggler {
+    color: var(--sidebar-icon-color); /* Muted color for toggler */
+}
+
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link {
+    color: var(--text-muted-color); /* Muted color for nav links */
+}
+
+    .navbar .navbar-menu-wrapper .navbar-nav .nav-item .nav-link i {
+        color: var(--text-muted-color);
+    }
+
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-toggle::after {
+    color: var(--text-muted-color);
+}
+
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item.nav-profile .nav-link .nav-profile-text p {
+    color: var(--text-color) !important; /* Ensure profile name is readable */
+    margin-bottom: 0;
+}
+
+
+/* 5. Card Styling */
+.card {
+    border: 1px solid var(--card-border);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    border-radius: 0.375rem; /* Slightly more rounded */
+    background-color: var(--card-bg);
+    margin-bottom: 1.5rem; /* Consistent bottom margin */
+}
+
+    .card .card-header {
+        background-color: var(--card-bg); /* Match card background */
+        border-bottom: 1px solid var(--card-border);
+        padding: 0.9rem 1.25rem;
+    }
+
+    .card .card-title {
+        color: var(--text-color);
+        margin-bottom: 1rem;
+        font-size: 1.05rem; /* Slightly smaller title */
+    }
+
+    .card .card-body {
+        padding: 1.25rem;
+        color: var(--body-color);
+    }
+
+    .card .card-description {
+        color: var(--text-muted-color);
+        margin-bottom: 1rem;
+    }
+
+    .card .card-footer {
+        background-color: var(--card-bg);
+        border-top: 1px solid var(--card-border);
+        color: var(--text-muted-color);
+    }
+
+/* 6. Button Adjustments (Primary Example) */
+.btn-primary {
+    /* Variables already overridden, but ensure text color has contrast */
+    color: #ffffff;
+    /* Optional: Add transition for hover */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+    .btn-primary:hover {
+        color: #ffffff;
+        /* Make hover slightly darker */
+        background-color: darken(var(--primary), 7%);
+        border-color: darken(var(--primary), 10%);
+        /* Add subtle lift effect */
+        transform: translateY(-2px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+
+/* 7. Form Control Adjustments */
+.form-control, .select2-container--default .select2-selection--single, .typeahead, .tt-hint {
+    border: 1px solid #ced4da; /* Standard border */
+    color: var(--text-color);
+    background-color: #fff; /* Ensure white background */
+    border-radius: 0.25rem; /* Bootstrap default radius */
+    padding: 0.75rem 1rem; /* Adjust padding for better feel */
+    height: auto; /* Remove fixed height if not needed */
+}
+
+    .form-control:focus, .select2-container--default .select2-selection--single:focus, .typeahead:focus, .tt-hint:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb, 11, 79, 108), 0.25); /* Use primary color for focus ring */
+    }
+    /* Placeholder color */
+    .form-control::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+    }
+
+/* Input group adjustments if needed */
+.input-group-text {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    color: var(--text-muted-color);
+}
+
+/* Fix for Select2 height with new padding */
+.select2-container--default .select2-selection--single {
+    height: calc(1.5em + 1.5rem + 2px); /* Match form-control padding */
+    padding: 0.75rem 1rem;
+}
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(1.5em + 1.5rem); /* Adjust arrow position */
+    }
+
+/* 8. Link Styling */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+    a:hover {
+        color: darken(var(--primary), 10%);
+        text-decoration: underline;
+    }
+
+
+/* Add other specific overrides as needed */

@@ -51,8 +51,8 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "69213899-2851-4a75-9154-3c0e72415ea4",
-                            ConcurrencyStamp = "049a59d8-6601-4338-bc59-0eec23e0dd2a",
+                            Id = "f3c80870-3b59-4be9-898e-48d19c4c933d",
+                            ConcurrencyStamp = "748ca691-c0c3-4951-9948-65f6fa366410",
                             Name = "Prog",
                             NormalizedName = "PROG"
                         });
@@ -217,13 +217,6 @@ namespace QualityControlApp.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "56bcceb0-c7a6-49c0-9136-27be057f417e",
-                            RoleId = "69213899-2851-4a75-9154-3c0e72415ea4"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -332,7 +325,6 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PilotName")
@@ -363,7 +355,8 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<Guid>("AirPortRequestId")
+                    b.Property<Guid?>("AirPortRequestId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
@@ -380,8 +373,17 @@ namespace QualityControlApp.Migrations
                     b.Property<Guid>("FileTypeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Inspect")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("LandingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("Modified")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Nots")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -389,13 +391,51 @@ namespace QualityControlApp.Migrations
 
                     b.HasIndex("FileTypeId");
 
+                    b.HasIndex("LandingId");
+
                     b.ToTable("AirPortRequestFiles");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.BookingAppointment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("BookingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("BookingAppointment");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Company", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AocNum")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CompanyTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
@@ -409,6 +449,8 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyTypeId");
 
                     b.ToTable("Company");
                 });
@@ -429,8 +471,14 @@ namespace QualityControlApp.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("Modified")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("Num")
+                        .HasColumnType("int");
 
                     b.Property<int>("SaftyGrid")
                         .HasColumnType("int");
@@ -447,6 +495,8 @@ namespace QualityControlApp.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("LocationId");
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -483,7 +533,7 @@ namespace QualityControlApp.Migrations
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Score")
+                    b.Property<int?>("Score")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -493,6 +543,56 @@ namespace QualityControlApp.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("CompanyQuestionContent");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CompanyType");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyTypeCategoryAvailable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<Guid>("CompanyTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("QuestionCategoryTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyTypeId");
+
+                    b.HasIndex("QuestionCategoryTypeId");
+
+                    b.ToTable("CompanyTypeCategoryAvailable");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Contact", b =>
@@ -535,8 +635,8 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("81082f25-7427-487b-b732-e878fe26135c"),
-                            Created = new DateTime(2025, 4, 25, 11, 56, 2, 75, DateTimeKind.Local).AddTicks(3166),
+                            Id = new Guid("3a0f4266-cf4b-43f3-a784-2b92195d9e6b"),
+                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(6162),
                             Email = "libyanlacc@gmail.com",
                             Facebook = "- Facebook",
                             Instagram = "- Instagram",
@@ -619,6 +719,139 @@ namespace QualityControlApp.Migrations
                     b.ToTable("FileType");
                 });
 
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("AircraftRegistration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AircraftType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AirportOfLanding")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AocDocumentPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApproverUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CaptainName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CaptainNationality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CaptainNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Consignee")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Consignor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CrewDetails")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfFlights")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ETA")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ETD")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FlightNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NatureOfPaxOrCargo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PurposeOfFlight")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RadioCallSign")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Route")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApproverUserId");
+
+                    b.ToTable("Landing");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Location", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Location");
+                });
+
             modelBuilder.Entity("QualityControlApp.Models.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")
@@ -641,6 +874,9 @@ namespace QualityControlApp.Migrations
 
                     b.Property<Guid>("QuestionTypeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SectionContent")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -742,10 +978,10 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7e7d1abe-dbf4-4850-aa49-ebde2460ac70"),
+                            Id = new Guid("e07775bf-b676-4147-92a4-f7a79f7280ca"),
                             About = "",
                             Activity = "LACC site",
-                            Created = new DateTime(2025, 4, 25, 11, 56, 2, 75, DateTimeKind.Local).AddTicks(2976),
+                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(5941),
                             Name = "LACC"
                         });
                 });
@@ -777,9 +1013,9 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("571a9185-9baa-4f84-9458-e3cda07359ea"),
+                            Id = new Guid("587e8ffd-2d66-4a8c-8ede-26786c4d4811"),
                             ClosingMessage = "The site is temporarily closed for development",
-                            Created = new DateTime(2025, 4, 25, 11, 56, 2, 75, DateTimeKind.Local).AddTicks(3195),
+                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(6203),
                             State = true
                         });
                 });
@@ -839,26 +1075,6 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "56bcceb0-c7a6-49c0-9136-27be057f417e",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "fd8b0aa2-c08f-496b-b6fe-2e0b9e56a6e0",
-                            Email = "libyanlacc@gmail.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = true,
-                            NormalizedEmail = "LIBYANLACC@GMAIL.COM",
-                            NormalizedUserName = "LIBYANLACC@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJG3//9Ep2zLoh5AC7Em+BVdnc0GLTX6xL35zk2W57Uq+xy4FjXX8VsoWPeerKvGQw==",
-                            PhoneNumberConfirmed = true,
-                            SecurityStamp = "4be4c876-41e4-47a9-87e2-eae7a0516c25",
-                            TwoFactorEnabled = false,
-                            UserName = "libyanlacc@gmail.com",
-                            Age = 0,
-                            CreatedDate = new DateTime(2025, 4, 25, 9, 56, 2, 75, DateTimeKind.Utc).AddTicks(3445)
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -936,9 +1152,36 @@ namespace QualityControlApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QualityControlApp.Models.Entities.Landing", "Landing")
+                        .WithMany("RequestFiles")
+                        .HasForeignKey("LandingId");
+
                     b.Navigation("AirPortRequest");
 
                     b.Navigation("FileType");
+
+                    b.Navigation("Landing");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.BookingAppointment", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.Company", "Company")
+                        .WithMany("BookingAppointment")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Company", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.CompanyType", "CompanyType")
+                        .WithMany("Company")
+                        .HasForeignKey("CompanyTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CompanyType");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyQuestion", b =>
@@ -946,17 +1189,22 @@ namespace QualityControlApp.Migrations
                     b.HasOne("QualityControlApp.Models.Entities.Company", "Company")
                         .WithMany("CompanyQuestions")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("QualityControlApp.Models.Entities.Location", "Location")
+                        .WithMany("CompanyQuestion")
+                        .HasForeignKey("LocationId");
 
                     b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "ApplicationUser")
                         .WithOne("CompanyQuestion")
-                        .HasForeignKey("QualityControlApp.Models.Entities.CompanyQuestion", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("QualityControlApp.Models.Entities.CompanyQuestion", "UserId");
 
                     b.Navigation("ApplicationUser");
 
                     b.Navigation("Company");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyQuestionContent", b =>
@@ -978,12 +1226,40 @@ namespace QualityControlApp.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyTypeCategoryAvailable", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.CompanyType", "CompanyType")
+                        .WithMany("AvailableCategories")
+                        .HasForeignKey("CompanyTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QualityControlApp.Models.Entities.QuestionCategoryType", "QuestionCategoryType")
+                        .WithMany()
+                        .HasForeignKey("QuestionCategoryTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CompanyType");
+
+                    b.Navigation("QuestionCategoryType");
+                });
+
             modelBuilder.Entity("QualityControlApp.Models.Entities.Employee", b =>
                 {
                     b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "ApplicationUser")
                         .WithOne("Employee")
                         .HasForeignKey("QualityControlApp.Models.Entities.Employee", "UserId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("Landing")
+                        .HasForeignKey("ApproverUserId");
 
                     b.Navigation("ApplicationUser");
                 });
@@ -1026,12 +1302,31 @@ namespace QualityControlApp.Migrations
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Company", b =>
                 {
+                    b.Navigation("BookingAppointment");
+
                     b.Navigation("CompanyQuestions");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyQuestion", b =>
                 {
                     b.Navigation("CompanyQuestionContents");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.CompanyType", b =>
+                {
+                    b.Navigation("AvailableCategories");
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>
+                {
+                    b.Navigation("RequestFiles");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Location", b =>
+                {
+                    b.Navigation("CompanyQuestion");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Question", b =>
@@ -1058,6 +1353,8 @@ namespace QualityControlApp.Migrations
 
                     b.Navigation("Employee")
                         .IsRequired();
+
+                    b.Navigation("Landing");
 
                     b.Navigation("UserProfile")
                         .IsRequired();

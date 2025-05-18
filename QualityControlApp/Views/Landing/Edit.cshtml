@@ -1,0 +1,301 @@
+﻿@model QualityControlApp.Models.Entities.Landing // Changed model to Landing
+@using System.IO // For Path.GetFileName
+
+@{
+    ViewData["Title"] = "Edit Landing Record"; // Updated title
+}
+
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-plane-arrival me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Update the details for landing record ID: <span class="fw-semibold">@Model.Id</span></p>
+        </div>
+        @* Status badge removed as Landing doesn't have status *@
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-lg-5 p-4">
+            <form asp-controller="Landing" asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                @* If there are any other properties that should not be edited but need to be part of the model, add them as hidden fields.
+                For example, if DateOfFlights should be read-only:
+                <input type="hidden" asp-for="DateOfFlights" />
+                *@
+                <input type="hidden" asp-for="AocDocumentPath" /> @* Keep current path if no new file is uploaded *@
+
+
+                <h5 class="fw-semibold text-primary mb-3 border-bottom pb-2"><i class="fas fa-plane me-2"></i>Flight & Operator Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="DateOfFlights" class="form-control form-control-sm" type="date" placeholder=" " required />
+                            <label asp-for="DateOfFlights"></label>
+                            <span asp-validation-for="DateOfFlights" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="FlightNumber" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="FlightNumber"></label>
+                            <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="Period" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="Period"></label>
+                            <span asp-validation-for="Period" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="OperatorName" class="form-control form-control-sm" placeholder=" " required />
+                            <label asp-for="OperatorName"></label>
+                            <span asp-validation-for="OperatorName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="OperatorAddress" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="OperatorAddress"></label>
+                            <span asp-validation-for="OperatorAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-fighter-jet me-2"></i>Aircraft Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="AircraftType" class="form-control form-control-sm" placeholder=" " required />
+                            <label asp-for="AircraftType"></label>
+                            <span asp-validation-for="AircraftType" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="AircraftRegistration" class="form-control form-control-sm" placeholder=" " required />
+                            <label asp-for="AircraftRegistration"></label>
+                            <span asp-validation-for="AircraftRegistration" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="RadioCallSign" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="RadioCallSign"></label>
+                            <span asp-validation-for="RadioCallSign" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-route me-2"></i>Route & Timing</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="Route" class="form-control form-control-sm" placeholder=" " required />
+                            <label asp-for="Route"></label>
+                            <span asp-validation-for="Route" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="AirportOfLanding" class="form-control form-control-sm" placeholder=" " required />
+                            <label asp-for="AirportOfLanding"></label>
+                            <span asp-validation-for="AirportOfLanding" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="ETA" class="form-control form-control-sm" type="datetime-local" placeholder=" " required />
+                            <label asp-for="ETA">Estimated Arrival</label>
+                            <span asp-validation-for="ETA" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="ETD" class="form-control form-control-sm" type="datetime-local" placeholder=" " required />
+                            <label asp-for="ETD">Estimated Departure</label>
+                            <span asp-validation-for="ETD" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-box-open me-2"></i>Purpose & Payload</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select asp-for="PurposeOfFlight" class="form-select form-select-sm">
+                                <option value="">Select Purpose</option>
+                                <option value="Scheduled Passenger">Scheduled Passenger</option>
+                                <option value="Charter Passenger">Charter Passenger</option>
+                                <option value="Scheduled Cargo">Scheduled Cargo</option>
+                                <option value="Charter Cargo">Charter Cargo</option>
+                                <option value="Private/Business">Private/Business</option>
+                                <option value="Ambulance/Medevac">Ambulance/Medevac</option>
+                                <option value="Training">Training</option>
+                                <option value="Government/State">Government/State</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <label asp-for="PurposeOfFlight"></label>
+                            <span asp-validation-for="PurposeOfFlight" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <textarea asp-for="NatureOfPaxOrCargo" class="form-control form-control-sm" placeholder=" " style="height: 100px"></textarea>
+                            <label asp-for="NatureOfPaxOrCargo">Pax/Cargo Details</label>
+                            <span asp-validation-for="NatureOfPaxOrCargo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="Consignor" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="Consignor"></label>
+                            <span asp-validation-for="Consignor" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="Consignee" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="Consignee"></label>
+                            <span asp-validation-for="Consignee" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-users me-2"></i>Crew Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="CaptainName" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="CaptainName"></label>
+                            <span asp-validation-for="CaptainName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="CaptainNumber" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="CaptainNumber"></label>
+                            <span asp-validation-for="CaptainNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input asp-for="CaptainNationality" class="form-control form-control-sm" placeholder=" " />
+                            <label asp-for="CaptainNationality"></label>
+                            <span asp-validation-for="CaptainNationality" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea asp-for="CrewDetails" class="form-control form-control-sm" placeholder=" " style="height: 100px"></textarea>
+                            <label asp-for="CrewDetails">Full Crew List</label>
+                            <span asp-validation-for="CrewDetails" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2">
+                    <i class="fas fa-paperclip me-2"></i>AOC Document
+                </h5>
+                <div class="row g-3 mb-4">
+                    @if (!string.IsNullOrWhiteSpace(Model.AocDocumentPath))
+                    {
+                        <div class="col-12 mb-2">
+                            <label class="form-label small fw-semibold">Current AOC Document:</label>
+                            <div>
+                                <i class="fas fa-file-certificate text-secondary me-1"></i>
+                                @{
+                                    var currentAocFileName = "Attached Document";
+                                    // try { currentAocFileName = Path.GetFileName(Model.AocDocumentPath); } catch { }
+                                }
+                                <a href="@Url.Content("~" + Model.AocDocumentPath)" target="_blank" class="text-decoration-none">@currentAocFileName</a>
+                            </div>
+                        </div>
+                    }
+                    <div class="col-12">
+                        <label for="aocFile" class="form-label small fw-semibold">Upload New AOC Document (Optional - will replace existing)</label>
+                        @* Name MUST match the IFormFile parameter in the Controller Action *@
+                        <input type="file" name="AocDocumentFile" id="aocFile" class="form-control form-control-sm" />
+                        @* asp-validation-for="AocDocumentFile" - not typically used directly for IFormFile, controller handles errors *@
+                    </div>
+                </div>
+
+                @* Removed existing attachments list and dynamic add attachment *@
+
+                <!-- Action Buttons -->
+                <div class="mt-5 pt-4 border-top">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div> <!-- /.card-body -->
+    </div> <!-- /.card -->
+</div> <!-- /.container-fluid -->
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .form-control-sm, .form-select-sm {
+            min-height: calc(1.5em + .5rem + 2px);
+            padding: .25rem .5rem;
+            font-size: .875rem;
+        }
+
+        .form-floating > .form-control-sm ~ label {
+            padding: .75rem .5rem;
+        }
+
+        .form-floating > .form-control-sm:not(:placeholder-shown) ~ label {
+            transform: scale(.85) translateY(-.7rem) translateX(.15rem);
+        }
+
+        .form-control.bg-light[readonly] {
+            background-color: #e9ecef !important;
+            opacity: 1;
+        }
+        /* Styles for Bootstrap 5.3+ subtle badges (if used again) */
+        .bg-success-subtle {
+            background-color: var(--bs-success-bg-subtle) !important;
+        }
+
+        .text-success-emphasis {
+            color: var(--bs-success-text-emphasis) !important;
+        }
+        /* ... other subtle badge styles if needed ... */
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @* jQuery is NOT needed for this simplified Edit view without AJAX updates for attachments *@
+    <script>
+        // Basic Bootstrap validation script enabling (if not globally enabled)
+        (function () {
+          'use strict'
+          var forms = document.querySelectorAll('.needs-validation')
+          Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+              form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                  event.preventDefault()
+                  event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+              }, false)
+            })
+        })()
+    </script>
+}

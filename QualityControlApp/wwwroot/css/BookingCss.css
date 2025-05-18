@@ -1,0 +1,266 @@
+﻿body {
+    : root
+
+{
+    --qc-primary-blue: #005A9C;
+    --qc-secondary-blue: #E6F0F7;
+    --qc-accent-orange: #FF6F00;
+    --qc-gray-dark: #333;
+    --qc-gray-medium: #6c757d;
+    --qc-gray-light: #f8f9fa;
+    --qc-white: #ffffff;
+    --qc-success: #198754;
+    --qc-danger: #dc3545;
+    --qc-border-radius: 0.375rem;
+    --qc-shadow-sm: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    --qc-shadow-md: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--qc-secondary-blue);
+    color: var(--qc-gray-dark);
+}
+
+/* --- Page Header & General --- */
+.page-header {
+    background-color: var(--qc-white);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--qc-primary-blue);
+        margin: 0;
+    }
+
+.header-actions .btn {
+    margin-left: 0.5rem;
+    font-weight: 600;
+}
+
+    .header-actions .btn i {
+        margin-right: 0.5rem;
+    }
+/* RTL Adjust */
+.header-actions .btn-primary {
+    background-color: var(--qc-primary-blue);
+    border-color: var(--qc-primary-blue);
+}
+
+    .header-actions .btn-primary:hover {
+        background-color: #004a80;
+        border-color: #004a80;
+    }
+
+.header-actions .btn-outline-secondary {
+    border-color: var(--qc-gray-medium);
+    color: var(--qc-gray-medium);
+}
+
+    .header-actions .btn-outline-secondary:hover {
+        background-color: var(--qc-gray-light);
+        color: var(--qc-gray-dark);
+    }
+
+/* --- Filter Panel --- */
+.filter-panel {
+    background-color: var(--qc-white);
+    padding: 1.5rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-sm);
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0; /* Start hidden */
+}
+
+    .filter-panel.show {
+        max-height: 500px;
+        opacity: 1;
+    }
+
+    .filter-panel .form-label {
+        font-weight: 600;
+        color: var(--qc-primary-blue);
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    .filter-panel .form-control, .filter-panel .form-select {
+        border-radius: var(--qc-border-radius);
+        font-size: 0.9rem;
+    }
+
+        .filter-panel .form-control:focus, .filter-panel .form-select:focus {
+            border-color: var(--qc-primary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 90, 156, 0.25);
+        }
+
+/* --- Table Styling --- */
+.qc-table {
+    border: 1px solid #dee2e6;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+    .qc-table thead th {
+        background-color: var(--qc-secondary-blue);
+        color: var(--qc-primary-blue);
+        font-weight: 600;
+        border-bottom-width: 2px;
+        border-color: #cdddee;
+        vertical-align: middle;
+    }
+
+    .qc-table th, .qc-table td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+
+    .qc-table tbody tr:hover {
+        background-color: #f0f5fa;
+    }
+
+.notes-column {
+    max-width: 300px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.action-buttons .btn {
+    margin: 0 2px;
+}
+
+.table-responsive {
+    border-radius: var(--qc-border-radius);
+    border: 1px solid #dee2e6;
+    box-shadow: var(--qc-shadow-sm);
+    background-color: var(--qc-white);
+}
+
+/* --- Loading Spinner --- */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 0;
+    min-height: 200px;
+}
+
+    .loading-spinner .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: var(--qc-primary-blue);
+    }
+
+/* --- FullCalendar Customization --- */
+#calendarContainer { /* Add a container for potential padding/margin */
+    background-color: var(--qc-white);
+    padding: 1.5rem;
+    border-radius: var(--qc-border-radius);
+    box-shadow: var(--qc-shadow-sm);
+    border: 1px solid #dee2e6;
+}
+/* Header */
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1.5em;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: var(--qc-primary-blue);
+}
+
+.fc .fc-button { /* General button style */
+    font-weight: 600;
+    text-transform: capitalize; /* Or none if you prefer */
+    border-radius: var(--qc-border-radius) !important; /* Override default */
+}
+
+.fc .fc-button-primary { /* Active / Primary buttons */
+    background-color: var(--qc-primary-blue) !important;
+    border-color: var(--qc-primary-blue) !important;
+    color: var(--qc-white) !important;
+    opacity: 1 !important; /* Ensure full visibility */
+}
+
+    .fc .fc-button-primary:hover {
+        background-color: #004a80 !important; /* Darker blue on hover */
+        border-color: #004a80 !important;
+    }
+
+    .fc .fc-button-primary:not(:disabled):active, /* Keep color on click */
+    .fc .fc-button-primary:not(:disabled).fc-button-active {
+        background-color: #004a80 !important;
+        border-color: #004a80 !important;
+        box-shadow: none !important;
+    }
+
+    .fc .fc-button-primary:disabled { /* Disabled button style */
+        background-color: var(--qc-gray-medium) !important;
+        border-color: var(--qc-gray-medium) !important;
+        opacity: 0.65 !important;
+    }
+
+/* Today's Date Highlight */
+.fc .fc-daygrid-day.fc-day-today {
+    background-color: var(--qc-secondary-blue) !important; /* Light blue background */
+    font-weight: bold;
+}
+
+.fc .fc-daygrid-day-number { /* Date numbers */
+    padding: 0.4em;
+}
+
+/* Event Styling */
+.fc-event { /* General event style */
+    border: 1px solid var(--qc-primary-blue) !important;
+    background-color: var(--qc-secondary-blue) !important;
+    color: var(--qc-primary-blue) !important;
+    font-weight: 600;
+    font-size: 0.85em;
+    cursor: pointer; /* Indicate clickable */
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .fc-event:hover {
+        background-color: var(--qc-primary-blue) !important; /* Primary blue on hover */
+        color: var(--qc-white) !important;
+    }
+
+.fc-daygrid-event { /* Ensure daygrid events get padding */
+    padding: 2px 4px;
+    margin-top: 2px; /* Add slight margin between events on same day */
+}
+
+.fc-event .fc-event-title { /* Event title text */
+    padding: 0 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Prevent long names breaking layout */
+}
+/* TimeGrid specific event styles (optional) */
+.fc-timegrid-event .fc-event-time {
+    font-weight: normal;
+}
+
+.fc-direction-rtl { /* Ensure RTL text alignment */
+    text-align: right;
+}
+
+}
+

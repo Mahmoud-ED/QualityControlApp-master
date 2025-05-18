@@ -4,177 +4,640 @@
 @model RepUserCompanyQuestionVM
 @{
     Layout = "_LayoutReport";
+    bool isNewType = Model.CreateQuestion?.Type == "New"; // استخدام ?. للأمان
 }
 <!DOCTYPE html>
-<html lang="en" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>تقرير  شركة</title>
+    <title>Organizational Safety Performance Report - @Model.CompanyName</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    @* Bootstrap CSS (إذا لم يكن في Layout) *@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    @* Font Awesome (لأيقونات التقرير الثابت) *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-
+        /* --- Base Styles (من الكود الأصلي) --- */
         html, body {
-        font-family: Arial, sans-serif;
-        font-size: 1em;
-        margin-top: 50px;
-        margin-left: 30px;
-        margin-right: 30px;
-        height: 100%;
-
-
-        }
-
-        body {
-        overflow-x: hidden; /* Prevent horizontal scroll on the body */
-        }
-
-
-
-        table {
-        width: 100%;
-        border-collapse: collapse;
-        /*  margin: 20px 0; */
-        }
-
-        th, td {
-        padding: 12px;
-        text-align: right;
-        border: 1px solid #ddd;
-        }
-
-        th {
-        background-color: #ddd;
-        }
-
-        tr:nth-child(even) {
-        background-color: #f2f2f2;
-        }
-
-        .header table{
-        width: 100%;
-        border-collapse: collapse;
-        }
-        .header  table th{
-        text-align:center;
-        background-color:ghostwhite;
-        border: 0px ;
-        }
-
-        .header {
-            margin-bottom: 20px;
-            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 10pt;
+            margin: 0; /* تم تعديل الهوامش لتكون في الحاوية الرئيسية */
+            padding: 0;
+            /* height: 100%; */ /* قد لا تحتاج لهذا إذا كان المحتوى يحدد الارتفاع */
             background-color: #f8f9fa;
-            border-radius: 8px;
+            color: #212529;
         }
 
-        .header-table {
+        .page-container { /* حاوية جديدة لتطبيق الهوامش والحدود */
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffffff; /* خلفية بيضاء للصفحة نفسها */
+            border: 1px solid #ccc; /* إطار خفيف للصفحة */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+
+        /* --- Aviation Theme Header (من الكود الأصلي) --- */
+        .report-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #003870 0%, #0055A4 100%);
+            color: #ffffff;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-header-table {
             width: 100%;
-            text-align: left;
             border-collapse: collapse;
         }
 
-        .header-title {
-            font-weight: bold;
-            color: #343a40;
-            padding-right: 20px;
-        }
+            .report-header-table th {
+                border: none;
+                padding: 5px 0;
+                vertical-align: middle;
+            }
 
-        .header-date {
+        .report-title {
+            font-weight: 600;
+            font-size: 1.4em;
             text-align: right;
-            color: #6c757d;
         }
 
-        .header h4 {
-            margin: 0;
+            .report-title i {
+                margin-left: 10px;
+                font-size: 1.2em;
+            }
+
+        .report-date {
+            font-size: 1em;
+            text-align: left;
+            font-weight: normal;
         }
+
+            .report-date i {
+                margin-right: 5px;
+            }
+
+        .main-title {
+            text-align: center;
+            color: #003870;
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+        }
+
+        /* --- Category and Type Headers (من الكود الأصلي) --- */
+        .category-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #003870;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #0055A4;
+        }
+
+            .category-header i {
+                margin-left: 8px; /* تم تغييرها من right إلى left لتناسب اتجاه النص الإنجليزي */
+                color: #0055A4;
+            }
+
+        .type-header {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #343a40;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+            .type-header i {
+                margin-left: 6px; /* تم تغييرها من right إلى left */
+                color: #6c757d;
+            }
+
+        .type-summary {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 15px;
+            background-color: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border-left: 4px solid #0055A4;
+        }
+
+        /* --- Aviation Theme Table (من الكود الأصلي) --- */
+        .aviation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+            .aviation-table th,
+            .aviation-table td {
+                padding: 10px 12px;
+                text-align: left; /* تم تغييرها إلى left لتناسب اتجاه النص الإنجليزي */
+                border: 1px solid #dee2e6;
+                vertical-align: middle;
+            }
+
+            .aviation-table thead th {
+                background-color: #e9ecef;
+                color: #495057;
+                font-weight: 600;
+                font-size: 0.95em;
+                border-bottom-width: 2px;
+            }
+            /* ... باقي تنسيقات aviation-table ... */
+            .aviation-table tbody tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+
+            .aviation-table tbody tr:hover {
+                background-color: #e2e6ea;
+            }
+
+            .aviation-table td {
+                font-size: 0.9em;
+            }
+
+        .col-seq {
+            width: 5%;
+            text-align: center;
+        }
+
+        .col-question {
+            width: @(isNewType ? "45%" : "55%");
+        }
+
+        .col-score, .col-maxscore {
+            width: 10%;
+            text-align: center;
+        }
+
+        .col-inspect {
+            width: 10%;
+            text-align: center;
+        }
+
+        .col-nots {
+            width: 20%;
+        }
+
+        .col-level {
+            width: 10%;
+            text-align: center;
+        }
+
+        .inspect-ns {
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+        .level-value {
+            font-weight: bold;
+        }
+
+        .nots-text {
+            font-style: italic;
+            color: #555;
+        }
+
+        .placeholder-cell {
+            color: #adb5bd;
+            text-align: center;
+        }
+
+        .aviation-table th i {
+            margin-right: 5px; /* تعديل لتناسب left-align */
+        }
+
+
+        /* --- START: CSS for Fixed Oversight Report Form (مقتبس من الرد السابق) --- */
+        .fixed-report-section {
+            margin-top: 50px; /* مسافة قبل هذا القسم */
+            padding-top: 30px;
+            border-top: 2px dashed #003870; /* خط فاصل مميز */
+        }
+
+        .fixed-report-header { /* لتشابه الهيدر الأصلي للتقرير الثابت */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .fixed-logo-section {
+            flex-basis: 15%;
+            text-align: center;
+        }
+
+        .fixed-logo {
+            max-width: 70px;
+            height: auto;
+        }
+
+        .fixed-title-section {
+            flex-basis: 60%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+            .fixed-title-section p {
+                margin: 2px 0;
+                line-height: 1.2;
+            }
+
+        .fixed-authority-name {
+            font-size: 11pt;
+        }
+
+        .fixed-department-name, .fixed-section-name {
+            font-size: 10pt;
+        }
+
+        .fixed-report-info-date {
+            flex-basis: 25%;
+            text-align: right;
+            border: 1px solid #000;
+            padding: 5px;
+            font-size: 9pt;
+        }
+
+            .fixed-report-info-date p {
+                margin: 2px 0;
+            }
+
+        .fixed-report-title-bar {
+            text-align: center;
+            font-weight: bold;
+            font-size: 11pt;
+            border: 1px solid #000;
+            border-top: none;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+
+        .fixed-responsibility-bar {
+            border: 1px solid #000;
+            padding: 5px;
+            font-size: 9pt;
+            margin-bottom: 15px;
+        }
+
+        .fixed-definitions-section h5, .fixed-auditee-response-section h5 {
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 5px;
+            text-decoration: underline;
+            color: #333; /* لون أغمق للعناوين الثابتة */
+        }
+
+        .fixed-definitions-section h6 {
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .fixed-check-codes-table td, .fixed-findings-table td {
+            font-size: 8pt;
+            padding: 3px 5px;
+            vertical-align: middle;
+            border: 1px solid #000 !important;
+        }
+
+            .fixed-check-codes-table td:nth-child(1), .fixed-check-codes-table td:nth-child(3) {
+                width: 15%;
+                font-weight: bold;
+            }
+
+            .fixed-check-codes-table td:nth-child(2), .fixed-check-codes-table td:nth-child(4) {
+                width: 35%;
+            }
+
+
+        .fixed-findings-table .finding-level {
+            width: 20%;
+            font-weight: bold;
+        }
+
+        .fixed-findings-table .finding-description {
+            width: 80%;
+            text-align: justify;
+            font-size: 9pt;
+        }
+
+        .fixed-findings-table .remedial-action {
+            margin-top: 8px;
+            font-size: 8.5pt;
+        }
+
+        .fixed-auditee-response-section p, .fixed-auditee-response-section li {
+            font-size: 9pt;
+            text-align: justify;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .fixed-auditee-response-section ol {
+            padding-left: 25px;
+        }
+
+            .fixed-auditee-response-section ol li {
+                margin-bottom: 5px;
+            }
+
+        .fixed-report-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+        /* --- END: CSS for Fixed Oversight Report Form --- */
 
     </style>
-
 </head>
 <body>
-    <div style="text-align: center;">
-        <h2>
-            Calculation of Organizational Safety.
-            Performance Level
-        </h2>
-    </div>
-    <br />
-    <br />
-    <div >
-        <div class="header">
-            <table class="header-table">
-                <tr>
-                    <th class="header-title">
-                        <h4>@Model.CompanyName</h4>
-                    </th>
-                    <th class="header-date">
-                        <h4>@Model.CreateDate.ToString()</h4>
-                    </th>
-                </tr>
-            </table>
+    <div class="page-container">
+        @* حاوية رئيسية لتطبيق الهوامش والحدود *@
+        <div class="main-title">
+            Calculation of Organizational Safety Performance Level
         </div>
 
-       
 
-        <br />
-        <br />
-        @{
-            int i = 0;
-            foreach (var CatType in Model.lstQuestionCategoryType)
-            {
-                // تصفية الأسئلة حسب التصنيف الحالي
-                var filteredQuestions = Model.lstCompanyQuestionContent.Where(s => s.Question.QuestionType.QuestionCategoryTypeId == CatType.Id).ToList();
 
-                // عرض اسم التصنيف
-                <h4>@CatType.CategoryName</h4>
+        <header class="fixed-report-header">
+            <div class="fixed-logo-section">
+                <img src="/img/LOGO.png" alt="CAA Logo" class="fixed-logo">
+            </div>
+            <div class="fixed-title-section">
+                <p class="fixed-authority-name">LIBYAN CIVIL AVIATION AUTHORITY</p>
+                <p class="fixed-department-name">FLIGHT SAFETY DEPARTMENT</p>
+                <p class="fixed-section-name">FLIGHT OPERATIONS SECTION</p>
+            </div>
+            <div class="fixed-report-info-date">
+                <p><strong>Finding Check Report </strong></p>
+                <p>Create Date: <span class="date-field">@Model.CreateDate?</span></p>
+                <p>Date: <span class="date-field">@DateTime.Now.ToString("dd MMM yyyy")</span></p>
+            </div>
+        </header>
 
-                // تصنيف الأسئلة حسب نوع السؤال
-                var groupedByType = filteredQuestions.GroupBy(s => s.Question.QuestionType.TypeName);
+        <div class="fixed-report-title-bar">
+            Oversight Report Form @Model.CompanyName
+        </div>
 
-                foreach (var questionTypeGroup in groupedByType)
+        <div class="fixed-responsibility-bar">
+            Responsibility: FSD Director, Head of Flight Operations Section
+        </div>
+        @*     <div class="report-header">
+        <table class="report-header-table">
+        <tr>
+        <th class="report-title">
+        <i class="bi bi-buildings"></i> @Model.CompanyName
+        </th>
+        <th class="report-date">
+        <i class="bi bi-calendar-check"></i> @Model.CreateDate?
+        </th>
+        </tr>
+        </table>
+        </div> *@
+
+        <div class="report-content">
+            @{
+                int questionCounter = 1; // عداد للأسئلة
+                // bool isNewType = ...; // تأكد من أن isNewType معرفة هنا
+                bool opsCategoryHasData = true;
+                foreach (var CatType in Model.lstQuestionCategoryType.OrderBy(c => c.Id))
                 {
-                    // حساب مجموع الدرجات لهذا النوع من الأسئلة
-                    var totalScore = questionTypeGroup.Sum(s => s.Score);
-                    var maxScore = questionTypeGroup.Sum(s => s.Question.MaxGrid);
+                    var filteredQuestions = Model.lstCompanyQuestionContent
+                    .Where(s => s.Question?.QuestionType?.QuestionCategoryTypeId == CatType.Id)
+                    .ToList();
 
-                    // عرض اسم نوع السؤال
-                    <h5>@questionTypeGroup.Key</h5>
-                    <p>مجموع الدرجات: @totalScore من أصل @maxScore</p>
+                    if (!filteredQuestions.Any())
+                    {
+                        continue;
+                    }
 
-                    <!-- جدول للأسئلة من هذا النوع -->
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>رقم</th>
-                                <th>السؤال</th>
-                                <th>الدرجة</th>
-                                <th>سقف الدرجة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in questionTypeGroup)
-                            {
-                                i++;
+                    // if (CatType.CategoryName != null && CatType.CategoryName.Equals("Ops", StringComparison.OrdinalIgnoreCase))
+                    // {
+                        
+                    //         opsCategoryHasData = true;
+                       
+                    // }
+
+                    <h4 class="category-header"><i class="bi bi-folder2-open"></i>@CatType.CategoryName</h4>
+
+                    // --- بداية التعديل ---
+                    // تجميع الأسئلة المفلترة حسب *معرّف* نوع السؤال (Id)
+                    var groupedByType = filteredQuestions
+                    .GroupBy(s => s.Question.QuestionType.Id) // <--- التغيير هنا: نجمع حسب معرّف النوع
+                    .OrderBy(g => g.Key); // <--- التغيير هنا: الترتيب حسب المفتاح (الذي هو معرّف النوع)
+                                          // --- نهاية التعديل ---
+
+                    foreach (var questionTypeGroup in groupedByType) // questionTypeGroup الآن هو IGrouping<int, CompanyQuestionContent>
+                    {
+                        // --- بداية التعديل ---
+                        // الحصول على اسم النوع من أول عنصر في المجموعة
+                        // بما أننا جمعنا حسب QuestionType.Id، فإن جميع الأسئلة في هذه المجموعة لها نفس النوع
+                        string questionTypeName = questionTypeGroup.First().Question.QuestionType.TypeName ?? "Undefined";
+                        // --- نهاية التعديل ---
+
+                        <h5 class="type-header"><i class="bi bi-tags"></i>@questionTypeName</h5>
+
+                        @if (!isNewType)
+                        {
+                            var totalScore = questionTypeGroup.Sum(s => s.Score); // لا تغيير هنا، questionTypeGroup لا يزال IEnumerable من الأسئلة
+                            var maxScore = questionTypeGroup.Sum(s => s.Question?.MaxGrid ?? 0);
+                            <p class="type-summary">
+                                Total Score for this type: <strong>@totalScore</strong> out of <strong>@maxScore</strong>
+                            </p>
+                        }
+                        else
+                        {
+                            int nsCount = questionTypeGroup.Count(s => s.Inspect == "Ns");
+                            <p class="type-summary">
+                                Number of items requiring Notes (Ns): <strong>@nsCount</strong> out of <strong>@questionTypeGroup.Count()</strong>
+                            </p>
+                        }
+
+                        <table class="aviation-table">
+                            <thead>
                                 <tr>
-                                    <td>@i</td>
-                                    <td>@item.Question.Content</td>
-                                    <td>@item.Score</td>
-                                    <td>@item.Question.MaxGrid</td>
+                                    <th class="col-seq"><i class="bi bi-hash"></i>No.</th>
+                                    <th class="col-question"><i class="bi bi-patch-question"></i>Question</th>
+                                    @if (!isNewType)
+                                    {
+                                        <th class="col-score"><i class="bi bi-check2-circle"></i>Score</th>
+                                        <th class="col-maxscore"><i class="bi bi-bullseye"></i>Max Score</th>
+                                    }
+                                    else
+                                    {
+                                        <th class="col-inspect"><i class="bi bi-clipboard-check"></i>Inspection</th>
+                                        <th class="col-nots"><i class="bi bi-pencil-square"></i>Notes</th>
+                                        <th class="col-level"><i class="bi bi-bar-chart-line"></i>Level</th>
+                                    }
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <br />
+                            </thead>
+                            <tbody>
+                                @foreach (var item in questionTypeGroup.OrderBy(q => q.Question?.Id))
+                                {
+                                    string questionContent = item.Question?.Content ?? "Question content not available";
+                                    bool showNsDetails = isNewType && item.Inspect == "Ns";
+
+                                    <tr>
+                                        <td class="col-seq">@questionCounter</td>
+                                        <td class="col-question">@Html.Raw(questionContent)</td>
+
+                                        @if (!isNewType)
+                                        {
+                                            <td class="col-score">@item.Score</td>
+                                            <td class="col-maxscore">@(item.Question?.MaxGrid ?? 0)</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="col-inspect @(item.Inspect == "Ns" ? "inspect-ns" : "")">
+                                                @item.Inspect
+                                            </td>
+                                            <td class="col-nots @(showNsDetails ? "nots-text" : "placeholder-cell")">
+                                                @(showNsDetails ? item.Nots : (string.IsNullOrEmpty(item.Nots) && item.Inspect != "Ns" ? "-" : item.Nots))
+                                            </td>
+                                            <td class="col-level @(showNsDetails ? "level-value" : "placeholder-cell")">
+                                                @(showNsDetails ? item.Level.ToString() : (item.Level.HasValue && item.Inspect != "Ns" ? item.Level.ToString() : "-"))
+                                            </td>
+                                        }
+                                    </tr>
+                                    questionCounter++;
+                                }
+                            </tbody>
+                        </table>
+                        <br />
+                    }
+                    <hr style="border-top: 1px dashed #ccc; margin-top: 30px; margin-bottom: 30px;">
+                }
+                @if (!Model.lstQuestionCategoryType.Any(cat => Model.lstCompanyQuestionContent.Any(q => q.Question?.QuestionType?.QuestionCategoryTypeId == cat.Id)))
+                {
+                    <div style="text-align: center; padding: 20px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 5px;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> No question data available to display in this report.
+                    </div>
                 }
             }
+        </div>        @* --- START: دمج محتوى التقرير الثابت --- *@
+
+        @if (opsCategoryHasData)
+        {
+            <section class="fixed-definitions-section">
+                <h5>DEFINITIONS</h5>
+                <h6>CHECK CODES</h6>
+                <table class="table table-bordered fixed-check-codes-table">
+                    <tbody>
+                        <tr>
+                            <td><strong>D-IHFO</strong></td>
+                            <td>Returned Flight Documentation Loading, performance and fuel reserve checks</td>
+                            <td><strong>R</strong></td>
+                            <td>Ramp Check</td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-I</strong></td>
+                            <td>Crew Training Records Check</td>
+                            <td><strong>I</strong></td>
+                            <td>Training Inspection</td>
+                        </tr>
+                        <tr>
+                            <td><strong>D-I+FILIHM</strong></td>
+                            <td>FTL records and procedures, FRM processes and analyses and Fatigue Management Training Records</td>
+                            <td><strong>DG</strong></td>
+                            <td>Dangerous Goods Check</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CM</strong></td>
+                            <td>Compliance Monitoring System Check</td>
+                            <td><strong>AR</strong></td>
+                            <td>Annual Review</td>
+                        </tr>
+                        <tr>
+                            <td><strong>G</strong></td>
+                            <td>Ground Check – Facilities, ground support functions, Operational Control, Flight Dispatchers, Aircraft inspection prior to service.</td>
+                            <td><strong>SMS</strong></td>
+                            <td>SMS Inspection</td>
+                        </tr>
+                        <tr>
+                            <td><strong>M</strong></td>
+                            <td>Operations Manual Check</td>
+                            <td><strong>O</strong></td>
+                            <td>Operator Competency Check</td>
+                        </tr>
+                        <tr>
+                            <td><strong>F</strong></td>
+                            <td>Flight Check</td>
+                            <td><strong>L</strong></td>
+                            <td>Liaison visit</td>
+                        </tr>
+                        <tr>
+                            <td><strong>C</strong></td>
+                            <td>Cabin Check</td>
+                            <td><strong>SP</strong></td>
+                            <td>Special Purpose Check /Unannounced</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="fixed-findings-definitions-section mt-3">
+                <table class="table table-bordered fixed-findings-table">
+                    <tbody>
+                        <tr>
+                            <td class="finding-level"><strong>Level 1 Finding</strong></td>
+                            <td class="finding-description">
+                                ARO.GEN.350 (b) A level 1 finding shall be issued by the LYCAA when any significant non-compliance is detected with the applicable requirements of the Civil Aviation Law and Regulations, with the organisation’s procedures and manuals or with the terms of an approval, certificate, specialised operation authorisation or with the content of a declaration which lowers safety or seriously hazards flight safety.
+                                <p class="remedial-action">Remedial action is required either before the next flight/event, or prior to the reinstatement of an Approval, lifting of a restriction placed on the operation. <strong>A level 1 finding will normally result in formal regulatory action; e.g., the withdrawal of an approval; prevention of an aircraft from flying, etc.</strong></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="finding-level"><strong>Level 2 Finding</strong></td>
+                            <td class="finding-description">
+                                ARO.GEN.350 (c) A level 2 finding shall be issued by the LYCAA when any non-compliance is detected with the applicable requirements of the Civil Aviation Law and Regulations, with the organisation’s procedures and manuals or with the terms of an an approval, certificate, specialised operation authorisation or with the content of a declaration which could lower safety or hazard flight safety.
+                                <p class="remedial-action"><strong>Remedial action is required within the period stated above, but not more than 90 days.</strong></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="finding-level"><strong>Observation</strong></td>
+                            <td class="finding-description">
+                                A process or practice not in accordance with industry best practice or guidance material, or that could lead to a future non-compliance. Failure to take appropriate action could adversely affect the operator's ability to continue to satisfy the CAA in accordance with Law No. 6-2005.
+                                <p class="remedial-action"><strong>The organisation should respond within 90 days.</strong></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="fixed-auditee-response-section mt-3">
+                <h5>AUDITEE RESPONSE</h5>
+                <p>Please respond to any finding(s) within the number of days shown under Section 2. The responses to findings should encompass the following five-point closure plan:</p>
+                <ol>
+                    <li><strong>immediate corrective action</strong> taken by the responsible manager has in the short term at least contained the non-compliance and stopped it from continuing.</li>
+                    <li><strong>root cause analysis</strong> by the responsible person to identify the origin(s) of the finding.</li>
+                    <li><strong>root cause correction</strong> by the responsible person that should significantly reduce or eliminate the chance of recurrence (providing documentary evidence if applicable).</li>
+                    <li><strong>follow-up</strong> by line management or the quality assurance programme to verify the effectiveness of the corrective action taken; and</li>
+                    <li><strong>closure</strong> (a statement from the Compliance Monitoring Manager (or a responsible manager) stating the reasons for acceptance of the corrective actions taken.</li>
+                </ol>
+                <p>Please respond to observations within 90 days with a brief summary of any actions taken or planned, or an explanation as to why no actions are considered appropriate.</p>
+            </section>
+
+            <footer class="fixed-report-footer">
+                <span>FSD-OPS-FORM-025- Issue 01, Rev. 06</span>
+                <span>Page X of Y</span> @* ستحتاج إلى طريقة لتحديد أرقام الصفحات بشكل ديناميكي إذا كان هذا مطلوبًا للطباعة *@
+            </footer>
+            @* --- END: دمج محتوى التقرير الثابت --- *@
         }
-
-
-        <br />
-
-    </div>
-   
+    </div> @* نهاية page-container *@
 </body>
 </html>
-
- 
-

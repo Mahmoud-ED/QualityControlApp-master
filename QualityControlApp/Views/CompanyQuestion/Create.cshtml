@@ -1,46 +1,263 @@
-﻿@model CompanyQuestion 
-
+﻿@model QualityControlApp.ViewModels.CreateCompanyQuestionVM
 @{
-    ViewData["Title"] = "Create Project";
+    ViewData["Title"] = "Create New Quality Task";
+
+    // لم نعد بحاجة لتعريف availableCategoriesForCheckboxes من ViewBag
+
+    // سنتعامل مع Model.AvailableQuestionCategoryTypes مباشرة
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+@* External CSS Libraries and Styles (كما هي) *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --qc-primary-blue: #005A9C;
+        --qc-secondary-blue: #E6F0F7;
+        --qc-accent-orange: #FF6F00;
+        --qc-gray-dark: #333;
+        --qc-gray-medium: #6c757d;
+        --qc-gray-light: #f8f9fa;
+        --qc-white: #ffffff;
+        --qc-success: #198754;
+        --qc-danger: #dc3545;
+        --qc-border-radius: 0.375rem;
+        --qc-shadow-sm: 0 .125rem .25rem rgba(0, 0, 0, .075);
+        --qc-shadow-md: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    }
 
-<div class="container mt-5">
-    <h2 class="text-center">Create Project</h2>
-    <form asp-action="Create" method="post" class="mt-4">
- 
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: var(--qc-secondary-blue);
+        color: var(--qc-gray-dark);
+    }
 
-        <div class="form-group">
-            <label asp-for="UserId " class="font-weight-bold">Select User</label>
-            <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users">
-                <option value="">-- Select an User --</option>
-            </select>
-            <span asp-validation-for="UserId" class="text-danger"></span>
+    .page-header {
+        background-color: var(--qc-white);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 2rem;
+        border-radius: var(--qc-border-radius);
+        box-shadow: var(--qc-shadow-sm);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--qc-primary-blue);
+            margin: 0;
+        }
+
+        .page-header .btn-back {
+            font-weight: 600;
+            color: var(--qc-gray-medium);
+            border-color: var(--qc-gray-medium);
+        }
+
+            .page-header .btn-back:hover {
+                background-color: var(--qc-gray-light);
+                color: var(--qc-gray-dark);
+            }
+
+            .page-header .btn-back i {
+                margin-right: 0.5rem;
+            }
+
+    .form-panel {
+        background-color: var(--qc-white);
+        padding: 2rem 2.5rem;
+        border-radius: var(--qc-border-radius);
+        box-shadow: var(--qc-shadow-md);
+        border: 1px solid #dee2e6;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+        .form-panel .form-label {
+            font-weight: 600;
+            color: var(--qc-primary-blue);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+            .form-panel .form-label i {
+                margin-right: 0.5rem;
+                width: 1.1em;
+                text-align: center;
+                color: var(--qc-accent-orange);
+            }
+
+        .form-panel .form-select,
+        .form-panel .form-check-input {
+            border-radius: var(--qc-border-radius);
+        }
+
+        .form-panel .form-select {
+            padding: .5rem 1rem;
+            font-size: 0.95rem;
+        }
+
+            .form-panel .form-select:focus,
+            .form-panel .form-check-input:focus {
+                border-color: var(--qc-primary-blue);
+                box-shadow: 0 0 0 0.25rem rgba(0, 90, 156, 0.25);
+            }
+
+    .form-select option[value=""] {
+        color: var(--qc-gray-medium);
+    }
+
+    .form-panel .btn-submit {
+        background-color: var(--qc-primary-blue);
+        border-color: var(--qc-primary-blue);
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 1.5rem;
+    }
+
+        .form-panel .btn-submit:hover {
+            background-color: #004a80;
+            border-color: #004a80;
+        }
+
+        .form-panel .btn-submit i {
+            margin-right: 0.5rem;
+        }
+
+    .form-panel .text-danger {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .list-group-item {
+        border-color: #e9ecef;
+    }
+
+    .list-group-item-action:hover, .list-group-item-action:focus {
+        background-color: var(--qc-secondary-blue);
+        color: var(--qc-primary-blue);
+    }
+</style>
+
+<div class="container-fluid px-lg-4 py-4">
+
+    <div class="page-header">
+        <h1><i class="fas fa-clipboard-list me-2" style="color: var(--qc-primary-blue);"></i>@ViewData["Title"]</h1>
+        <div>
+            <a asp-action="Index" asp-route-Type="@Model.Type" class="btn btn-outline-secondary btn-back">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label asp-for="CompanyId" class="font-weight-bold">Select Company</label>
-            <select asp-for="CompanyId" class="form-control" asp-items="ViewBag.Companies">
-                <option value="">-- Select a Company --</option>
-            </select>
-            <span asp-validation-for="CompanyId" class="text-danger"></span>
-        </div>
+    <div class="form-panel">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-4">
+                <label asp-for="UserId" class="form-label"><i class="fas fa-user"></i></label>
+                <select asp-for="UserId" class="form-select" asp-items="ViewBag.Users">
+                    <option value="">-- Please select a user --</option>
+                </select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
 
 
-        <input type="hidden" name="Type" value="@ViewBag.Type" />
-        <button asp-route-Type="@ViewBag.Type" type="submit" class="btn btn-primary btn-block mt-3">
-            <i class="fas fa-plus"></i> Create
-        </button>
-    </form>
+            <div class="mb-4">
+                <label asp-for="CompanyId" class="form-label"><i class="fas fa-building"></i> Company</label>
+                <select asp-for="CompanyId" id="companyDropdown" class="form-select" asp-items="ViewBag.Companies">
+                    <option value="">-- Please select a company --</option>
+                </select>
+                <span asp-validation-for="CompanyId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="LocationId" class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+                <select asp-for="LocationId" class="form-select" asp-items="ViewBag.Location">
+                    <option value="">-- Please select a Location --</option>
+                </select>
+                <span asp-validation-for="LocationId" class="text-danger"></span>
+            </div>
+
+            @* قسم QuestionCategoryTypes سيتم ملؤه ديناميكيًا *@
+            <div class="mb-4">
+                <label class="form-label"><i class="fas fa-tags"></i> Question Categories</label>
+                <div id="questionCategoriesContainer" class="list-group shadow-sm" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: var(--qc-border-radius);">
+                    @* سيتم عرض مربعات الاختيار هنا بواسطة JavaScript *@
+                    <p id="categoriesPlaceholder" class="p-3 text-muted">Please select a company to see available categories.</p>
+                </div>
+                @* يمكن إضافة span للتحقق من الصحة هنا إذا لزم الأمر، ولكن التحقق من الصحة سيتم غالبًا على SelectedQuestionCategoryTypeIds في الـ ViewModel *@
+                <span asp-validation-for="SelectedQuestionCategoryTypeIds" class="text-danger"></span>
+            </div>
+
+            <input type="hidden" asp-for="Type" />
+
+            <button type="submit" class="btn btn-primary btn-submit">
+                <i class="fas fa-plus-circle"></i> Create Task
+            </button>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function () {
+            $('#companyDropdown').on('change', function () {
+                var companyId = $(this).val();
+                var $categoriesContainer = $('#questionCategoriesContainer');
+                var $categoriesPlaceholder = $('#categoriesPlaceholder');
+
+                // مسح العناصر الحالية وإظهار رسالة تحميل أو الانتظار
+                $categoriesContainer.empty().append($categoriesPlaceholder.clone().text('Loading categories...').show());
+
+
+                if (companyId) {
+                    $.ajax({
+                        url: '@Url.Action("GetCategoriesForCompanyType", "CompanyQuestion")',
+                        type: 'GET',
+                        data: { companyId: companyId },
+                        success: function (categories) {
+                            $categoriesContainer.empty(); // مسح رسالة التحميل
+                            if (categories && categories.length > 0) {
+                                $.each(categories, function (index, category) {
+                                    var checkboxId = 'category_' + category.id;
+                                    var checkboxHtml =
+                                        '<label class="list-group-item list-group-item-action d-flex align-items-center py-2 px-3">' +
+                                        '<input type="checkbox" name="SelectedQuestionCategoryTypeIds" value="' + category.id + '" class="form-check-input me-3" style="width: 1.2em; height: 1.2em;" id="' + checkboxId + '" />' +
+                                        '<span class="fw-normal">' + category.categoryName + '</span>' +
+                                        '</label>';
+                                    $categoriesContainer.append(checkboxHtml);
+                                });
+                            } else {
+                                $categoriesContainer.append($categoriesPlaceholder.clone().text('No categories available for this company type or company not found.').show());
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching categories: ", status, error, xhr.responseText);
+                            $categoriesContainer.empty().append($categoriesPlaceholder.clone().text('Error loading categories. Please try again.').show());
+                        }
+                    });
+                } else {
+                    // إذا لم يتم اختيار شركة، اعرض الرسالة الافتراضية
+                    $categoriesContainer.empty().append($categoriesPlaceholder.clone().show());
+                }
+            });
+
+            // قم بتشغيل الحدث 'change' عند تحميل الصفحة إذا كانت هناك شركة محددة مسبقًا (مفيد في صفحة التعديل)
+            if ($('#companyDropdown').val()) {
+                $('#companyDropdown').trigger('change');
+            }
+        });
+    </script>
 }

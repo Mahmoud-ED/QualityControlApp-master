@@ -8,26 +8,30 @@ using QualityControlApp.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static System.Collections.Specialized.BitVector32;
 using QualityControlApp.Classes;
+using QualityControlApp.ViewModels;
 
 namespace QualityControlApp.Controllers
 {
 
-    [Authorize(Policy = "ProgOrAdminOrEmployeePolicy")]
-  
+    
+
     [ViewLayout("_LayoutDashboard")]
     public class CompanyController : BaseController
     {
 
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork<Company > _company;
+        private readonly IUnitOfWork<CompanyType> _companytype;
         //private readonly IWebHostEnvironment _host;
 
         public CompanyController(
     ApplicationDbContext context,
                          IUnitOfWork<Company> company,
+                         IUnitOfWork<CompanyType> compnayType,
                               IWebHostEnvironment host) : base(host)
         {
             _context = context;
+            _companytype = compnayType;
             _company = company;
             //_host = host; // نفعله فقط لو احتجناه في هذا الكونترولر
         }
@@ -35,11 +39,26 @@ namespace QualityControlApp.Controllers
 
 
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(Guid? companyTypeId)
         {
-            var company = await _company.Entity.GetAll().ToListAsync();
+            var allCompanyTypes = await _companytype.Entity.GetAll().ToListAsync();
 
-            return View(company);
+            IQueryable<Company> companiesQuery = _company.Entity.Include(c => c.CompanyType);
+
+
+            if (companyTypeId.HasValue )
+            {
+                companiesQuery = companiesQuery.Where(c => c.CompanyTypeId == companyTypeId.Value);
+            }
+            var companies = await companiesQuery.OrderBy(c => c.Name).ToListAsync(); // أو أي ترتيب تفضله
+
+            var viewModel = new CompanyIndexVM
+            {
+                Companies = companies,
+                CompanyTypes = allCompanyTypes
+            };
+
+            return View(viewModel);
 
         }
 
@@ -60,13 +79,24 @@ namespace QualityControlApp.Controllers
         //[Authorize(Policy = "CreatePolicy")]
         public async Task<IActionResult> Create()
         {
-           
-            return View();
+          
+            var companyType = await _companytype.Entity.GetAll().ToListAsync();
+
+            var viewModel = new CompanyCreateVM
+            {
+                Company = null,
+                CompanyTypes = companyType
+            };
+
+
+
+            return View(viewModel);
+
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name")] Company  company )
+        public async Task<IActionResult> Create([Bind("Name","AocNum", "CompanyTypeId")] Company  company )
         {
             //هذه لا تستعمل ابدا مع المفتاح الأجنبي لكن لو احتجنا لها في حقول اخرى
             //ModelState.Remove("Sections");// طريقة أخرى لمنع التحقق داخل وظيفة معينة وليس في الكلاس سيمنع التحقق بالمطلق لكل الوظائف
@@ -83,6 +113,7 @@ namespace QualityControlApp.Controllers
 
                     company.Created = DateTime.Now;
                     company.Name = company.Name;
+                    company.CompanyTypeId = company.CompanyTypeId;
                     _company .Entity.Insert(company);
                     await _company.SaveAsync();
                     return RedirectToAction(nameof(Index));
@@ -114,55 +145,74 @@ namespace QualityControlApp.Controllers
             {
                 return View("NotFound");
             }
+            var companyType = await _companytype.Entity.GetAll().ToListAsync();
 
-           
-            return View(company);
+            var viewModel = new CompanyCreateVM
+            {
+                Company = company,
+                CompanyTypes = companyType
+            };
+
+
+
+            return View(viewModel);
 
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Id,Created")] Company company)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Id,Created,AocNum,CompanyTypeId")] Company company)
         {
-
-            // (Cross-Site Request Forgery)
-
             if (id != company.Id)
             {
                 return View("NotFound");
             }
 
-            if (companyExistsEdit(company.Name,company.Id)) //في حال اسم موجود
+            if (companyExistsEdit(company.Name, company.Id))
             {
-                ViewBag.Message = " الاسم موجود مسبقا ";
-                return View();
+                ViewBag.Message = "الاسم موجود مسبقاً";
+
+                // إعادة تحميل الـ ViewModel
+                var vm = new CompanyCreateVM
+                {
+                    Company = company,
+                    CompanyTypes = await _companytype.Entity.GetAll().ToListAsync()
+                };
+                return View(vm);
             }
 
             if (ModelState.IsValid)
             {
-
                 try
                 {
                     company.Modified = DateTime.Now;
-                    _company .Entity.Update(company);
+                    company.CompanyTypeId = company.CompanyTypeId;
+                    _company.Entity.Update(company);
                     await _company.SaveAsync();
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
-                    if (!companyExists(company.Id )) //في حال محذوف
+                    if (!companyExists(company.Id))
                     {
                         return View("NotFound");
                     }
                     else
                     {
-                        ViewBag.ErrorTitle = "The basic data not found in the database ";
-                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                        ViewBag.ErrorTitle = "The basic data not found in the database";
                         return View("Error");
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(company);
+
+            // ModelState غير صحيح، نرجّع ViewModel
+            var viewModel = new CompanyCreateVM
+            {
+                Company = company,
+                CompanyTypes = await _companytype.Entity.GetAll().ToListAsync()
+            };
+            return View(viewModel);
         }
 
 

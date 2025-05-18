@@ -81,7 +81,7 @@
                                 @* mb-3 for space below category buttons *@
 
 
-                                    <a asp-controller="CompanyQuestion"
+                                    <a asp-controller="Employee" 
                                        asp-action="Details"
                                        asp-route-id="@question.Id"
                                        class="btn btn-outline-info btn-sm category-btn mb-1 me-1">
@@ -106,14 +106,6 @@
                         <div class="card-footer bg-light border-top d-flex justify-content-between align-items-center">
                             @* Changed bg-white to bg-light and added align-items-center *@
                             <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-outline-secondary btn-sm">طباعة <i class="fas fa-print"></i></a> @* Added Print Icon *@
-                            <div class="btn-group">
-                                @* Group edit/delete buttons *@
-                                <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> تعديل</a> @* Added Edit Icon *@
-                                <form asp-controller="CompanyQuestion" asp-action="Delete" asp-route-id="@question.Id" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا العنصر؟');"><i class="fas fa-trash-alt"></i> حذف</button> @* Added Delete Icon *@
-                                </form>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -125,10 +117,12 @@
 
         {
             <div class="col-12">
-                <div class="alert alert-warning text-center">لا توجد أسئلة شركات.</div>
+                <div class="alert alert-warning text-center">No Data</div>
             </div>
         }
     </div>
+
+
 </div>
 
 

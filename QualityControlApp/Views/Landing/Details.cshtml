@@ -1,0 +1,211 @@
+﻿@model QualityControlApp.Models.Entities.Landing // Changed model to Landing
+@using System.IO
+@{
+    ViewData["Title"] = "Landing Record Details"; // Updated title
+}
+
+<div class="container-fluid py-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-plane-arrival me-2"></i>@ViewData["Title"] @* Updated Icon *@
+                </h2>
+                @* Status badge removed as Landing doesn't have status *@
+                <span class="text-white-50">ID: @Model.Id</span> @* Display ID simply *@
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+
+                <!-- Section: Flight & Operator Information -->
+                <div class="col-lg-6 col-md-12">
+                    @* Use columns for sections *@
+                    <h5 class="fw-semibold text-primary mb-3 border-bottom pb-2"><i class="fas fa-plane me-2"></i>Flight & Operator</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Operator Name:</dt>
+                        <dd class="col-sm-7">@Model.OperatorName</dd>
+
+                        <dt class="col-sm-5 text-muted">Operator Address:</dt>
+                        <dd class="col-sm-7">@Model.OperatorAddress  <span class="text-muted fst-italic"> </span></dd>
+
+                        <dt class="col-sm-5 text-muted">Flight Date:</dt>
+                        <dd class="col-sm-7">@Model.DateOfFlights.ToString("dd MMM yyyy")</dd>
+
+                        <dt class="col-sm-5 text-muted">Flight Number:</dt>
+                        <dd class="col-sm-7">@Model.FlightNumber  <span class="text-muted fst-italic"> </span></dd>
+
+                        <dt class="col-sm-5 text-muted">Period:</dt>
+                        <dd class="col-sm-7">@Model.Period  <span class="text-muted fst-italic"> </span></dd>
+
+                        <dt class="col-sm-5 text-muted">Airport of Landing:</dt>
+                        <dd class="col-sm-7">@Model.AirportOfLanding</dd>
+                    </dl>
+                </div>
+
+                <!-- Section: Aircraft Details -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="fw-semibold text-primary mb-3 border-bottom pb-2"><i class="fas fa-fighter-jet me-2"></i>Aircraft Details</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Aircraft Type:</dt>
+                        <dd class="col-sm-7">@Model.AircraftType</dd>
+
+                        <dt class="col-sm-5 text-muted">Aircraft Registration:</dt>
+                        <dd class="col-sm-7">@Model.AircraftRegistration</dd>
+
+                        <dt class="col-sm-5 text-muted">Radio Call Sign:</dt>
+                        <dd class="col-sm-7">@Model.RadioCallSign  <span class="text-muted fst-italic"> </span></dd>
+                    </dl>
+                </div>
+
+                <!-- Section: Route & Timing -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="fw-semibold text-primary mt-3 mb-3 border-bottom pb-2"><i class="fas fa-route me-2"></i>Route & Timing</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Route:</dt>
+                        <dd class="col-sm-7">@Model.Route</dd>
+
+                        <dt class="col-sm-5 text-muted">Est. Arrival (ETA):</dt>
+                        <dd class="col-sm-7">@Model.ETA.ToString("dd MMM yyyy, HH:mm")</dd>
+
+                        <dt class="col-sm-5 text-muted">Est. Departure (ETD):</dt>
+                        <dd class="col-sm-7">@Model.ETD.ToString("dd MMM yyyy, HH:mm")</dd>
+                    </dl>
+                </div>
+
+                <!-- Section: Purpose & Payload -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="fw-semibold text-primary mt-3 mb-3 border-bottom pb-2"><i class="fas fa-box-open me-2"></i>Purpose & Payload</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Purpose of Flight:</dt>
+                        <dd class="col-sm-7">@Model.PurposeOfFlight  <span class="text-muted fst-italic"></span></dd>
+
+                        <dt class="col-sm-5 text-muted">Pax/Cargo Details:</dt>
+                        <dd class="col-sm-7">@Model.NatureOfPaxOrCargo  <span class="text-muted fst-italic"></span></dd>
+
+                        <dt class="col-sm-5 text-muted">Consignor:</dt>
+                        <dd class="col-sm-7">@Model.Consignor  <span class="text-muted fst-italic"></span></dd>
+
+                        <dt class="col-sm-5 text-muted">Consignee:</dt>
+                        <dd class="col-sm-7">@Model.Consignee  <span class="text-muted fst-italic"></span></dd>
+                    </dl>
+                </div>
+
+                <!-- Section: Crew Information -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="fw-semibold text-primary mt-3 mb-3 border-bottom pb-2"><i class="fas fa-users me-2"></i>Crew Information</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5 text-muted">Captain Name:</dt>
+                        <dd class="col-sm-7">@Model.CaptainName  <span class="text-muted fst-italic"></span></dd>
+
+                        <dt class="col-sm-5 text-muted">Captain Number:</dt>
+                        <dd class="col-sm-7">@Model.CaptainNumber  <span class="text-muted fst-italic"></span></dd>
+
+                        <dt class="col-sm-5 text-muted">Captain Nationality:</dt>
+                        <dd class="col-sm-7">@Model.CaptainNationality  <span class="text-muted fst-italic"></span></dd>
+                    </dl>
+                </div>
+
+                <!-- Section: Full Crew Details -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="fw-semibold text-primary mt-3 mb-3 border-bottom pb-2"><i class="fas fa-clipboard-list me-2"></i>Full Crew Details</h5>
+                    <div class="bg-light p-3 rounded">
+                        @if (!string.IsNullOrWhiteSpace(Model.CrewDetails))
+                        {
+                            <p class="mb-0" style="white-space: pre-wrap;">@Model.CrewDetails</p>
+                        }
+                        else
+                        {
+                            <p class="mb-0 text-muted fst-italic">No detailed crew list provided.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Section: AOC Document Attachment -->
+                <div class="col-12">
+                    <h5 class="fw-semibold text-primary mt-3 mb-3 border-bottom pb-2"><i class="fas fa-paperclip me-2"></i>AOC Document</h5>
+                    @* --- الطريقة الحالية: List Group Item --- *@
+                    @if (!string.IsNullOrWhiteSpace(Model.AocDocumentPath))
+                    {
+                        var aocFileName = System.IO.Path.GetFileName(Model.AocDocumentPath) ?? "Attached Document";
+                        <ul class="list-group list-group-flush mb-3">
+                            @* Added mb-3 for spacing below *@
+                            <li class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-file-certificate text-secondary me-2"></i> @* Or fa-file-alt, fa-paperclip *@
+                                    <span class="fw-semibold">@aocFileName</span>
+                                </div>
+                                <div>
+                                    <a href="@Model.AocDocumentPath" target="_blank"
+                                       class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="fas fa-download me-1"></i> View/Download AOC
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="bg-light p-3 rounded text-muted fst-italic mb-3">
+                            @* Added mb-3 *@
+                            No AOC document was uploaded for this record.
+                        </div>
+                    }
+                 
+                </div> 
+
+            </div> @* End of main content row *@
+
+            @* Removed Image Preview Box *@
+
+            <!-- Action Buttons -->
+            <div class="mt-5 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @* Change Status Button Removed *@
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-edit me-2"></i>Edit Record
+                        </a>
+                        @* Ensure the form targets the LandingController *@
+                        <form asp-action="Delete" asp-controller="Landing" method="post" onsubmit="return confirm('Are you sure you want to delete this landing record? This action cannot be undone.');" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 py-2">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Record
+                            </button>
+                        </form>
+                        <button onclick="window.print()" class="btn btn-outline-success rounded-pill px-4 py-2">
+                            <i class="fas fa-print me-2"></i>Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- /.card-body -->
+    </div> <!-- /.card -->
+</div> <!-- /.container-fluid -->
+@section Styles {
+    <style>
+        /* Styles from AirPortRequest Details - generally applicable */
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 0.625rem;
+        }
+        dl.row dt {
+            font-weight: 500;
+            /* Ensure consistent width if needed */
+            /* flex: 0 0 auto; */
+            /* width: 180px; */ /* Adjust width as needed */
+        }
+        dl.row dd {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    @* No JavaScript needed for this read-only view *@
+}

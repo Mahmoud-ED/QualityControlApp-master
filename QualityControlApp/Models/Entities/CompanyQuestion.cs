@@ -26,7 +26,14 @@ namespace QualityControlApp.Models.Entities
         public  int SqurtyGrid { get; set; }
         public  String? Type { get; set; } // هل هوا بنظام الاسئلة القديم او الجديد الي يبيه جمعة
 
+        //--------------------New-------------
+        public Guid? LocationId { get; set; }
 
+        [ValidateNever]
+        public Location? Location { get; set; }
+
+
+        public int? Num {  get; set; }  
 
     }
 }

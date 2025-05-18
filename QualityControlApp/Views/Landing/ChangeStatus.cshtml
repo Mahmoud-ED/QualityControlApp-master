@@ -1,0 +1,133 @@
+﻿@model QualityControlApp.Models.Entities.Landing // Changed model to Landing
+
+@{
+    ViewData["Title"] = "Delete Landing Record"; // Updated title
+}
+
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-trash-alt me-2 text-danger"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Confirm deletion for landing record ID: <span class="fw-semibold">@Model.Id</span></p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Landing Record Summary Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light py-3 border-bottom-0">
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-plane-arrival me-2"></i>Landing Record Summary</h5>
+                </div>
+                <div class="card-body p-4">
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-4 text-muted">Operator Name:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.OperatorName</dd>
+
+                        <dt class="col-sm-4 text-muted">Aircraft Registration:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.AircraftRegistration</dd>
+
+                        <dt class="col-sm-4 text-muted">Flight Date:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.DateOfFlights.ToString("dd MMM yyyy")</dd>
+
+                        <dt class="col-sm-4 text-muted">Aircraft Type:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.AircraftType</dd>
+
+                        <dt class="col-sm-4 text-muted">Route:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.Route</dd>
+                    </dl>
+                    <div class="text-end mt-2">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-link text-primary px-0">View Full Details <i class="fas fa-arrow-right small ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Update Request Status</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="ChangeStatus" asp-controller="Landing" method="post">
+                        @* Assuming action is "ChangeStatus" *@
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <p class="mb-3 text-muted">Select the new status for this request:</p>
+
+                        <div class="list-group">
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusPending">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusPending" value="Pending" @(Model.RequestStatus == "Pending" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Pending</strong>
+                                    <small class="d-block text-muted">The request is awaiting review or further action.</small>
+                                </span>
+                            </label>
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusApproved">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusApproved" value="Approved" @(Model.RequestStatus == "Approved" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Approved</strong>
+                                    <small class="d-block text-muted">The request has been officially approved.</small>
+                                </span>
+                            </label>
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusRejected">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusRejected" value="Rejected" @(Model.RequestStatus == "Rejected" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Rejected</strong>
+                                    <small class="d-block text-muted">The request has been denied.</small>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                                <i class="fas fa-check me-2"></i>Update Status
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <!-- Delete Confirmation Section -->
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-danger mb-3">
+                        <strong>Warning:</strong> Are you absolutely sure you want to delete this landing record?
+                        This action is permanent and cannot be undone.
+                    </p>
+                    <form asp-action="DeleteConfirmed" asp-controller="Landing" method="post">
+                        @* Ensure action is DeleteConfirmed or matches your POST delete action name *@
+                        <input type="hidden" asp-for="Id" /> @* Use asp-for for cleaner hidden input *@
+                        @Html.AntiForgeryToken() @* Add anti-forgery token *@
+
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 py-2">
+                                <i class="fas fa-trash-alt me-2"></i>Yes, Delete Record
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div> <!-- /.col -->
+    </div> <!-- /.row -->
+</div> <!-- /.container-fluid -->
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        /* Add any specific styles if needed */
+    </style>
+}

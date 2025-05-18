@@ -1,0 +1,92 @@
+﻿@model BookingAppointmentVM
+
+@{
+    ViewData["Title"] = "Create Appointment Booking";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-light">
+            <div class="card-header text-white d-flex align-items-center" style="background-color:blueviolet;">
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>@ViewData["Title"]</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+
+                    <div class="mb-4">
+                        <label asp-for="CompanyId" class="form-label fw-bold">
+                            <i class="fas fa-plane-departure me-2 text-primary"></i>Company
+                        </label>
+                        <select asp-for="CompanyId" id="companySelect" class="form-select form-select-lg" asp-items="Model.CompanySelectList">
+                            <option value="">-- Select Company --</option>
+                        </select>
+                        <span asp-validation-for="CompanyId" class="text-danger d-block mt-1"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="BookingDate" class="form-label fw-bold">
+                            <i class="fas fa-calendar-alt me-2 text-primary"></i>Booking Date
+                        </label>
+                        <input asp-for="BookingDate" type="date" class="form-control form-control-lg" id="bookingDateInput" />
+                        <span asp-validation-for="BookingDate" class="text-danger d-block mt-1"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label fw-bold">
+                            <i class="fas fa-sticky-note me-2 text-primary"></i>Notes
+                        </label>
+                        <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Add any additional notes here..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger d-block mt-1"></span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-right me-1"></i>Back</a>
+                        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-1"></i>Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const dateInput = document.getElementById('bookingDateInput');
+
+            if (dateInput && !dateInput.value) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+
+                const todayString = `${year}-${month}-${day}`;
+
+                dateInput.value = todayString;
+                dateInput.setAttribute('min', todayString);
+            } else if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.setAttribute('min', today);
+            }
+        });
+    </script>
+
+    <style>
+        .card-header {
+            border-bottom: none;
+        }
+
+        .form-label i {
+            font-size: 0.9em;
+        }
+    </style>
+}

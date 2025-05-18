@@ -1,385 +1,661 @@
 ﻿@model QualityControlApp.Models.Entities.AirPortRequest
 
 @{
-    ViewData["Title"] = "تعديل الطلب";
+    ViewData["Title"] = "Edit Airport Request";
 }
 
-<div class="card shadow-lg mt-10">
-    <div class="card-header bg-warning text-dark py-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <h2 class="card-title mb-0 text-center">
-                <i class="fas fa-edit me-2"></i>@ViewData["Title"]
-            </h2>
-
-            <div>
-                <label class="form-label fw-bold me-2 mb-0">حالة الطلب:</label>
-                @{
-                    string statusClass = Model.RequestStatus switch
-                    {
-                        "Approved" => "text-success",
-                        "Pending" => "text-warning",
-                        "Rejected" => "text-danger",
-                        _ => "text-secondary"
-                    };
-
-                    string statusText = Model.RequestStatus switch
-                    {
-                        "Approved" => "تمت الموافقة",
-                        "Pending" => "قيد الانتظار",
-                        "Rejected" => "مرفوض",
-                        _ => "غير معروف"
-                    };
-                }
-                <button class="fw-bold @statusClass fs-5">@statusText</button>
-            </div>
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-edit me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Update the details for airport request ID: <span class="fw-semibold">@Model.Id.ToString().Substring(0, 8)...</span></p>
+        </div>
+        <div>
+            @{
+                var statusConfig = Model.RequestStatus switch
+                {
+                    "Approved" => (BadgeClass: "bg-success-subtle text-success-emphasis", Text: "Approved", Icon: "fas fa-check-circle"),
+                    "Pending" => (BadgeClass: "bg-warning-subtle text-warning-emphasis", Text: "Pending", Icon: "fas fa-clock"),
+                    "Rejected" => (BadgeClass: "bg-danger-subtle text-danger-emphasis", Text: "Rejected", Icon: "fas fa-times-circle"),
+                    _ => (BadgeClass: "bg-secondary-subtle text-secondary-emphasis", Text: "Unknown", Icon: "fas fa-question-circle")
+                };
+            }
+            <span class="badge rounded-pill px-3 py-2 @statusConfig.BadgeClass fs-6">
+                <i class="@statusConfig.Icon me-1"></i> Status: @statusConfig.Text
+            </span>
         </div>
     </div>
-    <div class="card-body p-4">
-        <form asp-controller="AirPortRequests" asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation">
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="Email" />
-            <input type="hidden" asp-for="RequestStatus" />
 
-            <div class="row g-3">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-lg-5 p-4">
+            <form asp-controller="AirPortRequests" asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Email" /> <!-- Email is read-only but needed for model binding -->
+                <input type="hidden" asp-for="RequestStatus" /> <!-- Status is read-only but needed -->
+                <input type="hidden" asp-for="RequestTime" /> <!-- RequestTime should likely be read-only -->
 
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="Department" class="form-control" placeholder=" " required />
-                        <label asp-for="Department"></label>
-                        <span asp-validation-for="Department" class="text-danger"></span>
+
+                <h5 class="fw-semibold text-primary mb-3 border-bottom pb-2"><i class="fas fa-info-circle me-2"></i>Request Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="Department" class="form-control form-control-sm" placeholder="Department" required />
+                            <label asp-for="Department"></label>
+                            <span asp-validation-for="Department" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="EntryTime" class="form-control form-control-sm" type="datetime-local" placeholder="Entry Time" required />
+                            <label asp-for="EntryTime"></label>
+                            <span asp-validation-for="EntryTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Request Time (Read-only)</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="@Model.RequestTime.ToString("dd MMM yyyy, HH:mm")" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Applicant Email (Read-only)</label>
+                        <input type="text" class="form-control form-control-sm bg-light" value="@Model.Email" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="SenderName" class="form-control form-control-sm" placeholder="Sender Name" required />
+                            <label asp-for="SenderName"></label>
+                            <span asp-validation-for="SenderName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="CompanyName" class="form-control form-control-sm" placeholder="Company Name" required />
+                            <label asp-for="CompanyName"></label>
+                            <span asp-validation-for="CompanyName" class="text-danger"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="EntryTime" class="form-control" type="datetime-local" placeholder=" " required />
-                        <label asp-for="EntryTime"></label>
-                        <span asp-validation-for="EntryTime" class="text-danger"></span>
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-plane-departure me-2"></i>Flight Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="FlightDate" class="form-control form-control-sm" type="date" placeholder="Flight Date" required />
+                            <label asp-for="FlightDate"></label>
+                            <span asp-validation-for="FlightDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select asp-for="AircraftType" class="form-select form-select-sm" required>
+                                <option value="">Select Aircraft Type</option>
+                                <option value="Commercial">Commercial Aircraft</option>
+                                <option value="Private">Private Aircraft</option>
+                                <option value="Cargo">Cargo Aircraft</option>
+                                <option value="Military">Military Aircraft</option>
+                            </select>
+                            <label asp-for="AircraftType"></label>
+                            <span asp-validation-for="AircraftType" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="AircraftRegistration" class="form-control form-control-sm" placeholder="Aircraft Registration" required />
+                            <label asp-for="AircraftRegistration"></label>
+                            <span asp-validation-for="AircraftRegistration" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="CallSign" class="form-control form-control-sm" placeholder="Call Sign" required />
+                            <label asp-for="CallSign"></label>
+                            <span asp-validation-for="CallSign" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="FlightPath" class="form-control form-control-sm" placeholder="Flight Path" required />
+                            <label asp-for="FlightPath"></label>
+                            <span asp-validation-for="FlightPath" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="LandingTakeoffTime" class="form-control form-control-sm" placeholder="Landing/Takeoff Time Slot" required />
+                            <label asp-for="LandingTakeoffTime"></label>
+                            <span asp-validation-for="LandingTakeoffTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select asp-for="FlightPurpose" class="form-select form-select-sm" required>
+                                <option value="">Select Flight Purpose</option>
+                                <option value="Commercial">Commercial Flight</option>
+                                <option value="Private">Private Flight</option>
+                                <option value="Cargo">Cargo Shipment</option>
+                                <option value="Military">Military Flight</option>
+                            </select>
+                            <label asp-for="FlightPurpose"></label>
+                            <span asp-validation-for="FlightPurpose" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="EntryExitPoints" class="form-control form-control-sm" placeholder="Designated Entry/Exit Points" required />
+                            <label asp-for="EntryExitPoints"></label>
+                            <span asp-validation-for="EntryExitPoints" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="FlightNumber" class="form-control form-control-sm" placeholder="Flight Number" />
+                            <label asp-for="FlightNumber"></label>
+                            <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="EntryPoint" class="form-control form-control-sm" placeholder="Actual Entry Point" />
+                            <label asp-for="EntryPoint"></label>
+                            <span asp-validation-for="EntryPoint" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="ExitPoint" class="form-control form-control-sm" placeholder="Actual Exit Point" />
+                            <label asp-for="ExitPoint"></label>
+                            <span asp-validation-for="ExitPoint" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="EstimatedEntryTime" class="form-control form-control-sm" type="datetime-local" placeholder="Estimated Entry Time (Actual)" />
+                            <label asp-for="EstimatedEntryTime"></label>
+                            <span asp-validation-for="EstimatedEntryTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="EstimatedExitTime" class="form-control form-control-sm" type="datetime-local" placeholder="Estimated Exit Time (Actual)" />
+                            <label asp-for="EstimatedExitTime"></label>
+                            <span asp-validation-for="EstimatedExitTime" class="text-danger"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="RequestTime" class="form-control" type="datetime-local" placeholder=" " required />
-                        <label asp-for="RequestTime"></label>
-                        <span asp-validation-for="RequestTime" class="text-danger"></span>
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-users-cog me-2"></i>Crew & Cargo</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="PilotName" class="form-control form-control-sm" placeholder="Pilot Name" />
+                            <label asp-for="PilotName"></label>
+                            <span asp-validation-for="PilotName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="CargoDetails" class="form-control form-control-sm" placeholder="Cargo Details" />
+                            <label asp-for="CargoDetails"></label>
+                            <span asp-validation-for="CargoDetails" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="CrewCount" class="form-control form-control-sm" type="number" placeholder="Crew Count" />
+                            <label asp-for="CrewCount"></label>
+                            <span asp-validation-for="CrewCount" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input asp-for="CrewNationalities" class="form-control form-control-sm" placeholder="Crew Nationalities" />
+                            <label asp-for="CrewNationalities"></label>
+                            <span asp-validation-for="CrewNationalities" class="text-danger"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">البريد الإلكتروني</label>
-                    <div class="form-control-plaintext">@Model.Email</div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="SenderName" class="form-control" placeholder=" " required />
-                        <label asp-for="SenderName"></label>
-                        <span asp-validation-for="SenderName" class="text-danger"></span>
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2"><i class="fas fa-sticky-note me-2"></i>Notes</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea asp-for="Notes" class="form-control form-control-sm" placeholder="Notes" style="height: 120px"></textarea>
+                            <label asp-for="Notes"></label>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="CompanyName" class="form-control" placeholder=" " required />
-                        <label asp-for="CompanyName"></label>
-                        <span asp-validation-for="CompanyName" class="text-danger"></span>
+                <h5 class="fw-semibold text-primary mt-4 mb-3 border-bottom pb-2">
+                    <i class="fas fa-paperclip me-2"></i>Attachments
+                </h5>
+
+                @if (Model.RequestFiles != null && Model.RequestFiles.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var file in Model.RequestFiles)
+                        {
+                            var isNs = file.Inspect?.ToLower() == "ns";
+                            var fileIdSuffix = file.Id; // لتوليد IDs فريدة للعناصر
+
+                            <li class="list-group-item px-0 py-3" data-file-id="@file.Id">
+                                <div class="d-flex flex-column flex-md-row justify-content-between">
+
+                                    @* --- قسم معلومات الملف والتفاصيل (الجانب الأيسر/العلوي) --- *@
+                                    <div class="flex-grow-1 mb-3 mb-md-0 pe-md-3">
+                                        @* معلومات الملف الأساسية *@
+                                        <div class="mb-2">
+                                            <i class="fas fa-file-alt text-secondary me-2"></i>
+                                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank" class="text-decoration-none fw-semibold me-2">
+                                                @file.FileName
+                                            </a>
+                                            @if (file.FileType != null)
+                                            {
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary-emphasis rounded-pill small">
+                                                    @file.FileType.TypeName
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted rounded-pill small">Type N/A</span>
+                                            }
+                                        </div>
+
+                                        @* تفاصيل Inspect و Notes *@
+                                        <div class="mt-3 small attachment-details">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-auto">
+                                                    <label for="inspect-select-@fileIdSuffix" class="col-form-label col-form-label-sm fw-bold @(isNs ? "text-danger" : "text-muted")">Inspect:</label>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <select id="inspect-select-@fileIdSuffix" class="form-select form-select-sm inspect-select" aria-label="Select Inspect Status for @file.FileName">
+                                                        <option value="">Choose</option>
+                                                        <option value="S" selected="@(file.Inspect == "S")">S</option>
+                                                        <option value="Ns" selected="@(file.Inspect == "Ns")">Ns</option>
+                                                        <option value="Na" selected="@(file.Inspect == "Na")">Na</option>
+                                                    </select>
+                                                </div>
+                                                @* تم إزالة span النصي للقيمة الحالية لأنه مكرر مع القيمة المختارة في الـ select *@
+                                            </div>
+                                            <div class="nots-container mb-2" style="@(isNs ? "" : "display: none;")">
+                                                <label for="nots-text-@fileIdSuffix" class="form-label small mb-1"><i class="bi bi-pencil-square me-1 text-warning"></i>Notes</label> @* تغيير "Nots" إلى "Notes" *@
+                                                <textarea id="nots-text-@fileIdSuffix" class="form-control form-control-sm nots-text" placeholder="Enter notes..." rows="2">@file.Nots</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @* --- قسم الأزرار (الجانب الأيمن/السفلي) --- *@
+                                    <div class="mt-md-0">
+                                        @* إزالة الهامش العلوي الافتراضي للشاشات الكبيرة *@
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end align-items-center">
+                                            @* استخدام grid للشاشات الصغيرة و flex للشاشات المتوسطة وما فوق للمحاذاة لليمين *@
+                                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank"
+                                               class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                                @* تغيير اللون لتمييز زر التحديث *@
+                                                <i class="fas fa-eye me-1"></i> View @* تغيير النص والأيقونة قليلًا *@
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 update-attachment-btn" data-file-id="@file.Id">
+                                                <i class="fas fa-save me-1"></i> Update
+                                            </button>
+                                        </div>
+                                        <div class="text-md-end mt-1">
+                                            @* محاذاة النص لليمين في الشاشات الكبيرة *@
+                                            <span class="update-status small text-muted" style="display: none;"></span>
+                                        </div>
+                                    </div>
+
+                                </div> @* نهاية .d-flex *@
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="alert alert-info mt-3">
+                        @* إضافة هامش علوي بسيط *@
+                        <i class="fas fa-info-circle me-1"></i> No attachments found.
                     </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="FlightDate" class="form-control" type="date" placeholder=" " required />
-                        <label asp-for="FlightDate"></label>
-                        <span asp-validation-for="FlightDate" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <select asp-for="AircraftType" class="form-select" required>
-                            <option value="">اختر نوع الطائرة</option>
-                            <option value="Commercial">طائرة تجارية</option>
-                            <option value="Private">طائرة خاصة</option>
-                            <option value="Cargo">طائرة شحن</option>
-                            <option value="Military">طائرة عسكرية</option>
-                        </select>
-                        <label asp-for="AircraftType"></label>
-                        <span asp-validation-for="AircraftType" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="AircraftRegistration" class="form-control" placeholder=" " required />
-                        <label asp-for="AircraftRegistration"></label>
-                        <span asp-validation-for="AircraftRegistration" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="CallSign" class="form-control" placeholder=" " required />
-                        <label asp-for="CallSign"></label>
-                        <span asp-validation-for="CallSign" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="FlightPath" class="form-control" placeholder=" " required />
-                        <label asp-for="FlightPath"></label>
-                        <span asp-validation-for="FlightPath" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="LandingTakeoffTime" class="form-control" placeholder=" " required />
-                        <label asp-for="LandingTakeoffTime"></label>
-                        <span asp-validation-for="LandingTakeoffTime" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <select asp-for="FlightPurpose" class="form-select" required>
-                            <option value="">اختر الغرض من الرحلة</option>
-                            <option value="Commercial">رحلة تجارية</option>
-                            <option value="Private">رحلة خاصة</option>
-                            <option value="Cargo">شحن بضائع</option>
-                            <option value="Military">رحلة عسكرية</option>
-                        </select>
-                        <label asp-for="FlightPurpose"></label>
-                        <span asp-validation-for="FlightPurpose" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="EntryExitPoints" class="form-control" placeholder=" " required />
-                        <label asp-for="EntryExitPoints"></label>
-                        <span asp-validation-for="EntryExitPoints" class="text-danger"></span>
-                    </div>
-                </div>
+                }
 
 
 
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="PilotName" class="form-control" placeholder=" " required />
-                        <label asp-for="PilotName"></label>
-                        <span asp-validation-for="PilotName" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="FlightNumber" class="form-control" placeholder=" " required />
-                        <label asp-for="FlightNumber"></label>
-                        <span asp-validation-for="FlightNumber" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="EntryPoint" class="form-control" placeholder=" " required />
-                        <label asp-for="EntryPoint"></label>
-                        <span asp-validation-for="EntryPoint" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="ExitPoint" class="form-control" placeholder=" " required />
-                        <label asp-for="ExitPoint"></label>
-                        <span asp-validation-for="ExitPoint" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="EstimatedEntryTime" class="form-control" type="datetime-local" placeholder=" " required />
-                        <label asp-for="EstimatedEntryTime"></label>
-                        <span asp-validation-for="EstimatedEntryTime" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="EstimatedExitTime" class="form-control" type="datetime-local" placeholder=" " required />
-                        <label asp-for="EstimatedExitTime"></label>
-                        <span asp-validation-for="EstimatedExitTime" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="CargoDetails" class="form-control" placeholder=" " required />
-                        <label asp-for="CargoDetails"></label>
-                        <span asp-validation-for="CargoDetails" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="CrewCount" class="form-control" type="number" placeholder=" " required />
-                        <label asp-for="CrewCount"></label>
-                        <span asp-validation-for="CrewCount" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="CrewNationalities" class="form-control" placeholder=" " required />
-                        <label asp-for="CrewNationalities"></label>
-                        <span asp-validation-for="CrewNationalities" class="text-danger"></span>
-                    </div>
-                </div>
-
+                <div id="attachmentsContainer" class="col-12 mt-3"></div> <!-- Added col-12 and mt-3 for spacing -->
 
                 <div class="col-12">
-                    <div class="form-floating">
-                        <textarea asp-for="Notes" class="form-control" placeholder=" " style="height: 100px"></textarea>
-                        <label asp-for="Notes"></label>
-                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    <!-- Wrapped button in col-12 for proper grid alignment -->
+                    <button type="button" class="btn btn-primary mt-2" onclick="addAttachmentRow()">
+                        <i class="fas fa-paperclip me-1"></i>Add Attachment <!-- Translated & Icon added -->
+                    </button>
+                </div>
+
+                <!-- Image Preview Box (No text to translate here, alt text already generic) -->
+                <div id="imagePreview" class="text-center my-3" style="display: none;">
+                    <img id="previewImage" src="" alt="Preview" class="img-thumbnail" style="max-width: 100%; max-height: 300px;" />
+                </div>
+                <!-- Action Buttons -->
+                <div class="mt-5 pt-4 border-top">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
                     </div>
                 </div>
 
-           
-               
+            </form>
 
-                <!-- تحديث المرفقات -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label">تحديث المرفقات (اختياري)</label>
-                        <input type="file" name="files" class="form-control" multiple />
-                        <small class="text-muted">يمكنك رفع ملفات جديدة أو ترك الحقل فارغًا للاحتفاظ بالمرفقات الحالية</small>
-                        @if (ViewData["FileError"] != null)
-                        {
-                            <span class="text-danger">@ViewData["FileError"]</span>
-                        }
-                    </div>
-                </div>
-            </div>
 
-            <!-- قائمة الملفات المختارة -->
-            <ul id="fileList" class="list-group mt-3"></ul>
 
-            <!-- عرض الصورة عند النقر -->
-            <div id="imagePreview" class="mt-3 d-none">
-                <img id="previewImg" src="" class="img-fluid rounded border" style="max-height: 300px;" />
-            </div>
 
-            <!-- أزرار الإرسال -->
-            <div class="d-flex justify-content-center gap-3 mt-5">
-                <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
-                    تحديث الطلب
-                </button>
-            </div>
-        </form>
 
-        @if (Model.RequestFiles != null && Model.RequestFiles.Any())
-        {
-            <div class="mt-4">
-                <h5>المرفقات الحالية:</h5>
-                <ul class="list-group">
-                    @foreach (var file in Model.RequestFiles)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank">
-                                <i class="bi bi-file-earmark-pdf"></i> @file.FileName
-                            </a>
-                            <form asp-action="DeleteFile" asp-controller="AirPortRequests" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@file.Id" />
-                                <button type="submit" class="btn btn-sm btn-danger">❌</button>
-                            </form>
-                        </li>
-                    }
-                </ul>
-            </div>
-        }
-    </div>
-</div>
 
+
+
+
+
+        </div> <!-- /.card-body -->
+    </div> <!-- /.card -->
+</div> <!-- /.container-fluid -->
 @section Styles {
     <style>
-        .card {
-            border-radius: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
+        body {
+            background-color: #f8f9fa;
         }
 
-        .form-floating > label {
-            right: unset;
-            left: 0;
-            transform-origin: right top;
+        .form-control-sm, .form-select-sm { /* Ensure consistent small height */
+            min-height: calc(1.5em + .5rem + 2px);
+            padding: .25rem .5rem;
+            font-size: .875rem;
         }
 
-        .form-control, .form-select {
-            padding: 16px 12px 4px 12px;
-            height: calc(3.5rem + 2px);
+        .form-floating > .form-control-sm ~ label { /* Adjust floating label for sm controls */
+            padding: .75rem .5rem; /* Needs fine-tuning based on Bootstrap version */
         }
 
-        .text-danger {
-            font-size: 0.85rem;
+        .form-floating > .form-control-sm:not(:placeholder-shown) ~ label {
+            transform: scale(.85) translateY(-.7rem) translateX(.15rem); /* Adjust for sm */
+        }
+
+        .form-control.bg-light[readonly] {
+            background-color: #e9ecef !important; /* More distinct readonly background */
+            opacity: 1;
         }
     </style>
 }
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- تأكد من تضمين jQuery -->
     <script>
-        const fileInput = document.querySelector('input[name="files"]');
-        const fileList = document.getElementById('fileList');
-        const previewImg = document.getElementById('previewImg');
-        const imagePreview = document.getElementById('imagePreview');
+        // ============================================================
+        // START: Existing Code (for adding NEW attachments dynamically)
+        // ============================================================
+        let selectedFiles = []; // Note: This seems specific to the '#fileInput' uploader below
+        let attachmentIndex = 0; // Used by addAttachmentRow
 
-        let filesArray = [];
+        document.addEventListener('DOMContentLoaded', function () {
+            // This section seems related to a specific uploader (fileInput, fileList)
+            // Keep it if it's actively used, remove if it's leftover from something else.
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
 
-        fileInput.addEventListener('change', function () {
-            filesArray = Array.from(this.files);
-            updateFileList();
-        });
+            if (fileInput) {
+                fileInput.addEventListener('change', (event) => {
+                    const files = Array.from(event.target.files);
+                    // This selectedFiles array doesn't seem related to the Update logic for existing files
+                    selectedFiles = [...selectedFiles, ...files];
+                    renderFileList();
+                });
+            }
 
-        function updateFileList() {
-            filesArray.forEach((file, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            function renderFileList() {
+                if (!fileList) return;
+                fileList.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'd-flex align-items-center justify-content-between mb-2 border p-2 rounded bg-light';
+                    const fileName = document.createElement('span');
+                    fileName.textContent = file.name;
+                    fileName.style.cursor = 'pointer';
+                    fileName.classList.add('me-2', 'text-primary', 'file-link');
+                    fileName.onclick = () => previewFile(file);
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-sm btn-danger';
+                    deleteBtn.textContent = '✖';
+                    deleteBtn.onclick = () => {
+                        selectedFiles.splice(index, 1);
+                        renderFileList();
+                    };
+                    fileItem.appendChild(fileName);
+                    fileItem.appendChild(deleteBtn);
+                    fileList.appendChild(fileItem);
+                });
+                if (fileInput) {
+                    const dataTransfer = new DataTransfer();
+                    selectedFiles.forEach(f => dataTransfer.items.add(f));
+                    fileInput.files = dataTransfer.files;
+                }
+            }
 
-                const nameLink = document.createElement('a');
-                nameLink.href = '#';
-                nameLink.textContent = file.name;
-                nameLink.addEventListener('click', (e) => {
-                    e.preventDefault();
+            function previewFile(file) {
+                if (!imagePreview || !previewImage) return;
+                if (file && file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        previewImg.src = e.target.result;
-                        imagePreview.classList.remove('d-none');
+                        previewImage.src = e.target.result;
+                        imagePreview.style.display = 'block';
                     };
                     reader.readAsDataURL(file);
-                });
+                } else {
+                    imagePreview.style.display = 'none';
+                    previewImage.src = '';
+                }
+            }
 
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'btn btn-sm btn-danger';
-                removeBtn.innerHTML = '❌';
-                removeBtn.addEventListener('click', () => {
-                    filesArray.splice(index, 1);
-                    updateFileList();
-                    if (filesArray.length === 0) {
-                        imagePreview.classList.add('d-none');
-                    }
-                });
+            // Initialize existing handlers if needed
+            // renderFileList(); // Call if you need to render initially based on selectedFiles
 
-                li.appendChild(nameLink);
-                li.appendChild(removeBtn);
-                fileList.appendChild(li);
+        }); // End DOMContentLoaded for the original uploader logic
+
+        // Function to add a new attachment row (for NEW uploads)
+        function addAttachmentRow() {
+            const container = document.getElementById('attachmentsContainer');
+            if (!container) {
+                console.error("Element with ID 'attachmentsContainer' not found for adding new rows.");
+                return; // Exit if the container doesn't exist
+            }
+
+            const row = document.createElement('div');
+            row.className = 'row align-items-end mb-3';
+            row.dataset.index = attachmentIndex;
+
+            const fileTypeCol = document.createElement('div');
+            fileTypeCol.className = 'col-md-5';
+            fileTypeCol.innerHTML = `
+                    <label class="form-label">File Type</label>
+                    <select name="FileTypes[${attachmentIndex}].FileTypeId" class="form-select" required>
+                        <option value="">Select File Type</option>
+                        ${getFileTypeOptions()}
+                    </select>
+                `;
+
+            const fileInputCol = document.createElement('div');
+            fileInputCol.className = 'col-md-5';
+            fileInputCol.innerHTML = `
+                    <label class="form-label">Attachment</label>
+                    <input type="file" name="FileTypes[${attachmentIndex}].File" class="form-control" required />
+                `;
+
+            const deleteCol = document.createElement('div');
+            deleteCol.className = 'col-md-2 d-flex align-items-end pb-1';
+            deleteCol.innerHTML = `
+                    <button type="button" class="btn btn-danger w-100" onclick="removeAttachmentRow(this)">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+
+            row.appendChild(fileTypeCol);
+            row.appendChild(fileInputCol);
+            row.appendChild(deleteCol);
+
+            container.appendChild(row);
+            attachmentIndex++;
+        }
+
+        // Function to remove a dynamically added attachment row (for NEW uploads)
+        function removeAttachmentRow(button) {
+            const row = button.closest('.row');
+            if (row) {
+                row.remove();
+            }
+            // Note: Re-indexing is usually not needed if the server model binder can handle gaps.
+        }
+
+        // Function to get file type options (used by addAttachmentRow)
+        function getFileTypeOptions() {
+            // This uses Razor syntax within JS, which is fine as it's rendered server-side.
+            return `
+        @if (ViewBag.FileTypes != null)
+        {
+            foreach (var type in ViewBag.FileTypes)
+            {
+                // Use <text> to ensure proper rendering of HTML within the C# block
+                <text><option value="@type.Id">@type.TypeName</option></text>
+            }
+        }
+            `;
+        }
+        // ============================================================
+        // END: Existing Code
+        // ============================================================
+
+
+        // ============================================================
+        // START: NEW Code (for updating EXISTING attachments via AJAX)
+        // ============================================================
+        // Requires jQuery - ensure it's included before this script block
+        $(document).ready(function () {
+
+            // 1. Show/hide 'Nots' textarea based on 'Inspect' dropdown changes
+            //    Targets dropdowns within the existing attachments list
+            //    Using event delegation on a static parent for robustness if needed, but direct is fine here.
+            $('.list-group').on('change', '.inspect-select', function () { // Target inspect-select within the list-group
+                var selectElement = $(this);
+                // Find the closest list item (li) and then the nots container within it
+                var listItem = selectElement.closest('.list-group-item');
+                var notsContainer = listItem.find('.nots-container');
+                var selectedValue = selectElement.val();
+
+                if (selectedValue === 'Ns') {
+                    notsContainer.slideDown(); // Show with animation
+                } else {
+                    notsContainer.slideUp();   // Hide with animation
+                    // Optional: Clear the textarea when hiding
+                    // notsContainer.find('.nots-text').val('');
+                }
             });
 
-            // تحديث ملفات الـ input
-            const dataTransfer = new DataTransfer();
-            filesArray.forEach(f => dataTransfer.items.add(f));
-            fileInput.files = dataTransfer.files;
-        }
+            // 2. Handle click on the 'Update' button for an existing attachment
+            //    Targets buttons within the existing attachments list
+            $('.list-group').on('click', '.update-attachment-btn', function () { // Target update buttons within the list-group
+                var updateButton = $(this);
+                var listItem = updateButton.closest('.list-group-item'); // Get the parent li element
+                var fileId = updateButton.data('file-id'); // Get the file ID from data attribute
+
+                // Find the input elements within this specific list item
+                var inspectSelect = listItem.find('.inspect-select');
+                var notsTextarea = listItem.find('.nots-text');
+                var statusSpan = listItem.find('.update-status'); // Find the status span
+
+                // Get the current values from the form elements
+                var inspectValue = inspectSelect.val();
+                var notsValue = notsTextarea.val();
+
+                // Basic validation (optional but recommended)
+                if (!inspectValue) {
+                    alert('Please select an Inspect status (S, Ns, or Na).'); // Or use a more subtle notification
+                    inspectSelect.focus();
+                    return; // Stop processing
+                }
+
+                // --- Prevent multiple clicks & provide visual feedback ---
+                if (updateButton.prop('disabled')) {
+                    return; // Already processing, do nothing
+                }
+                updateButton.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Updating...');
+                statusSpan.text('').removeClass('text-success text-danger').hide(); // Reset status message
+
+
+                console.log("AJAX Request - File ID:", fileId, "Inspect:", inspectValue, "Nots:", notsValue); // Debugging
+
+                // --- Perform AJAX request ---
+                $.ajax({
+                    url: '/AirPortRequests/UpdateAttachmentDetails', // <-- !!! IMPORTANT: CHANGE TO YOUR ACTUAL URL !!!
+                    type: 'POST',
+                    data: {
+                        // Parameter names MUST match your Controller Action's parameters
+                        requestFileId: fileId,
+                        inspect: inspectValue,
+                        nots: notsValue
+                        // If using AntiForgeryToken:
+                        // __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        console.log("AJAX Success:", response); // Debugging
+                        statusSpan.text('Updated successfully!')
+                            .removeClass('text-danger')
+                            .addClass('text-success')
+                            .fadeIn();
+
+                        // Optional: Update the displayed inspect value text if you have one
+                        listItem.find('.current-inspect-value').text(inspectValue);
+                        // Optional: Update text color based on new inspect value
+                        var inspectLabelSpan = listItem.find('.attachment-details .fw-bold').first(); // Find the bold span for "Inspect:"
+                        inspectLabelSpan.removeClass('text-danger text-muted'); // Remove old color classes
+                        if (inspectValue.toLowerCase() === 'ns') {
+                            inspectLabelSpan.addClass('text-danger');
+                        } else {
+                            inspectLabelSpan.addClass('text-muted');
+                        }
+
+
+                        // Hide success message after a few seconds
+                        setTimeout(function () {
+                            statusSpan.fadeOut();
+                        }, 3500); // 3.5 seconds
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", xhr.responseText); // Debugging
+                        var errorMessage = 'Error updating. Please try again.';
+                        // Try to get a more specific error message from the server response
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            // Fallback for non-JSON error messages (less ideal)
+                            // You might want to parse this better depending on server errors
+                            //errorMessage = `Error: ${xhr.status} ${xhr.statusText}`;
+                        }
+                        statusSpan.text(errorMessage)
+                            .removeClass('text-success')
+                            .addClass('text-danger')
+                            .fadeIn();
+                        // Keep error message visible longer or until next action
+                    },
+                    complete: function () {
+                        // Re-enable the button regardless of success or error
+                        updateButton.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Update');
+                    }
+                }); // End AJAX call
+            }); // End update button click handler
+
+        }); // End jQuery $(document).ready() for NEW code
+        // ============================================================
+        // END: NEW Code
+        // ============================================================
     </script>
 }

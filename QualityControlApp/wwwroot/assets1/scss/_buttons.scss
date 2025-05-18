@@ -1,0 +1,132 @@
+﻿.btn {
+    font-family: $font-family-nunito-medium;
+    font-weight: 500;
+    font-size: 0.875rem; // Standard button size
+    padding: 0.6rem 1.2rem; // Comfortable padding
+    border-radius: 0.25rem; // Standard Bootstrap radius
+    line-height: 1.5;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.1s ease-out;
+    cursor: pointer;
+
+    &:focus, &.focus {
+        outline: 0;
+        // Box shadow for focus is usually handled by Bootstrap's :root variables
+    }
+
+    &:active {
+        transform: translateY(1px); // Subtle press effect
+    }
+
+    i { // Icons inside buttons
+        margin-right: 0.35rem;
+        font-size: 1em; // Match button text size or adjust
+        vertical-align: middle;
+        position: relative;
+        top: -1px;
+    }
+
+    &.btn-icon-text .btn-icon-append i {
+        margin-right: 0;
+        margin-left: 0.35rem;
+    }
+    // Sizing
+    &.btn-sm, .btn-group-sm > .btn {
+        padding: 0.35rem 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    &.btn-lg, .btn-group-lg > .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    // Icon only buttons
+    &.btn-icon {
+        width: calc(1.5em + (0.6rem * 2) + 2px); // Based on font-size, padding and border for a square
+        height: calc(1.5em + (0.6rem * 2) + 2px);
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        i {
+            margin-right: 0;
+            font-size: 1.2em; // Slightly larger icon for icon-only
+        }
+    }
+}
+
+// Primary Button (Example)
+.btn-primary {
+    background-color: var(--db-primary);
+    border-color: var(--db-primary);
+    color: #fff;
+
+    &:hover {
+        background-color: darken(var(--db-primary), 7%);
+        border-color: darken(var(--db-primary), 10%);
+        color: #fff;
+    }
+
+    &:focus, &.focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--db-primary-rgb), 0.5);
+    }
+
+    &:active, &.active, .show > &.dropdown-toggle {
+        background-color: darken(var(--db-primary), 10%);
+        border-color: darken(var(--db-primary), 12%);
+        color: #fff;
+    }
+
+    &:disabled, &.disabled {
+        background-color: var(--db-primary);
+        border-color: var(--db-primary);
+        opacity: 0.65;
+    }
+}
+
+// Secondary Button (Example)
+.btn-secondary {
+    background-color: var(--db-secondary);
+    border-color: var(--db-secondary);
+    color: #fff; // Ensure good contrast for darker grays
+
+    &:hover {
+        background-color: darken(var(--db-secondary), 7%);
+        border-color: darken(var(--db-secondary), 10%);
+        color: #fff;
+    }
+
+    &:focus, &.focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--db-secondary-rgb), 0.5);
+    }
+
+    &:active, &.active, .show > &.dropdown-toggle {
+        background-color: darken(var(--db-secondary), 10%);
+        border-color: darken(var(--db-secondary), 12%);
+        color: #fff;
+    }
+
+    &:disabled, &.disabled {
+        background-color: var(--db-secondary);
+        border-color: var(--db-secondary);
+        opacity: 0.65;
+    }
+}
+
+// Outline Buttons
+.btn-outline-primary {
+    color: var(--db-primary);
+    border-color: var(--db-primary);
+
+    &:hover {
+        color: #fff;
+        background-color: var(--db-primary);
+        border-color: var(--db-primary);
+    }
+}
+// ... Add other outline buttons and success, danger etc. as needed.
+
+// Rounded buttons
+.btn.btn-rounded {
+    border-radius: 50px; // Or use Bootstrap's default .rounded-pill
+}

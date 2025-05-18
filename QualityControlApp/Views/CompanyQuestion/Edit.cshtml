@@ -1,24 +1,24 @@
 ﻿@model CompanyQuestion
 
 @{
-    ViewData["Title"] = "تعديل السؤال";
+    ViewData["Title"] = "Edit Question";
 }
 
 <style>
     .content {
-        margin-top: 20px; /* ضبط المسافة العلوية */
-        padding: 20px; /* إضافة بعض الحشوة */
-        background-color: #f8f9fa; /* لون خلفية للتباين */
-        border-radius: 5px; /* زوايا مدورة */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* ظل خفيف */
+        margin-top: 20px; /* Adjust top margin */
+        padding: 20px; /* Add some padding */
+        background-color: #f8f9fa; /* Background color for contrast */
+        border-radius: 5px; /* Rounded corners */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
     }
 
     h1 {
-        margin-bottom: 20px; /* مسافة تحت العنوان */
+        margin-bottom: 20px; /* Bottom margin for the title */
     }
 
     .form-group label {
-        font-weight: bold; /* جعل تسميات الحقول غامقة */
+        font-weight: bold; /* Make field labels bold */
     }
 </style>
 
@@ -32,43 +32,41 @@
             <span asp-validation-for="Created" class="text-danger"></span>
         </div>
 
-       
-        <div class="form-group  mt-4">
-            <span>  المستخدم</span>
+        <div class="form-group mt-4">
+            <span>User</span>
             <select asp-for="UserId" class="form-control" asp-items="ViewBag.Users">
             </select>
             <span asp-validation-for="UserId" class="text-danger"></span>
         </div>
 
-        <div class="form-group  mt-4 ">
-            <span>  الشركة</span>
-
+        <div class="form-group mt-4">
+            <span>Company</span>
             <select asp-for="CompanyId" class="form-control" asp-items="ViewBag.Companies">
             </select>
             <span asp-validation-for="CompanyId" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="Active" class="control-label">الحالة</label>
+            <label asp-for="Active" class="control-label">Status</label>
             <input asp-for="Active" type="checkbox" />
             <span asp-validation-for="Active" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="SaftyGrid" class="control-label">شبكة الأمان</label>
+            <label asp-for="SaftyGrid" class="control-label">Safety Grid</label>
             <input asp-for="SaftyGrid" class="form-control" />
             <span asp-validation-for="SaftyGrid" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <label asp-for="SqurtyGrid" class="control-label">شبكة الأمان الثانية</label>
+            <label asp-for="SqurtyGrid" class="control-label">Secondary Safety Grid</label>
             <input asp-for="SqurtyGrid" class="form-control" />
             <span asp-validation-for="SqurtyGrid" class="text-danger"></span>
         </div>
 
         <div class="form-group">
-            <input type="submit" value="حفظ" class="btn btn-primary" />
-            <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+            <input type="submit" value="Save" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>

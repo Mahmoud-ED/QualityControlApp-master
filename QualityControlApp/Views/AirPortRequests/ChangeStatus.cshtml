@@ -1,236 +1,145 @@
 ﻿@model QualityControlApp.Models.Entities.AirPortRequest
 
 @{
-    ViewData["Title"] = "تغيير حالة الطلب";
+    ViewData["Title"] = "Change Request Status";
 }
 
-<div class="card shadow-lg mt-10">
-    <div class="card-header bg-warning text-dark py-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <h2 class="card-title mb-0 text-center">
-                <i class="fas fa-edit me-2"></i>@ViewData["Title"]
-            </h2>
-
-            <div>
-                <label class="form-label fw-bold me-2 mb-0">حالة الطلب الحالية:</label>
-                @{
-                    string statusClass = Model.RequestStatus switch
-                    {
-                        "Approved" => "text-success",
-                        "Pending" => "text-warning",
-                        "Rejected" => "text-danger",
-                        _ => "text-secondary"
-                    };
-
-                    string statusText = Model.RequestStatus switch
-                    {
-                        "Approved" => "تمت الموافقة",
-                        "Pending" => "قيد الانتظار",
-                        "Rejected" => "مرفوض",
-                        _ => "غير معروف"
-                    };
-                }
-                <button class="fw-bold @statusClass fs-5">@statusText</button>
-            </div>
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-sync-alt me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Update the status for airport request ID: <span class="fw-semibold">@Model.Id.ToString().Substring(0, 8)...</span></p>
+        </div>
+        <div>
+            @{
+                var currentStatusConfig = Model.RequestStatus switch
+                {
+                    "Approved" => (BadgeClass: "bg-success-subtle text-success-emphasis", Text: "Approved", Icon: "fas fa-check-circle"),
+                    "Pending" => (BadgeClass: "bg-warning-subtle text-warning-emphasis", Text: "Pending", Icon: "fas fa-clock"),
+                    "Rejected" => (BadgeClass: "bg-danger-subtle text-danger-emphasis", Text: "Rejected", Icon: "fas fa-times-circle"),
+                    _ => (BadgeClass: "bg-secondary-subtle text-secondary-emphasis", Text: "Unknown", Icon: "fas fa-question-circle")
+                };
+            }
+            <span class="badge rounded-pill px-3 py-2 @currentStatusConfig.BadgeClass fs-6">
+                <i class="@currentStatusConfig.Icon me-1"></i> Current Status: @currentStatusConfig.Text
+            </span>
         </div>
     </div>
-</div>
 
-    <div class="card-body p-4">
-        <div class="row g-3">
-            @* عرض الحقول *@
-            <div class="col-md-6">
-                <label class="form-label fw-bold">الإدارة</label>
-                <div class="form-control-plaintext">@Model.Department</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">وقت الإدخال</label>
-                <div class="form-control-plaintext">@Model.EntryTime</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">وقت الطلب</label>
-                <div class="form-control-plaintext">@Model.RequestTime</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">البريد الإلكتروني</label>
-                <div class="form-control-plaintext">@Model.Email</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">اسم المرسل</label>
-                <div class="form-control-plaintext">@Model.SenderName</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">اسم الشركة</label>
-                <div class="form-control-plaintext">@Model.CompanyName</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">تاريخ الرحلة</label>
-                <div class="form-control-plaintext">@Model.FlightDate.ToString("yyyy-MM-dd")</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">نوع الطائرة</label>
-                <div class="form-control-plaintext">@Model.AircraftType</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">تسجيل الطائرة</label>
-                <div class="form-control-plaintext">@Model.AircraftRegistration</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">نداء الرحلة</label>
-                <div class="form-control-plaintext">@Model.CallSign</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">مسار الرحلة</label>
-                <div class="form-control-plaintext">@Model.FlightPath</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">وقت الهبوط/الإقلاع</label>
-                <div class="form-control-plaintext">@Model.LandingTakeoffTime</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">غرض الرحلة</label>
-                <div class="form-control-plaintext">@Model.FlightPurpose</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">نقاط الدخول/الخروج</label>
-                <div class="form-control-plaintext">@Model.EntryExitPoints</div>
-            </div>
-
-        <!-- إضافة الحقول الجديدة -->
-        <div class="col-md-6">
-            <label class="form-label fw-bold">اسم الطيار</label>
-            <div class="form-control-plaintext">@Model.PilotName</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">رقم الرحلة</label>
-            <div class="form-control-plaintext">@Model.FlightNumber</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">نقطة الدخول</label>
-            <div class="form-control-plaintext">@Model.EntryPoint</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">نقطة الخروج</label>
-            <div class="form-control-plaintext">@Model.ExitPoint</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">وقت الدخول المتوقع</label>
-            <div class="form-control-plaintext">@Model.EstimatedEntryTime?.ToString("yyyy-MM-dd HH:mm")</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">وقت الخروج المتوقع</label>
-            <div class="form-control-plaintext">@Model.EstimatedExitTime?.ToString("yyyy-MM-dd HH:mm")</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">تفاصيل الشحنة</label>
-            <div class="form-control-plaintext">@Model.CargoDetails</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">عدد أفراد الطاقم</label>
-            <div class="form-control-plaintext">@Model.CrewCount</div>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label fw-bold">جنسيات الطاقم</label>
-            <div class="form-control-plaintext">@Model.CrewNationalities</div>
-        </div>
-
-            <div class="col-12">
-                <label class="form-label fw-bold">ملاحظات</label>
-                <div class="form-control-plaintext">@Model.Notes</div>
-            </div>
-
-            @* المرفقات *@
-            @if (Model.RequestFiles != null && Model.RequestFiles.Any())
-            {
-            <div class="col-12 mt-4">
-                <h5 class="fw-bold">المرفقات:</h5>
-                <ul class="list-group">
-                    @foreach (var file in Model.RequestFiles)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="@Url.Content("~/pictures/requestfiles/" + file.FileName)" target="_blank">
-                                <i class="bi bi-file-earmark-pdf"></i> @file.FileName
-                            </a>
-                            </li>
-                        }
-                    </ul>
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Request Summary Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light py-3 border-bottom-0">
+                    <h5 class="mb-0 fw-semibold"><i class="fas fa-file-alt me-2"></i>Request Summary</h5>
                 </div>
-            }
-        </div>
+                <div class="card-body p-4">
+                    <dl class="row mb-0 small">
+                        <dt class="col-sm-4 text-muted">Company Name:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.CompanyName</dd>
 
+                        <dt class="col-sm-4 text-muted">Applicant Email:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.Email</dd>
 
-    <div class="container">
-        <!-- تغيير حالة الطلب -->
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-8">
-                <form asp-action="Approve" asp-controller="AirPortRequests" method="post">
-                    <input type="hidden" name="id" value="@Model.Id" />
+                        <dt class="col-sm-4 text-muted">Flight Date:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.FlightDate.ToString("dd MMM yyyy")</dd>
 
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-warning text-white text-center">
-                            <h5 class="mb-0">تغيير حالة الطلب</h5>
+                        <dt class="col-sm-4 text-muted">Aircraft Type:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.AircraftType</dd>
+
+                        <dt class="col-sm-4 text-muted">Request Time:</dt>
+                        <dd class="col-sm-8 fw-medium">@Model.RequestTime.ToString("dd MMM yyyy, HH:mm")</dd>
+                    </dl>
+                    <div class="text-end mt-2">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-sm btn-link text-primary px-0">View Full Details <i class="fas fa-arrow-right small ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Status Form -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Update Request Status</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="ChangeStatus" asp-controller="AirPortRequests" method="post">
+                        @* Assuming action is "ChangeStatus" *@
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <p class="mb-3 text-muted">Select the new status for this request:</p>
+
+                        <div class="list-group">
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusPending">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusPending" value="Pending" @(Model.RequestStatus == "Pending" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Pending</strong>
+                                    <small class="d-block text-muted">The request is awaiting review or further action.</small>
+                                </span>
+                            </label>
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusApproved">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusApproved" value="Approved" @(Model.RequestStatus == "Approved" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Approved</strong>
+                                    <small class="d-block text-muted">The request has been officially approved.</small>
+                                </span>
+                            </label>
+                            <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusRejected">
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusRejected" value="Rejected" @(Model.RequestStatus == "Rejected" ? "checked" : "")>
+                                <span class="pt-1 form-checked-content">
+                                    <strong>Rejected</strong>
+                                    <small class="d-block text-muted">The request has been denied.</small>
+                                </span>
+                            </label>
                         </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">تغيير حالة الطلب</label>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="newStatus" id="pendingStatus" value="Pending" @(Model.RequestStatus == "Pending" ? "checked" : "")>
-                                    <label class="form-check-label" for="pendingStatus">
-                                        قيد الانتظار
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="newStatus" id="approvedStatus" value="Approved" @(Model.RequestStatus == "Approved" ? "checked" : "")>
-                                    <label class="form-check-label" for="approvedStatus">
-                                        تمت الموافقة
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="newStatus" id="rejectedStatus" value="Rejected" @(Model.RequestStatus == "Rejected" ? "checked" : "")>
-                                    <label class="form-check-label" for="rejectedStatus">
-                                        مرفوض
-                                    </label>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-lg w-100">
-                                <i class="fas fa-check me-2"></i>تغيير الحالة
+
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                                <i class="fas fa-check me-2"></i>Update Status
                             </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- حذف الطلب -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-8">
-                <form asp-action="Delete" asp-controller="AirPortRequests" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟');">
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger btn-lg w-100">
-                        <i class="fas fa-trash-alt me-2"></i>حذف الطلب
-                    </button>
-                </form>
+            <!-- Delete Request Section (Optional - can be on Details page too) -->
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Request</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-danger mb-3">
+                        <strong>Warning:</strong> Deleting this request is a permanent action and cannot be undone.
+                        Please ensure you want to proceed before clicking the delete button.
+                    </p>
+                    <form asp-action="Delete" asp-controller="AirPortRequests" method="post" onsubmit="return confirm('Are you absolutely sure you want to delete this request? This action cannot be undone.');" class="text-end">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 py-2">
+                            <i class="fas fa-trash-alt me-2"></i>Permanently Delete Request
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
+
+        </div> <!-- /.col -->
+    </div> <!-- /.row -->
+</div> <!-- /.container-fluid -->
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .list-group-item-action:hover, .list-group-item-action:focus {
+            background-color: #e9ecef; /* Subtle hover for radio button list items */
+        }
+
+        .form-checked-content strong {
+            font-weight: 600;
+        }
+    </style>
+}

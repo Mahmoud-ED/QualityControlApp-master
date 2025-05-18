@@ -15,5 +15,9 @@ namespace QualityControlApp.Models.Entities
         [Range(0, 4)]
         public int  MaxGrid { get; set; }
 
+        public string? SectionContent { get; set; }
+
+
+
     }
 }

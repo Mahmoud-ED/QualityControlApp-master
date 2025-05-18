@@ -1,29 +1,155 @@
-﻿@model IEnumerable<CompanyQuestion>
-
-@foreach (var question in Model)
-{
-    <tr>
-        <td>@question.Created.ToString("yyyy-MM-dd")</td>
-        <td>@question.Company?.Name</td>
-        <td>@question.ApplicationUser?.UserName</td>
-        <td class="@(question.Active ? "completed" : "incomplete")">
-            @(question.Active ? "مكتمل" : "غير مكتمل")
-        </td>
-
-        <td>
-            <a asp-controller="CompanyQuestion" asp-action="Details" asp-route-id="@question.Id" asp-route-CategoryId="ad536151-9d1c-42ff-a337-313c27423992" class="btn btn-info">SPL @question.SaftyGrid</a>
-        </td>
-
-        <td>
-            <a asp-controller="CompanyQuestion" asp-action="Details" asp-route-id="@question.Id" asp-route-CategoryId="669d4587-6a9b-42f9-9e14-c40d834dde5a" class="btn btn-info">COL @question.SqurtyGrid</a>
-        </td>
-
-        <td>
-            <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-info">
-                طباعة
-            </a>
-            <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-warning">تعديل</a>
-            <a asp-action="Delete" asp-route-id="@question.Id" class="btn btn-danger" onclick="return confirm('هل أنت متأكد أنك تريد حذف هذا العنصر؟');">حذف</a>
-        </td>
-    </tr>
+﻿@model QualityControlApp.ViewModels.CompanyQuestionVM
+@{
+    ViewData["Title"] = "Company Questions";
+    // Layout = "_AdminLayout"; // Uncomment or set your layout if needed
 }
+
+@* External CSS Libraries *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+@* Custom CSS for Card Enhancements *@
+<style>
+    .card-enhanced {
+        border: none;
+        border-radius: 0.5rem;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        border-left: 3px solid var(--bs-primary); /* Use primary color for left border */
+    }
+
+        .card-enhanced:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+        .card-enhanced .card-body {
+            padding: 1.25rem; /* Adjusted padding */
+        }
+
+        .card-enhanced .card-title {
+            font-size: 1.15rem; /* Slightly smaller title */
+            font-weight: 600;
+            margin-bottom: 0.3rem; /* Reduced margin */
+            color: var(--bs-primary); /* Title color matching border */
+        }
+
+        .card-enhanced .card-subtitle {
+            font-size: 0.85rem; /* Smaller subtitle */
+            color: #6c757d;
+        }
+
+        .card-enhanced .card-text strong {
+            font-weight: 500;
+        }
+
+    .status-badge {
+        font-size: 0.8rem; /* Smaller badge */
+        padding: 0.3em 0.6em;
+        vertical-align: middle;
+    }
+
+    .category-btn {
+        font-size: 0.75rem; /* Smaller category button */
+        padding: 0.2rem 0.45rem;
+    }
+
+    .card-enhanced .card-body-divider {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem; /* Ensure space before next section */
+    }
+
+    .card-footer {
+        background-color: #f8f9fa; /* Lighter footer background */
+        padding: 0.75rem 1.25rem; /* Footer padding */
+    }
+
+        /* Ensure form inside button group doesn't add extra margin */
+        .card-footer .btn-group form {
+            margin-left: -1px; /* Overlap border for adjacent buttons */
+        }
+
+            .card-footer .btn-group form .btn {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+
+        .card-footer .btn-group a:not(:last-child) {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+</style>
+
+<div class="container mt-5">
+    @* Top controls: Create button, Back button, Company Filter *@
+    <div class="top-container d-flex justify-content-between align-items-center mb-4">
+        <div class="btn-group">
+            <a asp-action="Create" asp-route-Type="@ViewBag.Type" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> انشاء
+            </a>
+            <a asp-action="Index" asp-controller="Admin" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> رجوع الى القائمة
+            </a>
+        </div>
+        <div class="select-container w-50">
+            @* Give filter some width *@
+            <input type="hidden" id="Type" value="@ViewBag.Type">
+            <select id="companyFilter" class="form-select" onchange="filterByCompany()">
+                <option value="">-- اختر الشركة للفلترة --</option>
+                @* Populate Company Options *@
+                @if (Model != null && Model.Company != null)
+                {
+                    foreach (var company in Model.Company)
+                    {
+                        <option value="@company.Id">@company.Name</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    @* Area where filtered cards will be loaded *@
+    <div class="row" id="questionsCards">
+        @* Render the initial set of cards using a Partial View *@
+        @await Html.PartialAsync("_CompanyQuestionsCards", Model) @* Pass the full VM to the partial *@
+    </div>
+</div>
+
+@* Include jQuery *@
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    function filterByCompany() {
+        // Get values from the filter dropdown and hidden type input
+        var companyId = document.getElementById('companyFilter').value;
+        var type = document.getElementById('Type').value; // Corrected ID usage
+        console.log("Filtering by Company ID: " + companyId + ", Type: " + type);
+
+        // Show a loading indicator (optional but good practice)
+        $('#questionsCards').html('<div class="col-12 text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+        $.ajax({
+            // Use the Index action, passing parameters for filtering
+            url: '@Url.Action("Index", "CompanyQuestion")', // Use Index Action
+            data: { companyId: companyId, Type: type }, // Match parameter names in Index action
+            // type: "GET", // Usually GET for filtering/fetching data
+            success: function (data) {
+                // Replace the content of #questionsCards with the Partial View result
+                $('#questionsCards').html(data);
+                console.log("Filter successful.");
+
+                // Re-select the company in the dropdown (optional)
+                $('#companyFilter').val(companyId);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                // Provide more informative error message
+                $('#questionsCards').html('<div class="col-12"><div class="alert alert-danger text-center">حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى. (' + textStatus + ': ' + errorThrown + ')</div></div>');
+                console.error("AJAX Error:", textStatus, errorThrown);
+            }
+        });
+    }
+
+    // Note: The $(document).ajaxSuccess part is removed as re-selecting
+    // the value is handled within the success callback of the specific AJAX call.
+</script>

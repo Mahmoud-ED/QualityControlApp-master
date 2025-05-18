@@ -9,6 +9,8 @@ namespace QualityControlApp.ViewModels
         public string CompanyName { get; set; }
         public string UserName { get; set; }
         public string CreateDate { get; set; }
+
+        public CompanyQuestion CreateQuestion { get; set; }
         public List<QuestionCategoryType> lstQuestionCategoryType { get; set; }
         public List<CompanyQuestionContent> lstCompanyQuestionContent { get; set; }
          

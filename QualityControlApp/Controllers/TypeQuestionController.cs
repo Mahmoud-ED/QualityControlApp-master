@@ -37,7 +37,7 @@ namespace QualityControlApp.Controllers
         {
 
            
-            var QuestionType = await _questionType .Entity.Include(n => n.QuestionCategoryType).OrderBy(s => s.TypeName).ToListAsync();
+            var QuestionType = await _questionType .Entity.Include(n => n.QuestionCategoryType).OrderBy(s => s.QuestionCategoryType.CategoryName ).ToListAsync();
 
             ViewData["QuestionTypeCount"] = QuestionType.Count();
           

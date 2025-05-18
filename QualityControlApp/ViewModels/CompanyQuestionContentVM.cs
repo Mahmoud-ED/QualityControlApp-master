@@ -9,6 +9,6 @@ namespace QualityControlApp.ViewModels
 
         public List<QuestionType> QuestionType { get; set; }
         public List<QuestionCategoryType> QuestionCategoryType { get; set; }
-
+        public Guid? ActiveQuestionTypeId { get; set; } // خاصية جديدة
     }
 }

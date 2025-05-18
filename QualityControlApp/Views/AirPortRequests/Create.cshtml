@@ -1,10 +1,8 @@
 ﻿@model QualityControlApp.ViewModels.AirPortReqeustVM
 
 @{
-    ViewData["Title"] = "إنشاء طلب جديد";
+    ViewData["Title"] = "Create New Airport Request"; // Translated
 }
-
-
 
 <div class="card shadow-lg">
     <div class="card-header bg-primary text-white py-3">
@@ -15,7 +13,7 @@
     <div class="card-body p-4">
         <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             <div class="row g-3">
-                <!-- الصف الأول -->
+                <!-- Row 1 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.Department" class="form-control" placeholder=" " required />
@@ -31,9 +29,9 @@
                         <span asp-validation-for="AirPortRequest.Email" class="text-danger"></span>
                     </div>
                 </div>
-              
-                <!-- الصف الثاني -->
-              
+
+                <!-- Row 2 -->
+
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.EntryTime" class="form-control" type="datetime-local" placeholder=" " required />
@@ -42,7 +40,6 @@
                     </div>
                 </div>
 
-
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.FlightDate" class="form-control" type="date" placeholder=" " required />
@@ -50,9 +47,8 @@
                         <span asp-validation-for="AirPortRequest.FlightDate" class="text-danger"></span>
                     </div>
                 </div>
-           
 
-                <!-- الصف الثالث -->
+                <!-- Row 3 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.SenderName" class="form-control" placeholder=" " required />
@@ -69,7 +65,7 @@
                     </div>
                 </div>
 
-                <!-- الصف الرابع -->
+                <!-- Row 4 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.EntryExitPoints" class="form-control" placeholder=" " required />
@@ -81,19 +77,18 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <select asp-for="AirPortRequest.AircraftType" class="form-select" required>
-                            <option value="">اختر نوع الطائرة</option>
-                            <option value="Commercial">طائرة تجارية</option>
-                            <option value="Private">طائرة خاصة</option>
-                            <option value="Cargo">طائرة شحن</option>
-                            <option value="Military">طائرة عسكرية</option>
+                            <option value="">Select Aircraft Type</option> <!-- Translated -->
+                            <option value="Commercial">Commercial Aircraft</option> <!-- Translated -->
+                            <option value="Private">Private Aircraft</option> <!-- Translated -->
+                            <option value="Cargo">Cargo Aircraft</option> <!-- Translated -->
+                            <option value="Military">Military Aircraft</option> <!-- Translated -->
                         </select>
                         <label asp-for="AirPortRequest.AircraftType"></label>
-
                         <span asp-validation-for="AirPortRequest.AircraftType" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- الصف الخامس -->
+                <!-- Row 5 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.AircraftRegistration" class="form-control" placeholder=" " required />
@@ -110,7 +105,7 @@
                     </div>
                 </div>
 
-                <!-- الصف السادس -->
+                <!-- Row 6 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.FlightPath" class="form-control" placeholder=" " required />
@@ -127,26 +122,26 @@
                     </div>
                 </div>
 
-                <!-- الصف السابع -->
+                <!-- Row 7 -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <select asp-for="AirPortRequest.FlightPurpose" class="form-select" required>
-                            <option value="">اختر الغرض من الرحلة</option>
-                            <option value="Commercial">رحلة تجارية</option>
-                            <option value="Private">رحلة خاصة</option>
-                            <option value="Cargo">شحن بضائع</option>
-                            <option value="Military">رحلة عسكرية</option>
+                            <option value="">Select Flight Purpose</option> <!-- Translated -->
+                            <option value="Commercial">Commercial Flight</option> <!-- Translated -->
+                            <option value="Private">Private Flight</option> <!-- Translated -->
+                            <option value="Cargo">Cargo Shipment</option> <!-- Translated -->
+                            <option value="Military">Military Flight</option> <!-- Translated -->
                         </select>
                         <label asp-for="AirPortRequest.FlightPurpose"></label>
                         <span asp-validation-for="AirPortRequest.FlightPurpose" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- الصف الثامن - معلومات الطاقم -->
+                <!-- Row 8 - Crew Information -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.PilotName" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.PilotName">اسم الطيّار</label>
+                        <label asp-for="AirPortRequest.PilotName">Pilot Name</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.PilotName" class="text-danger"></span>
                     </div>
                 </div>
@@ -154,16 +149,16 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.FlightNumber" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.FlightNumber">رقم الرحلة</label>
+                        <label asp-for="AirPortRequest.FlightNumber">Flight Number</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.FlightNumber" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- الصف التاسع - نقاط الدخول والخروج -->
+                <!-- Row 9 - Entry and Exit Points -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.EntryPoint" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.EntryPoint">نقطة الدخول</label>
+                        <label asp-for="AirPortRequest.EntryPoint">Entry Point</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.EntryPoint" class="text-danger"></span>
                     </div>
                 </div>
@@ -171,16 +166,16 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.ExitPoint" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.ExitPoint">نقطة الخروج</label>
+                        <label asp-for="AirPortRequest.ExitPoint">Exit Point</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.ExitPoint" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- الصف العاشر - التوقيتات المتوقعة -->
+                <!-- Row 10 - Estimated Times -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.EstimatedEntryTime" class="form-control" type="datetime-local" placeholder=" " />
-                        <label asp-for="AirPortRequest.EstimatedEntryTime">وقت الدخول المتوقع</label>
+                        <label asp-for="AirPortRequest.EstimatedEntryTime">Estimated Entry Time</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.EstimatedEntryTime" class="text-danger"></span>
                     </div>
                 </div>
@@ -188,16 +183,16 @@
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.EstimatedExitTime" class="form-control" type="datetime-local" placeholder=" " />
-                        <label asp-for="AirPortRequest.EstimatedExitTime">وقت الخروج المتوقع</label>
+                        <label asp-for="AirPortRequest.EstimatedExitTime">Estimated Exit Time</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.EstimatedExitTime" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- الصف الحادي عشر - معلومات الحمولة والطاقم -->
+                <!-- Row 11 - Cargo and Crew Information -->
                 <div class="col-md-6">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.CargoDetails" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.CargoDetails">تفاصيل الحمولة</label>
+                        <label asp-for="AirPortRequest.CargoDetails">Cargo Details</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.CargoDetails" class="text-danger"></span>
                     </div>
                 </div>
@@ -205,7 +200,7 @@
                 <div class="col-md-3">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.CrewCount" class="form-control" type="number" min="0" placeholder=" " />
-                        <label asp-for="AirPortRequest.CrewCount">عدد الطاقم</label>
+                        <label asp-for="AirPortRequest.CrewCount">Crew Count</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.CrewCount" class="text-danger"></span>
                     </div>
                 </div>
@@ -213,14 +208,12 @@
                 <div class="col-md-9">
                     <div class="form-floating">
                         <input asp-for="AirPortRequest.CrewNationalities" class="form-control" placeholder=" " />
-                        <label asp-for="AirPortRequest.CrewNationalities">جنسيات الطاقم</label>
+                        <label asp-for="AirPortRequest.CrewNationalities">Crew Nationalities</label> <!-- Translated -->
                         <span asp-validation-for="AirPortRequest.CrewNationalities" class="text-danger"></span>
                     </div>
                 </div>
 
-              
-
-                <!-- حقل الملاحظات -->
+                <!-- Notes Field -->
                 <div class="col-12">
                     <div class="form-floating">
                         <textarea asp-for="AirPortRequest.Notes" class="form-control" placeholder=" " style="height: 100px"></textarea>
@@ -228,25 +221,29 @@
                         <span asp-validation-for="AirPortRequest.Notes" class="text-danger"></span>
                     </div>
                 </div>
-<div id="attachmentsContainer"></div>
 
-<button type="button" class="btn btn-primary mt-2" onclick="addAttachmentRow()">➕ إضافة مرفق</button>
-</div>
+                <div id="attachmentsContainer" class="col-12 mt-3"></div> <!-- Added col-12 and mt-3 for spacing -->
 
-
-                <!-- مربع عرض الصورة -->
-                <div id="imagePreview" class="text-center my-3" style="display: none;">
-                    <img id="previewImage" src="" alt="معاينة" class="img-thumbnail" style="max-width: 100%; max-height: 300px;" />
+                <div class="col-12">
+                    <!-- Wrapped button in col-12 for proper grid alignment -->
+                    <button type="button" class="btn btn-primary mt-2" onclick="addAttachmentRow()">
+                        <i class="fas fa-paperclip me-1"></i>Add Attachment <!-- Translated & Icon added -->
+                    </button>
                 </div>
+            </div>
 
+            <!-- Image Preview Box (No text to translate here, alt text already generic) -->
+            <div id="imagePreview" class="text-center my-3" style="display: none;">
+                <img id="previewImage" src="" alt="Preview" class="img-thumbnail" style="max-width: 100%; max-height: 300px;" />
+            </div>
 
-            <!-- أزرار الإرسال -->
+            <!-- Submit Buttons -->
             <div class="d-flex justify-content-center gap-3 mt-5">
                 <button type="submit" class="btn btn-primary btn-lg px-5">
-                    <i class="fas fa-save me-2"></i>حفظ الطلب
+                    <i class="fas fa-save me-2"></i>Save Request <!-- Translated -->
                 </button>
                 <button type="reset" class="btn btn-outline-secondary btn-lg px-5">
-                    <i class="fas fa-undo me-2"></i>إعادة تعيين
+                    <i class="fas fa-undo me-2"></i>Reset <!-- Translated -->
                 </button>
             </div>
         </form>
@@ -256,43 +253,62 @@
 @section Styles {
     <style>
         .card {
-            border-radius: 10px;
-            max-width: 1200px;
+            border-radius: 0.625rem; /* 10px */
+            max-width: 75rem; /* 1200px */
             margin: 0 auto;
         }
+        /* Styles for LTR floating labels (Bootstrap 5 default for LTR) */
         .form-floating > label {
-            right: unset;
-            left: 0;
-            transform-origin: right top;
+            /* Default Bootstrap 5 LTR behavior, no specific override needed unless RTL was forced previously */
         }
+
         .form-control, .form-select {
-            padding: 16px 12px 4px 12px;
-            height: calc(3.5rem + 2px);
+            /* padding: 1rem 0.75rem 0.25rem 0.75rem; /* Adjusted padding for standard height */
+            /* height: calc(3.5rem + 2px); /* This makes inputs quite tall, standard is usually less */
         }
+
         .text-danger {
             font-size: 0.85rem;
+        }
+        /* Added some styles for attachment rows if needed */
+        #attachmentsContainer .row {
+            padding: 0.5rem;
+            border: 1px solid #dee2e6; /* Light border for each attachment row */
+            border-radius: 0.25rem;
+            background-color: #f8f9fa; /* Light background */
         }
     </style>
 }
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        let selectedFiles = [];
+        // JavaScript code remains the same, but labels inside it will be translated.
+        let selectedFiles = []; // This variable seems unused in the provided attachment logic
         let attachmentIndex = 0;
 
+        // The `fileInput`, `fileList` related DOMContentLoaded logic seems to be for a different uploader
+        // I'll keep the addAttachmentRow logic as it is, assuming it's the one in use.
+        // If 'fileInput' and 'fileList' are part of a different, now unused, uploader, they can be removed.
+
         document.addEventListener('DOMContentLoaded', function () {
-            const fileInput = document.getElementById('fileInput');
-            const fileList = document.getElementById('fileList');
+            // This section seems to be for a different file uploader (id="fileInput", id="fileList")
+            // than the one dynamically added by addAttachmentRow.
+            // If it's not used, it can be removed to avoid confusion.
+            const fileInput = document.getElementById('fileInput'); // This ID is not in the HTML for attachments
+            const fileList = document.getElementById('fileList');   // This ID is not in the HTML
             const imagePreview = document.getElementById('imagePreview');
             const previewImage = document.getElementById('previewImage');
 
-            fileInput.addEventListener('change', (event) => {
-                const files = Array.from(event.target.files);
-                selectedFiles = [...selectedFiles, ...files];
-                renderFileList();
-            });
+            if (fileInput) { // Check if the element exists before adding event listener
+                fileInput.addEventListener('change', (event) => {
+                    const files = Array.from(event.target.files);
+                    selectedFiles = [...selectedFiles, ...files]; // 'selectedFiles' is not used by 'addAttachmentRow'
+                    renderFileList();
+                });
+            }
 
-            function renderFileList() {
+            function renderFileList() { // This function is tied to the 'fileInput' & 'fileList' uploader
+                if (!fileList) return; // Guard clause
                 fileList.innerHTML = '';
 
                 selectedFiles.forEach((file, index) => {
@@ -318,12 +334,16 @@
                     fileList.appendChild(fileItem);
                 });
 
-                const dataTransfer = new DataTransfer();
-                selectedFiles.forEach(f => dataTransfer.items.add(f));
-                fileInput.files = dataTransfer.files;
+                if (fileInput) { // Guard clause
+                    const dataTransfer = new DataTransfer();
+                    selectedFiles.forEach(f => dataTransfer.items.add(f));
+                    fileInput.files = dataTransfer.files;
+                }
             }
 
-            function previewFile(file) {
+            function previewFile(file) { // This function is tied to the 'fileInput' & 'fileList' uploader
+                if (!imagePreview || !previewImage) return; // Guard clauses
+
                 if (file && file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function (e) {
@@ -342,31 +362,33 @@
             const container = document.getElementById('attachmentsContainer');
 
             const row = document.createElement('div');
-            row.className = 'row align-items-end mb-3';
+            row.className = 'row align-items-end mb-3'; // Bootstrap classes for alignment and margin
             row.dataset.index = attachmentIndex;
 
             const fileTypeCol = document.createElement('div');
             fileTypeCol.className = 'col-md-5';
             fileTypeCol.innerHTML = `
-                <label class="form-label">نوع الملف</label>
-                <select name="FileTypes[${attachmentIndex}].FileTypeId" class="form-select" required>
-                    <option value="">اختر نوع الملف</option>
-                    ${getFileTypeOptions()}
-                </select>
-            `;
+                        <label class="form-label">File Type</label> <!-- Translated -->
+                        <select name="FileTypes[${attachmentIndex}].FileTypeId" class="form-select" required>
+                            <option value="">Select File Type</option> <!-- Translated -->
+                            ${getFileTypeOptions()}
+                        </select>
+                    `;
 
             const fileInputCol = document.createElement('div');
-            fileInputCol.className = 'col-md-5';
+            fileInputCol.className = 'col-md-5'; // Adjusted for a 2-col delete button
             fileInputCol.innerHTML = `
-                <label class="form-label">المرفق</label>
-                <input type="file" name="FileTypes[${attachmentIndex}].File" class="form-control" required />
-            `;
+                        <label class="form-label">Attachment</label> <!-- Translated -->
+                        <input type="file" name="FileTypes[${attachmentIndex}].File" class="form-control" required />
+                    `;
 
             const deleteCol = document.createElement('div');
-            deleteCol.className = 'col-md-2 text-end';
+            deleteCol.className = 'col-md-2 d-flex align-items-end pb-1'; // Align button with bottom of inputs
             deleteCol.innerHTML = `
-                <button type="button" class="btn btn-danger" onclick="removeAttachmentRow(this)">✖</button>
-            `;
+                        <button type="button" class="btn btn-danger w-100" onclick="removeAttachmentRow(this)">
+                            <i class="fas fa-trash-alt"></i> <!-- Icon Added -->
+                        </button>
+                    `;
 
             row.appendChild(fileTypeCol);
             row.appendChild(fileInputCol);
@@ -379,15 +401,19 @@
         function removeAttachmentRow(button) {
             const row = button.closest('.row');
             row.remove();
+            // Optionally, re-index if needed, but usually not necessary if server handles gaps.
         }
 
         function getFileTypeOptions() {
             return `
-                @foreach (var type in ViewBag.FileTypes)
-                {
-                    <text><option value="@type.Id">@type.TypeName</option></text>
-                }
-            `;
+        @if (ViewBag.FileTypes != null)
+        {
+            foreach (var type in ViewBag.FileTypes)
+            {
+                <text><option value="@type.Id">@type.TypeName</option></text>
+            }
+        }
+                    `;
         }
     </script>
 }

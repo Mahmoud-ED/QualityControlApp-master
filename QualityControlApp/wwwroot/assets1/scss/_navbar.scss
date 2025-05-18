@@ -1,0 +1,223 @@
+﻿.navbar.default-layout-navbar { // Be specific to avoid conflicts
+    background: $db-navbar-bg;
+    transition: background 0.25s ease;
+    height: 64px; // Define navbar height
+    border-bottom: 1px solid $db-navbar-border;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03); // Subtle shadow
+
+    .navbar-brand-wrapper {
+        transition: width 0.25s ease, background 0.25s ease;
+        background: $db-navbar-bg; // Match navbar background
+        width: 258px; // Match sidebar width
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid $db-navbar-border; // if needed for separation
+
+        .navbar-brand {
+            color: $db-navbar-brand-text;
+            font-size: 1.5rem;
+            line-height: 1;
+            margin-right: 0;
+            padding: 0;
+
+            img {
+                height: 30px; // Adjust logo height
+                width: auto;
+                vertical-align: middle;
+            }
+
+            &.brand-logo-mini {
+                display: none; // Handled by JS or media queries for .sidebar-icon-only
+                img {
+                    height: 28px; // Adjust mini logo
+                }
+            }
+        }
+    }
+
+    .navbar-menu-wrapper {
+        transition: width 0.25s ease;
+        color: $db-navbar-text;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        width: calc(100% - 258px);
+        height: 64px;
+        display: flex;
+        align-items: center;
+
+        .navbar-toggler {
+            border: 0;
+            color: $db-text-muted; // Muted color for toggler
+            font-size: 1.25rem;
+            padding: 0 0.5rem;
+
+            &:focus {
+                box-shadow: none;
+            }
+        }
+        // Search (if you have one)
+        .search-field {
+            .input-group {
+                background: darken($db-main-bg, 3%); // Slightly darker than main bg
+                border-radius: 4px;
+
+                input {
+                    background: transparent;
+                    border: none;
+                    padding: 0.6rem 1rem;
+                    color: $db-text-color;
+
+                    &::placeholder {
+                        color: $db-text-muted;
+                    }
+                }
+
+                .input-group-text {
+                    background: transparent;
+                    border: none;
+                    padding: 0 1rem;
+
+                    i {
+                        color: $db-text-muted;
+                    }
+                }
+            }
+        }
+
+
+        .navbar-nav {
+            flex-direction: row;
+            align-items: center;
+
+            &.navbar-nav-right {
+                margin-left: auto;
+            }
+
+            .nav-item {
+                .nav-link {
+                    color: $db-navbar-text;
+                    font-size: 0.875rem;
+                    height: 64px; // Vertically center content
+                    display: flex;
+                    align-items: center;
+                    padding: 0 0.75rem; // Adjust spacing
+                    i {
+                        font-size: 1.2rem; // Icon size
+                        color: $db-text-muted;
+                    }
+
+                    &:hover i, &:hover {
+                        color: $db-primary;
+                    }
+                }
+                // Dropdowns
+                &.dropdown {
+                    .dropdown-toggle::after {
+                        // Keep Bootstrap's default or customize with MDI
+                        font-family: "Material Design Icons";
+                        content: "\F140"; // Chevron down
+                        border: none;
+                        font-size: 1rem;
+                        vertical-align: middle;
+                        margin-left: 0.25rem;
+                    }
+
+                    .dropdown-menu {
+                        border: 1px solid $db-card-border;
+                        box-shadow: 0px 4px 15px rgba(0,0,0,0.07);
+                        font-size: 0.875rem;
+                        border-radius: 0.25rem;
+                        margin-top: 0.25rem; // Small gap
+                        .dropdown-item {
+                            padding: 0.6rem 1.2rem;
+                            color: $db-text-color;
+
+                            &:hover, &:focus {
+                                background-color: $db-sidebar-active-bg; // Use theme active bg for hover
+                                color: $db-primary;
+                            }
+
+                            i {
+                                margin-right: 0.75rem;
+                                color: $db-sidebar-icon;
+                            }
+
+                            &:hover i {
+                                color: $db-primary;
+                            }
+                        }
+                    }
+                }
+                // Profile
+                &.nav-profile {
+                    .nav-link {
+                        .nav-profile-img {
+                            position: relative;
+                            width: 32px;
+                            height: 32px;
+                            margin-right: 0.75rem;
+
+                            img {
+                                width: 100%;
+                                height: 100%;
+                                border-radius: 50%;
+                                object-fit: cover;
+                            }
+                        }
+
+                        .nav-profile-text {
+                            p {
+                                margin-bottom: 0;
+                                color: $db-text-color !important; // Important to override other rules
+                                font-weight: 500;
+                            }
+                        }
+
+                        @media (max-width: 767px) { // Hide text on smaller screens
+                            .nav-profile-text {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+                // Notification count indicator
+                .count-indicator {
+                    .count-symbol, .count-number {
+                        border: 2px solid $db-navbar-bg; // Match navbar bg for clean look
+                    }
+
+                    .count-number {
+                        background-color: var(--db-danger); // Use danger color for notification count
+                    }
+
+                    .count-symbol { // for green online dot
+                        background-color: var(--db-success);
+                    }
+                }
+            }
+        }
+    }
+    // Responsive adjustments for navbar brand and menu wrapper
+    @media (max-width: 991px) {
+        .navbar-brand-wrapper {
+            width: 70px; // Smaller brand area
+            border-right: none;
+
+            .navbar-brand.brand-logo {
+                display: none;
+            }
+
+            .navbar-brand.brand-logo-mini {
+                display: inline-block;
+            }
+        }
+
+        .navbar-menu-wrapper {
+            width: calc(100% - 70px);
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+}

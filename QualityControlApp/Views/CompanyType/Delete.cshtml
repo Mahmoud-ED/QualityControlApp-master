@@ -1,0 +1,63 @@
+﻿@model QualityControlApp.Models.Entities.CompanyType
+
+@{
+    ViewData["Title"] = "Delete Company Type";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>Are you sure you want to delete this company type?</h3>
+<div class="alert alert-warning" role="alert">
+    <strong>Warning:</strong> Deleting this company type might affect associated companies if any exist.
+    Please ensure this action is intended.
+</div>
+<div>
+    <h4>@Html.DisplayFor(model => model.Name)</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        @*
+        // If you want to show the count of associated companies (optional)
+        // Make sure to .Include(ct => ct.Company) in your Delete GET action in the controller
+        @if (Model.Company != null && Model.Company.Any())
+        {
+        <dt class="col-sm-3">
+        Associated Companies
+        </dt>
+        <dd class="col-sm-9">
+        @Model.Company.Count
+        </dd>
+        }
+        else if (Model.Company != null) // Check if Company list is initialized but empty
+        {
+        <dt class="col-sm-3">
+        Associated Companies
+        </dt>
+        <dd class="col-sm-9">
+        0
+        </dd>
+        }
+        *@
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt"></i> Delete
+        </button> |
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Cancel & Back to List
+        </a>
+    </form>
+</div>
+
+@* Optional: Add Font Awesome for icons if you plan to use them.
+   Place this in your _Layout.cshtml <head> section or here if only for this page.
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+*@

@@ -1,0 +1,186 @@
+﻿@model QualityControlApp.ViewModels.CompanyQuestionVM
+
+@* --- إضافة بعض الأنماط المخصصة لتعزيز التصميم --- *@
+<style>
+    .card-enhanced {
+        border: 1px solid #e0e0e0; /* حد أفتح قليلاً */
+        transition: all 0.3s ease-in-out;
+        border-radius: 0.5rem; /* زوايا أكثر استدارة */
+    }
+
+        .card-enhanced:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important; /* ظل أقوى عند التحويم */
+        }
+
+    .card-header-custom {
+        background-color: #f8f9fa; /* خلفية فاتحة للترويسة */
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0.75rem 1.25rem;
+    }
+
+        .card-header-custom .company-name {
+            font-size: 1.15rem; /* حجم خط أكبر لاسم الشركة */
+            font-weight: 600;
+            color: #1b2c8e; /* لون العلامة التجارية */
+        }
+
+        .card-header-custom .aoc-num,
+        .card-header-custom .record-num-badge {
+            font-size: 0.85rem;
+        }
+
+    .card-body-divider { /* قد يكون موجوداً لديك */
+        border-top: 1px dashed #ced4da;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4em 0.7em;
+    }
+
+    .category-btn {
+        font-size: 0.75rem; /* أزرار فئات أصغر قليلاً */
+        padding: 0.25rem 0.5rem;
+    }
+
+    .card-footer-actions {
+        background-color: #f8f9fa; /* خلفية متناسقة للتذييل */
+    }
+
+        .card-footer-actions .btn {
+            padding: 0.3rem 0.6rem; /* توحيد حجم أزرار الإجراءات */
+            font-size: 0.8rem;
+        }
+
+            .card-footer-actions .btn i {
+                margin-right: 3px; /* مسافة صغيرة قبل الأيقونة */
+            }
+
+    .details-section p {
+        margin-bottom: 0.5rem; /* مسافة أقل بين فقرات التفاصيل */
+    }
+
+    .details-section strong {
+        color: #495057; 
+    }
+
+</style>
+
+@if (Model != null && Model.CompanyQuestion != null && Model.CompanyQuestion.Any())
+{
+    foreach (var question in Model.CompanyQuestion)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card card-enhanced shadow-sm h-100">
+                @* --- ترويسة البطاقة المحسنة --- *@
+                <div class="card-header-custom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="company-name mb-0">@question.Company?.Name</h5>
+                        @if (question.Num.HasValue)
+                        {
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle record-num-badge">
+                                <i class="fas fa-hashtag me-1"></i>NUM: @question.Num
+                            </span>
+                        }
+                    </div>
+                    @if (!string.IsNullOrEmpty(question.Company.AocNum))
+                    {
+                        <small class="text-muted aoc-num d-block">
+                            <i class="fas fa-certificate me-1"></i>AOC: @question.Company.AocNum
+                        </small>
+                    }
+                </div>
+
+                <div class="card-body details-section">
+                    <p class="card-text mb-1">
+                        <small class="text-muted"><strong><i class="fas fa-calendar-alt me-1"></i>Date:</strong> @question.Created.ToString("yyyy-MM-dd")</small>
+                    </p>
+                    <p class="card-text mb-1">
+                        <strong><i class="fas fa-user me-1"></i>User:</strong> @(question.ApplicationUser?.UserName ?? "N/A")
+                    </p>
+                    <p class="card-text mb-2">
+                        <strong><i class="fas fa-check-circle me-1"></i>Status:</strong>
+                        <span class="badge status-badge @(question.Active ? "bg-success-subtle text-success-emphasis border border-success-subtle" : "bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle")">
+                            @(question.Active ? "Completed" : "Incomplete")
+                        </span>
+                    </p>
+
+                    @if (question.Type == "Old")
+                    {
+                        <p class="mt-2 mb-0 text-muted">
+                            <small><i class="fas fa-star-half-alt me-1"></i>SPL: (@question.SaftyGrid) / OCL: (@question.SqurtyGrid)</small>
+                        </p>
+                    }
+                </div>
+
+
+                <a asp-controller="CompanyQuestion"
+                   asp-action="Details"
+                   asp-route-id="@question.Id"
+                   class="btn btn-outline-primary btn-sm category-btn mb-1 me-1">
+                   Open
+                </a>
+             @*    @if (Model.QuestionCategoryType != null && Model.QuestionCategoryType.Any())
+                {
+                    <div class="card-body pt-2 pb-2 border-top">
+                        <div class="mb-0">
+                            @foreach (var categoryType in Model.QuestionCategoryType)
+                            {
+                                <a asp-controller="CompanyQuestion"
+                                   asp-action="Details"
+                                   asp-route-id="@question.Id"
+                                   asp-route-CategoryId="@categoryType.Id"
+                                   class="btn btn-outline-primary btn-sm category-btn mb-1 me-1">
+                                    @categoryType.CategoryName
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (question.Type != "Old") 
+                {
+                    <div class="card-body pt-2 pb-2 border-top">
+                        <span class="text-muted d-block text-center"><small>No evaluation types available.</small></span>
+                    </div>
+                }  *@
+
+
+                @* --- تذييل البطاقة مع الإجراءات --- *@
+                <div class="card-footer border-top d-flex justify-content-between align-items-center card-footer-actions">
+                    <a target="_blank" asp-controller="CompanyQuestion" asp-action="PrintReport" asp-route-id="@question.Id" class="btn btn-outline-secondary btn-sm" title="Print Report">
+                        <i class="fas fa-print"></i> <span class="d-none d-md-inline">Print</span>
+                    </a>
+
+                    <div class="btn-group">
+                        <a asp-action="Edit" asp-route-id="@question.Id" class="btn btn-outline-warning btn-sm" title="Edit">
+                            <i class="fas fa-edit"></i> <span class="d-none d-md-inline">Edit</span>
+                        </a>
+
+                        <a asp-controller="CompanyQuestion" asp-action="SendEmail" asp-route-id="@question.Id" class="btn btn-outline-info btn-sm" title="Send Email">
+                            <i class="fas fa-envelope"></i> <span class="d-none d-md-inline">Send</span>
+                        </a>
+
+                        <form asp-controller="CompanyQuestion" asp-action="Delete" asp-route-id="@question.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete"
+                                    onclick="return confirm('Are you sure you want to delete this item?\nCompany: @question.Company?.Name\nDate: @question.Created.ToString("d")');">
+                                <i class="fas fa-trash-alt"></i> <span class="d-none d-md-inline">Delete</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i> No data available that matches the current search criteria.
+        </div>
+    </div>
+}

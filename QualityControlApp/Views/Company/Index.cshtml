@@ -1,85 +1,207 @@
-﻿@model IEnumerable<Company>
+﻿@model CompanyIndexVM
 
 @{
-    ViewData["Title"] = ViewContext.RouteData.Values["controller"]?.ToString();
-    // Layout = null;
+    ViewData["Title"] = "Company Directory";
+
+    var currentFilterTypeId = ViewContext.HttpContext.Request.Query["companyTypeId"].FirstOrDefault();
+
+    var searchTerm = ViewContext.HttpContext.Request.Query["searchTerm"].FirstOrDefault();
 }
 
+<div class="container-fluid py-4">
 
-<div style="min-height:80vh;">
-    <h4>
-        <b>@ViewContext.RouteData.Values["controller"]?.ToString()</b>
-    </h4>
-    <hr />
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-building me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Manage and explore registered companies with advanced filtering and search capabilities.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
+            <i class="fas fa-plus-circle me-2"></i> Add New Company
+        </a>
+    </div>
 
-    @if (Model.Any())
+    <!-- Filters & Search Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <form asp-action="Index" method="get">
+                <div class="row g-3 align-items-end">
+                    <!-- Filter by Company Type -->
+                    <div class="col-lg-8 col-md-12">
+                        <label for="companyTypeFilter" class="form-label fw-semibold mb-1">Filter by Type:</label>
+                        <div id="companyTypeFilter" class="btn-toolbar" role="toolbar">
+                            <div class="btn-group btn-group-sm me-2 mb-1" role="group">
+                                <a asp-action="Index" asp-route-searchTerm="@searchTerm"
+                                   class="btn @(string.IsNullOrEmpty(currentFilterTypeId) ? "btn-primary active" : "btn-outline-secondary") rounded-pill px-3">
+                                    <i class="fas fa-list-alt me-1"></i> All
+                                </a>
+                            </div>
+                            <div class="btn-group btn-group-sm flex-wrap" role="group">
+                                @foreach (var type in Model.CompanyTypes ?? new List<CompanyType>())
+
+                                {
+
+                                    var isActive = type.Id.ToString() == currentFilterTypeId;
+                                    <a asp-action="Index" asp-route-companyTypeId="@type.Id" asp-route-searchTerm="@searchTerm"
+                                       class="btn @(isActive ? "btn-primary active" : "btn-outline-secondary") rounded-pill px-3 me-1 mb-1">
+                                        @type.Name
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="col-lg-4 col-md-12">
+                        <label for="companySearch" class="form-label fw-semibold mb-1">Search:</label>
+                        <div class="input-group input-group-sm">
+                            <input type="hidden" name="companyTypeId" value="@currentFilterTypeId" />
+                            <input id="companySearch" class="form-control" type="search" name="searchTerm" placeholder="Company name or AOC..." aria-label="Search" value="@searchTerm">
+                            <button class="btn btn-outline-primary" type="submit" title="Search"><i class="fas fa-search"></i></button>
+                            @if (!string.IsNullOrEmpty(searchTerm))
+
+                            {
+                                <a asp-action="Index" asp-route-companyTypeId="@currentFilterTypeId" class="btn btn-outline-danger" title="Clear Search">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Cards Listing -->
+    @if (Model.Companies.Any())
+
     {
-        <p>
-            <a asp-action="Create" class="btn btn-primary">جديد</a>
-        </p>
-        <span>QuestionType Count: </span>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model.Companies)
 
-    
-        <table id="table1" class="table table-hover table-striped table-bordered">
-            <thead class=" table-primary">
-                <tr>
-                    <th>
-                        N
-                    </th>
-                 
-                    <th>
-                        اسم الشركة
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Created)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Modified)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int i = 0;
-                    foreach (var item in Model)
-                    {
-                        i++;
-                        <tr>
-                            <td>
-                                @i
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Name)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Created)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Modified)
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info">تعديل</a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-warning">تفاصيل</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">حذف</a>
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-hover border-0 rounded-3 overflow-hidden company-card">
+                        <div class="card-header bg-light py-3 px-4 border-bottom-0 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title fw-semibold mb-0 text-truncate text-dark" title="@item.Name">
+                                <i class="fas fa-building me-2 text-primary"></i>@item.Name
+                            </h5>
+                            @if (item.CompanyType != null)
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary-emphasis rounded-pill px-2 py-1 small">@item.CompanyType.Name</span>
+                            }
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">AOC Number</small>
+                                <p class="fw-bold mb-0">@item.AocNum</p>
+                            </div>
+
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex justify-content-between text-muted small">
+                                    <span title="Date Created"><i class="far fa-calendar-plus me-1"></i> @item.Created.ToString("dd MMM yyyy")</span>
+                                    @if (item.Modified.HasValue)
+
+                                    {
+                                        <span title="Last Modified"><i class="far fa-calendar-check me-1"></i> @item.Modified?.ToString("dd MMM yyyy")</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white py-3 px-4 border-top-0">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="View Details">
+                                    <i class="fas fa-eye me-1"></i> Details
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3" title="Edit Company">
+                                    <i class="fas fa-pencil-alt me-1"></i> Edit
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Delete Company">
+                                    <i class="fas fa-trash me-1"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     }
+
     else
+
     {
-        <div class="card">
-            <div class="card-header">
-                لاتوجد شركات 
-            </div>
-            <div class="card-body">
-                <a asp-controller="Company" asp-action="Create" class="btn btn-primary">انشاء</a>
+        <!-- No Data Placeholder -->
+        <div class="text-center py-5">
+            <div class="card border-0 shadow-sm mx-auto" style="max-width: 480px;">
+                <div class="card-body p-lg-5 p-4">
+                    <img src="/images/no-data-illustration.svg" alt="No companies found" class="img-fluid mb-4" style="max-height: 200px;" />
+                    <h3 class="fw-bold text-dark mb-3">No Companies to Display</h3>
+                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(currentFilterTypeId))
+                    {
+                        <p class="text-muted mb-4">We couldn't find any companies matching your current filters. Try adjusting or clearing them.</p>
+                        <a asp-action="Index" class="btn btn-outline-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-undo me-2"></i> Clear All Filters
+                        </a>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-4">It looks a bit empty here. Get started by adding your first company.</p>
+                        <a asp-action="Create" class="btn btn-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-plus-circle me-2"></i> Add First Company
+                        </a>
+                    }
+                </div>
             </div>
         </div>
     }
 </div>
 
+<!-- Custom Styles Section -->
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background for the page */
+        }
 
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .shadow-hover:hover, .company-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .1) !important;
+        }
+
+        .btn-toolbar .btn {
+            font-size: 0.875rem; /* Slightly smaller font for filter buttons */
+        }
+
+        .input-group .form-control, .input-group .btn {
+            /* Ensure consistent height for search bar elements */
+        }
+
+        .badge.bg-opacity-10.text-primary-emphasis {
+            /* For Bootstrap 5.3+, for earlier versions, you might need custom CSS for this effect */
+            /* Example for older Bootstrap or custom:
+                background-color: rgba(var(--bs-primary-rgb), 0.1);
+                color: var(--bs-primary);
+                */
+        }
+
+        .card-header .badge {
+            font-size: 0.75em;
+        }
+
+        /* Illustration for no data - ensure you have an image at this path or use a different one */
+        /* You can find free SVG illustrations on sites like unDraw, Humaaans, etc. */
+
+    </style>
+}
+
+@section Scripts {
+    <!-- Optional JavaScript for interactions if needed -->
+    <script>
+        // Example: Add active class to filter buttons (though Razor handles it well)
+        // Or any other client-side enhancements
+    </script>
+}

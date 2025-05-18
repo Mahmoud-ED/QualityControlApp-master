@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.CodeAnalysis.Options;
 using System;
+using QualityControlApp.ViewModels;
 
 namespace QualityControlApp.Controllers
 {
@@ -39,17 +40,82 @@ namespace QualityControlApp.Controllers
 
 
 
-        public async Task<IActionResult> Index()
+        //public async Task<IActionResult> Index(Guid? Typeid )
+        //{
+
+        //    var question = await _question.Entity.Include(n => n.QuestionType)
+        //                    .OrderByDescending(n => n.Created)
+        //                    .ToListAsync();
+
+        //    var questionType = await _questionType.Entity.GetAll().ToListAsync(); ;
+
+
+        //    ViewBag.Section = "All Questions ";
+
+        //    var viewModel = new QuestionIndexVM 
+        //    {
+        //        Question = question,
+        //        QuestionType = questionType
+        //    };
+
+        //    return View(viewModel);
+
+        //}
+
+
+        // في QuestionController.cs
+
+        // ... (Constructor وحقن التبعيات كما هي) ...
+
+        public async Task<IActionResult> Index(Guid? questionTypeId) // تم تغيير اسم البارامتر هنا ليكون أوضح
         {
-            //var question = _question.Entity.Include(n => n.QuestionType).ToList();
+            // 1. جلب كل أنواع الأسئلة لعرضها كفلاتر
+            var allQuestionTypes = await _questionType.Entity.GetAll()
+                                             .OrderBy(qt => qt.Created)
+                                             
+                                             .ToListAsync();
 
-            var question = await _question.Entity.Include(n => n.QuestionType)
-                            .OrderByDescending(n => n.Created)
-                            .ToListAsync();
-            ViewBag.Section = "جميع الاسئلة ";  //ViewComponent في Default يستطيع تمرير قيمة الى صفحة Controller 
-            return View(question);
+            IQueryable<Question> questionsQuery = _question.Entity
+    .Include(q => q.QuestionType)
+    .OrderBy(q => q.SectionContent)
+    .ThenByDescending(q => q.Created);
 
+            
+
+
+            // ... (الكود اللاحق لفلترة questionTypeId وتجميع الـ ViewModel) ...
+
+
+
+            string pageTitle = "All Questions";
+
+            if (questionTypeId.HasValue && questionTypeId.Value != Guid.Empty)
+            {
+                questionsQuery = questionsQuery.Where(q => q.QuestionTypeId == questionTypeId.Value);
+                var filteredTypeName = allQuestionTypes.FirstOrDefault(qt => qt.Id == questionTypeId.Value)?.TypeName;
+                pageTitle = !string.IsNullOrEmpty(filteredTypeName) ? $"Questions - {filteredTypeName}" : "Filtered Questions";
+            }
+
+            var questions = await questionsQuery.ToListAsync();
+
+            var viewModel = new QuestionIndexFilterVM
+            {
+                Questions = questions,
+                AllQuestionTypes = allQuestionTypes,
+                CurrentQuestionTypeIdFilter = questionTypeId,
+                PageTitle = pageTitle
+            };
+
+            ViewBag.Section = viewModel.PageTitle; // لتحديث عنوان التبويب أو أي مكان آخر تستخدمه
+
+            return View(viewModel);
         }
+
+
+
+
+
+
 
         public async Task<IActionResult> DisplayQuestionType(Guid? questionId)
         {
@@ -92,32 +158,46 @@ namespace QualityControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Content,QuestionTypeId,MaxGrid")] Question question)
+        public async Task<IActionResult> Create([Bind("Content,QuestionTypeId,MaxGrid,SectionContent")] Question question)
         {
-            //هذه لا تستعمل ابدا مع المفتاح الأجنبي لكن لو احتجنا لها في حقول اخرى
-            //ModelState.Remove("Sections");// طريقة أخرى لمنع التحقق داخل وظيفة معينة وليس في الكلاس سيمنع التحقق بالمطلق لكل الوظائف
-
             if (ModelState.IsValid)
             {
                 try
                 {
-
-
                     question.Created = DateTime.Now;
                     _question.Entity.Insert(question);
                     await _question.SaveAsync();
-                    return RedirectToAction(nameof(Index));
+
+                    ViewData["QuestionType"] = new SelectList(
+                        await _questionType.Entity.GetAll().ToListAsync(), "Id", "TypeName");
+
+                    ModelState.Clear();
+
+                    var newQuestion = new Question
+                    {
+                        QuestionTypeId = question.QuestionTypeId,
+                        MaxGrid = question.MaxGrid,
+                        SectionContent = question.SectionContent,
+                        // Content is left empty intentionally
+                    };
+
+                    return View("Create", newQuestion);
                 }
                 catch (Exception)
                 {
                     throw;
                 }
             }
-            return View();
+
+            ViewData["QuestionType"] = new SelectList(
+                await _questionType.Entity.GetAll().ToListAsync(), "Id", "TypeName");
+
+            return View("Create", question);
         }
 
 
-        [Authorize(Policy = "EditPolicy")]
+
+        //[Authorize(Policy = "EditPolicy")]
 
         public async Task<IActionResult> Edit(Guid? id)
         {
@@ -144,17 +224,10 @@ namespace QualityControlApp.Controllers
         }
 
 
-            //<div class="form-group">
-            //        <label asp-for="QuestionTypeId " class="control-label"></label>
-            //        <select asp-for="QuestionTypeId" class="form-control" asp-items="ViewBag.QuestionType">
-            //            <option value = "" disabled selected>---------Select Type---------</option>
-            //        </select>
-            //        <span asp-validation-for="QuestionTypeId" class="text-danger"></span>
-            //    </div>
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Content,QuestionTypeId,MaxGrid,Id,Created")] Question question)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Content,QuestionTypeId,MaxGrid,Id,Created,SectionContent")] Question question)
         {
 
             // (Cross-Site Request Forgery)

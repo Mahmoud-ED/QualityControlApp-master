@@ -15,12 +15,8 @@ namespace QualityControlApp.Models.Entities
 
         public bool? Approval { get; set; }
 
-
         [ValidateNever]
         public UserProfile UserProfile { get; set; }
-        
-        
-       
 
         [ValidateNever]
         public Employee Employee { get; set; }
@@ -33,6 +29,7 @@ namespace QualityControlApp.Models.Entities
         [ValidateNever]
 
         public virtual ICollection<AirPortRequest> AirportRequest { get; set; }    
+        public virtual ICollection<Landing> Landing { get; set; }    
         public string LastAccessTimeLocalTime
         {
             get { return LastAccessTime?.ToLocalTime().ToString("dd-MM-yyyy hh:mm:ss tt"); }
