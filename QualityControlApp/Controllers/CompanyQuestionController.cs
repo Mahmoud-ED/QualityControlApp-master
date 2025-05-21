@@ -32,6 +32,7 @@ namespace QualityControlApp.Controllers
         private readonly IUnitOfWork<ApplicationUser> _applicationUser;
         private readonly IUnitOfWork<QuestionCategoryType> _questioncategorytype;
         private readonly IUnitOfWork<CompanyQuestion> _companyquestion;
+        private readonly IUnitOfWork<CompanyQuestionAssignedUsers> _companyQuestionAssignedUsers;
         private readonly IUnitOfWork<CompanyTypeCategoryAvailable> _companytypeCategoryAvailable;
         private readonly IUnitOfWork<CompanyQuestionContent> _companyquestionContent;
         private readonly IUnitOfWork<Question> _question;
@@ -48,6 +49,7 @@ namespace QualityControlApp.Controllers
             IUnitOfWork<SiteInfo> siteInfo,
             IUnitOfWork<Contact> contact,
             IUnitOfWork<CompanyTypeCategoryAvailable> companytypeCategoryAvailable,
+            IUnitOfWork<CompanyQuestionAssignedUsers> companyQuestionAssignedUsers,
             IUnitOfWork<Question> question,
             IUnitOfWork<Location> location,
             IUnitOfWork<QuestionCategoryType> questioncategorytype,
@@ -69,6 +71,7 @@ namespace QualityControlApp.Controllers
             _userManager = userManager;
             _company = company;
             _companytypeCategoryAvailable = companytypeCategoryAvailable;
+            _companyQuestionAssignedUsers = companyQuestionAssignedUsers;
             _contact = contact;
             _emailSender = emailSender;
             _applicationUser = applicationUser;
@@ -87,7 +90,7 @@ namespace QualityControlApp.Controllers
 
             var companyquestion = await _companyquestion.Entity.GetWhere(q => q.Type == Type) // old or New  الي يبيه عمي الشارف old
                        .Include(q => q.Company)  // تضمين معلومات الشركة
-                       .Include(q => q.ApplicationUser)
+                       .Include(q => q.Creator)
                       .OrderBy(ec => ec.Active)
                       .OrderByDescending(q => q.Created)
                        .ToListAsync();
@@ -110,58 +113,57 @@ namespace QualityControlApp.Controllers
             return View(CompanyQuestionVM);
         }
 
-     
+
         public async Task<IActionResult> Create(string Type)
         {
             if (string.IsNullOrEmpty(Type))
             {
                 TempData["ErrorMessage"] = "Task type is required.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { Type = "old" }); // أضفت Type هنا ليعمل الـ Redirect بشكل صحيح
             }
 
-            var availableCategoriesData = await _context.QuestionCategoryType
-                                                  .Where(qct => qct.Type == Type)
-                                                  .OrderBy(qct => qct.CategoryName)
-                                                  .Select(qct => new QuestionCategoryTypeSelectItemVM
-                                                  {
-                                                      Id = qct.Id,
-                                                      CategoryName = qct.CategoryName
-                                                  })
-                                                  .ToListAsync();
+            var availableCategoriesData = await _questioncategorytype.Entity
+                                                .GetWhere(qct => qct.Type == Type)
+                                                .OrderBy(qct => qct.CategoryName)
+                                                .Select(qct => new QuestionCategoryTypeSelectItemVM
+                                                {
+                                                    Id = qct.Id,
+                                                    CategoryName = qct.CategoryName
+                                                })
+                                                .ToListAsync();
 
+            // جلب المستخدمين لتعبئة قائمة الاختيار للمستخدمين المعينين
+            var allUsers = await _applicationUser.Entity
+                                        .Include(u => u.UserProfile)
+                                        .OrderBy(u => u.UserProfile != null ? u.UserProfile.DisplayName : u.UserName)
+                                        .Select(u => new SelectListItem
+                                        {
+                                            Value = u.Id.ToString(),
+                                            Text = u.UserProfile != null && !string.IsNullOrEmpty(u.UserProfile.DisplayName) ? u.UserProfile.DisplayName : u.UserName
+                                        })
+                                        .ToListAsync();
 
-
-            List<Guid> preselectedCategoryIds = new List<Guid>();
-
-
+            // جلب المستخدمين لقائمة مُنشئ السؤال (Creator)
+            var creatorUsersList = allUsers; // يمكن استخدام نفس القائمة أو قائمة مختلفة إذا كان هناك منطق مختلف
 
             var viewModel = new CreateCompanyQuestionVM
             {
+                CreatorId="123",
                 Type = Type,
                 AvailableQuestionCategoryTypes = availableCategoriesData,
-                SelectedQuestionCategoryTypeIds = preselectedCategoryIds // تعيين القائمة المبدئية هنا
+                SelectedQuestionCategoryTypeIds = new List<Guid>(),
+                AvailableAssignedUsers = allUsers, // تعبئة قائمة المستخدمين المتاحين للتعيين
+                SelectedAssignedUserIds = new List<Guid>() // مبدئيًا لا يوجد مستخدمون معينون محددون
             };
 
-
-            var usersWithProfile = await _applicationUser.Entity  // أو _userRepository.GetQueryable() أو ما شابه
-                                .Include(u => u.UserProfile) // <-- تضمين Profile
-                                .OrderBy(u => u.UserName) // يمكنك الترتيب حسب UserName أو Profile.Name
-                                .ToListAsync();
-
-            // إنشاء قائمة SelectListItem مخصصة
-            var userSelectList = usersWithProfile.Select(u => new SelectListItem
-            {
-                Value = u.Id.ToString(), // القيمة التي سيتم إرسالها عند الاختيار (عادةً الـ Id)
-                Text = !string.IsNullOrEmpty(u.UserProfile?.DisplayName) ? u.UserProfile.DisplayName : u.UserName // <-- المنطق المطلوب
-            }).ToList();
-            ViewBag.Users = userSelectList;
-            //ViewBag.Users = new SelectList(await _applicationUser.Entity.GetAll().OrderBy(u => u.UserName).ToListAsync(), "Id", "UserName");
+            ViewBag.CreatorUsers = new SelectList(creatorUsersList, "Value", "Text"); // للمستخدم المُنشئ
             ViewBag.Companies = new SelectList(await _company.Entity.GetAll().OrderBy(c => c.Name).ToListAsync(), "Id", "Name");
             ViewBag.Location = new SelectList(await _location.Entity.GetAll().OrderBy(l => l.Name).ToListAsync(), "Id", "Name");
+            // تمت إزالة ViewBag.Users لأنه تم نقله إلى الفيو موديل كـ AvailableAssignedUsers
 
             return View(viewModel);
         }
-    
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
@@ -194,14 +196,50 @@ namespace QualityControlApp.Controllers
                 ViewBag.Location = new SelectList(await _location.Entity.GetAll().OrderBy(l => l.Name).ToListAsync(), "Id", "Name", viewModel.LocationId);
             }
 
+            viewModel.UserId = Guid.Parse(_userManager.GetUserId(User));
+            viewModel.CreatorId = _userManager.GetUserId(User);
+
+
             if (!ModelState.IsValid)
             {
                 TempData["ErrorMessage"] = "Please correct the validation errors.";
-                await PopulateViewBagsForCreateView(viewModel.Type);
-                return View(viewModel);
+                var allUsers = await _applicationUser.Entity
+                                        .Include(u => u.UserProfile)
+                                        .OrderBy(u => u.UserProfile != null ? u.UserProfile.DisplayName : u.UserName)
+                                        .Select(u => new SelectListItem
+                                        {
+                                            Value = u.Id.ToString(),
+                                            Text = u.UserProfile != null && !string.IsNullOrEmpty(u.UserProfile.DisplayName) ? u.UserProfile.DisplayName : u.UserName
+                                        })
+                                        .ToListAsync();
+
+                // جلب المستخدمين لقائمة مُنشئ السؤال (Creator)
+                var creatorUsersList = allUsers; // يمكن استخدام نفس القائمة أو قائمة مختلفة إذا كان هناك منطق مختلف
+
+                var viewModel2 = new CreateCompanyQuestionVM
+                {
+                    AvailableQuestionCategoryTypes = null,
+                    SelectedQuestionCategoryTypeIds = new List<Guid>(),
+                    AvailableAssignedUsers = allUsers, // تعبئة قائمة المستخدمين المتاحين للتعيين
+                    SelectedAssignedUserIds = new List<Guid>() // مبدئيًا لا يوجد مستخدمون معينون محددون
+                };
+
+                ViewBag.CreatorUsers = new SelectList(creatorUsersList, "Value", "Text"); // للمستخدم المُنشئ
+                ViewBag.Companies = new SelectList(await _company.Entity.GetAll().OrderBy(c => c.Name).ToListAsync(), "Id", "Name");
+                ViewBag.Location = new SelectList(await _location.Entity.GetAll().OrderBy(l => l.Name).ToListAsync(), "Id", "Name");
+                // تمت إزالة ViewBag.Users لأنه تم نقله إلى الفيو موديل كـ AvailableAssignedUsers
+
+                return View(viewModel2);
             }
 
-            var userForEmail = await _applicationUser.Entity.GetByIdAsync(viewModel.UserId);
+
+
+
+
+
+
+            string Id = viewModel.UserId.ToString();
+            var userForEmail = await _applicationUser.Entity.GetByIdAsync(Id);
             if (userForEmail == null)
             {
                 ModelState.AddModelError("", "Selected user not found for email.");
@@ -257,7 +295,8 @@ namespace QualityControlApp.Controllers
                 LocationId = viewModel.LocationId,
                 CompanyId = viewModel.CompanyId,
                 UserId = viewModel.UserId,
-                Active = false, 
+                CreatorId = viewModel.CreatorId,
+                Active = false,
                 SaftyGrid = 0,
                 SqurtyGrid = 0,
                 Type = viewModel.Type,
@@ -323,9 +362,25 @@ namespace QualityControlApp.Controllers
                 TempData["WarningMessage"] = (TempData["WarningMessage"] ?? "") + " Quality task created, but no questions were found for the selected categories.";
             }
 
+
+            foreach (var userS in viewModel.SelectedAssignedUserIds) // الآن 'user' يجب أن يكون ApplicationUser
+            {
+                var companyQuestionAssignedUsers = new CompanyQuestionAssignedUsers // هذا هو كائن الكيان
+                {
+                    AssignedCompanyQuestionsId = newCompanyQuestionEntity.Id,
+                    AssignedUsersId = userS.ToString(),
+                };
+                _companyQuestionAssignedUsers.Entity.Insert(companyQuestionAssignedUsers);
+            }
+
+
+
+
+
+            await _context.SaveChangesAsync();
+
             return RedirectToAction("Index", "CompanyQuestion", new { Type = viewModel.Type });
         }
-
 
         public async Task<IActionResult> Details(Guid id, Guid CategoryId)
         {
@@ -344,7 +399,7 @@ namespace QualityControlApp.Controllers
                  .FirstOrDefaultAsync();
 
 
-          
+
             var availableCategoryInfo = _companytypeCategoryAvailable.Entity
                 .GetWhere(cta => cta.CompanyTypeId == companyTypeId)
                 .Select(cta => cta.QuestionCategoryTypeId)
@@ -442,7 +497,6 @@ namespace QualityControlApp.Controllers
             return _questioncategorytype.Entity.GetAll()?.Any(e => e.Id == id) ?? false;
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -457,7 +511,7 @@ namespace QualityControlApp.Controllers
 
             // تحويل البيانات إلى SelectList
             ViewBag.Companies = new SelectList(companies, "Id", "Name", companyquestion.CompanyId);
-            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.UserId);
+            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.CreatorId);
 
             return View(companyquestion);
         }
@@ -634,8 +688,6 @@ namespace QualityControlApp.Controllers
         }
 
 
-
-
         [HttpPost]
         public IActionResult UpdateCompanyQuestionContent([FromBody] List<CompanyQuestionContentUpdateViewModel> updatedData, Guid Id)
         {
@@ -758,7 +810,7 @@ namespace QualityControlApp.Controllers
                     filePath = _host.WebRootPath + "\\templates" + "\\EndCompanyQuestionNew.html";
 
                 }
-                var Uesr = await _applicationUser.Entity.GetByIdAsync(companyQuestion.UserId);
+                var Uesr = await _applicationUser.Entity.GetByIdAsync(companyQuestion.CreatorId);
                 if (Uesr == null)
                 {
                     return NotFound();
@@ -800,7 +852,7 @@ namespace QualityControlApp.Controllers
                     content = content.Replace("{Phone}", EmailInfo.Phone);
 
 
-                    var message = new Message(new string[] { companyQuestion.ApplicationUser.UserName }, "OverSiteUpdate", content, null);
+                    var message = new Message(new string[] { companyQuestion.Creator.UserName }, "OverSiteUpdate", content, null);
 
                     try
                     {
@@ -927,7 +979,7 @@ namespace QualityControlApp.Controllers
                 lstQty = await _companyquestionContent.Entity
                     .Include(s => s.Question.QuestionType.QuestionCategoryType)
                     .Include(s => s.CompanyQuestion.Company)
-                    .Include(s => s.CompanyQuestion.ApplicationUser)
+                    .Include(s => s.CompanyQuestion.Creator)
                     .Where(s =>
                         s.CompanyQuestionId == Id &&
                         s.Question.QuestionType.QuestionCategoryTypeId == CategoryId &&
@@ -949,7 +1001,7 @@ namespace QualityControlApp.Controllers
                 lstQty = await _companyquestionContent.Entity
                     .Include(s => s.Question.QuestionType.QuestionCategoryType)
                     .Include(s => s.CompanyQuestion.Company)
-                    .Include(s => s.CompanyQuestion.ApplicationUser)
+                    .Include(s => s.CompanyQuestion.Creator)
                     .Where(s =>
                         s.CompanyQuestionId == Id &&
                         (s.CompanyQuestion.Type != "New" || s.Inspect == "Ns"))
@@ -1002,7 +1054,7 @@ namespace QualityControlApp.Controllers
 
             }
 
-            var studentname = lstQty?.FirstOrDefault()?.CompanyQuestion?.ApplicationUser?.UserName ?? "اسم الموظف";
+            var studentname = lstQty?.FirstOrDefault()?.CompanyQuestion?.Creator?.UserName ?? "اسم الموظف";
             var createdate = lstQty?.FirstOrDefault()?.CompanyQuestion?.Created ?? DateTime.Now;
             var companyName = lstQty?.FirstOrDefault()?.CompanyQuestion?.Company?.Name ?? "اسم الشركة";
 
@@ -1175,7 +1227,7 @@ namespace QualityControlApp.Controllers
             // --- 3. تضمين البيانات المرتبطة وتطبيق الترتيب ---
             var filteredQuestions = await query
                                         .Include(q => q.Company)
-                                        .Include(q => q.ApplicationUser)
+                                        .Include(q => q.Creator)
                                         .OrderByDescending(q => q.Created) // نفس الترتيب المستخدم في Index
                                         .ToListAsync();
 

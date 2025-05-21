@@ -24,6 +24,7 @@ namespace QualityControlApp.Models
         public DbSet<CompanyQuestion> CompanyQuestion { get; set; }
         public DbSet<CompanyQuestionContent> CompanyQuestionContent { get; set; }
         public DbSet<QuestionCategoryType> QuestionCategoryType { get; set; }
+        public DbSet<CompanyQuestionAssignedUsers> CompanyQuestionAssignedUsers { get; set; }
 
         public DbSet<SiteInfo> SiteInfo { get; set; }
         public DbSet<SiteState> SiteState { get; set; }
@@ -121,6 +122,40 @@ namespace QualityControlApp.Models
        .WithMany(ct => ct.Company)
        .HasForeignKey(c => c.CompanyTypeId)
        .OnDelete(DeleteBehavior.SetNull); // أو DeleteBehavior.Restrict حسب ما يناسبك
+
+
+
+            modelBuilder.Entity<CompanyQuestionAssignedUsers>()
+    .HasKey(x => new { x.AssignedCompanyQuestionsId, x.AssignedUsersId });
+
+            modelBuilder.Entity<CompanyQuestionAssignedUsers>()
+                .HasOne(x => x.CompanyQuestion)
+                .WithMany() // أو .WithMany(x => x.AssignedUsersLink) لو أضفت navigation
+                .HasForeignKey(x => x.AssignedCompanyQuestionsId);
+
+            modelBuilder.Entity<CompanyQuestionAssignedUsers>()
+                .HasOne(x => x.User)
+                .WithMany() // أو .WithMany(x => x.AssignedCompanyQuestionsLink)
+                .HasForeignKey(x => x.AssignedUsersId);
+
+
+        //    modelBuilder.Entity<CompanyQuestion>()
+        //.HasOne(q => q.Creator)
+        //.WithMany(u => u.CreatedCompanyQuestions)
+        //.HasForeignKey(q => q.CreatorId) // <-- استخدم اسم الخاصية المعدل
+        //.OnDelete(DeleteBehavior.Restrict);
+
+
+
+
+
+
+
+
+
         }
+
     }
+
+
 }

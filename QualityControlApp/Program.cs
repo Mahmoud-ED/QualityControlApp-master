@@ -133,6 +133,8 @@ else if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAntiforgery();
+
 
 app.UseAuthentication();//Who are you//ááÊÍÞÞ ãä åæíÉ ÇáãÓÊÎÏã¡ ÇáÇÓã æßáãÉ ÇáãÑæÑ æÇáÑãÒ ÇáÎÇÕ æÇáãÕÇÏÞÉ ÇáËäÇÆíÉ
 app.UseAuthentication();//Who are you//ááÊÍÞÞ ãä åæíÉ ÇáãÓÊÎÏã¡ ÇáÇÓã æßáãÉ ÇáãÑæÑ æÇáÑãÒ ÇáÎÇÕ æÇáãÕÇÏÞÉ ÇáËäÇÆíÉ

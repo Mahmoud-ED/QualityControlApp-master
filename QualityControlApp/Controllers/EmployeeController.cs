@@ -66,17 +66,21 @@ namespace QualityControlApp.Controllers
         }
         [ViewLayout("_LayoutEmployee")]
 
-        public async Task<IActionResult> Index(string Id)
+        public async Task<IActionResult> Index(Guid Id)
         {
 
 
-            var companyquestion = await _companyquestion.Entity // old or New  الي يبيه عمي الشارف old
-                      .Include(q => q.Company)  // تضمين معلومات الشركة
-                      .Include(q => q.ApplicationUser)
-                      .Where(n => n.UserId == Id)
-                     .OrderBy(ec => ec.Active)
-                     .OrderByDescending(q => q.Created)
-                      .ToListAsync();
+
+            var companyquestion = await _context.CompanyQuestionAssignedUsers
+ .Where(a => a.AssignedUsersId == Id.ToString())
+ .Include(a => a.CompanyQuestion)
+     .ThenInclude(q => q.Company)
+ .Include(a => a.CompanyQuestion)
+     .ThenInclude(q => q.Creator)
+ .Select(a => a.CompanyQuestion)
+ .OrderBy(q => q.Active)
+ .ThenByDescending(q => q.Created)
+ .ToListAsync();
 
             // أولاً: حدد الصلاحيات التي يمتلكها المستخدم الحالي
             bool hasOPPerm = false;
@@ -296,7 +300,7 @@ namespace QualityControlApp.Controllers
 
             // تحويل البيانات إلى SelectList
             ViewBag.Companies = new SelectList(companies, "Id", "Name", companyquestion.CompanyId);
-            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.UserId);
+            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.CreatorId);
 
 
 
@@ -437,7 +441,7 @@ namespace QualityControlApp.Controllers
 
             // تحويل البيانات إلى SelectList
             ViewBag.Companies = new SelectList(companies, "Id", "Name", companyquestion.CompanyId);
-            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.UserId);
+            ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.CreatorId);
 
             var labels2 = ContentList.Select(c => c.Question.Content).ToList();
             var percentageScores2 = ContentList.Select(c =>
@@ -516,7 +520,7 @@ namespace QualityControlApp.Controllers
 
 
             // إعادة توجيه المستخدم إلى نفس الصفحة أو أي صفحة أخرى حسب الحاجة
-            return RedirectToAction("Index", new { id = companyQuestion.UserId });
+            return RedirectToAction("Index", new { id = companyQuestion.CreatorId });
         }
 
 
@@ -555,7 +559,7 @@ namespace QualityControlApp.Controllers
                 filePath = _host.WebRootPath + "\\templates" + "\\EndCompanyQuestionNew.html";
 
             }
-            var Uesr = await _applicationuser.Entity.GetByIdAsync(companyQuestion.UserId);
+            var Uesr = await _applicationuser.Entity.GetByIdAsync(companyQuestion.CreatorId);
             if (Uesr == null)
             {
                 return NotFound();

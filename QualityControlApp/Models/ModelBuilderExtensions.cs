@@ -58,45 +58,45 @@ namespace QualityControlApp.Models
 
             //-------------------Programmer-----------------------------
 
-            //string programmerId = Guid.NewGuid().ToString();
-            ////string programmerName = "REEMA2783@GMAIL.COM";
+            string programmerId = Guid.NewGuid().ToString();
+            //string programmerName = "REEMA2783@GMAIL.COM";
 
-            //var programmerSettings = serviceProvider.
-            //                 GetRequiredService<IOptions<ProgrammerSettings>>().Value;
-            //string programmerName = programmerSettings.ProgrammerName;
+            var programmerSettings = serviceProvider.
+                             GetRequiredService<IOptions<ProgrammerSettings>>().Value;
+            string programmerName = programmerSettings.ProgrammerName;
 
-            //string programmerPassword = "p111";
+            string programmerPassword = "p111";
 
-            //var Programmer = new ApplicationUser
-            //{
-            //    Id = programmerId,
-            //    UserName = programmerName,
-            //    NormalizedUserName = programmerName.ToUpper(),
-            //    Email = programmerName,
-            //    NormalizedEmail = programmerName.ToUpper(),
-            //    EmailConfirmed = true,
-            //    PhoneNumberConfirmed = true,
-            //    LockoutEnabled = true,
-            //    //SecurityStamp = // سيتم تخصيصها تلقائيًا  
-            //    //ConcurrencyStamp = // سيتم تخصيصها تلقائيًا  
-            //    CreatedDate = DateTime.UtcNow,
-            //    Age = 0
-            //};
+            var Programmer = new ApplicationUser
+            {
+                Id = programmerId,
+                UserName = programmerName,
+                NormalizedUserName = programmerName.ToUpper(),
+                Email = programmerName,
+                NormalizedEmail = programmerName.ToUpper(),
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = true,
+                LockoutEnabled = true,
+                //SecurityStamp = // سيتم تخصيصها تلقائيًا  
+                //ConcurrencyStamp = // سيتم تخصيصها تلقائيًا  
+                CreatedDate = DateTime.UtcNow,
+                Age = 0
+            };
 
-            //var hasher = new PasswordHasher<ApplicationUser>();
-            //Programmer.PasswordHash =
-            //    hasher.HashPassword(Programmer, programmerPassword);
+            var hasher = new PasswordHasher<ApplicationUser>();
+            Programmer.PasswordHash =
+                hasher.HashPassword(Programmer, programmerPassword);
 
-            //modelBuilder.Entity<ApplicationUser>().HasData(Programmer);
+            modelBuilder.Entity<ApplicationUser>().HasData(Programmer);
 
 
-            ////-------------Add User to Role--------------------
-            //modelBuilder.Entity<IdentityUserRole<string>>().HasData(
-            //new IdentityUserRole<string>
-            //{
-            //    RoleId = progRoleId,
-            //    UserId = programmerId
-            //});
+            //-------------Add User to Role--------------------
+            modelBuilder.Entity<IdentityUserRole<string>>().HasData(
+            new IdentityUserRole<string>
+            {
+                RoleId = progRoleId,
+                UserId = programmerId
+            });
         }
 
     }

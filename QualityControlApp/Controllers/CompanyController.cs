@@ -22,7 +22,6 @@ namespace QualityControlApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork<Company > _company;
         private readonly IUnitOfWork<CompanyType> _companytype;
-        //private readonly IWebHostEnvironment _host;
 
         public CompanyController(
     ApplicationDbContext context,
@@ -33,7 +32,6 @@ namespace QualityControlApp.Controllers
             _context = context;
             _companytype = compnayType;
             _company = company;
-            //_host = host; // نفعله فقط لو احتجناه في هذا الكونترولر
         }
 
 

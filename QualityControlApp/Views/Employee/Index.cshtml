@@ -65,7 +65,7 @@
                             <h6 class="card-subtitle mb-3">تاريخ: @question.Created.ToString("yyyy-MM-dd")</h6> @* mb-3 for more space *@
 
                             <p class="card-text">
-                                <strong>المستخدم:</strong> @question.ApplicationUser?.UserName<br />
+                                <strong>المستخدم:</strong> @question.Creator?.UserName<br />
                                 <strong>الحالة:</strong>
                                 @* Using Bootstrap Badges for Status *@
                                 <span class="badge status-badge @(question.Active ? "bg-success" : "bg-danger")">

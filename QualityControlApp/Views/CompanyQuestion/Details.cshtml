@@ -44,7 +44,7 @@
                 <div class="col-md">
                     <label asp-for="CompanyQuestion.UserId" class="form-label small mb-1"><i class="bi bi-person me-1"></i>User Name</label>
                     <select asp-for="CompanyQuestion.UserId" class="form-select form-select-sm" asp-items="ViewBag.Users" disabled>
-                        <option value="">@Model.CompanyQuestion.ApplicationUser?.UserName</option>
+                        <option value="">@Model.CompanyQuestion.Creator?.UserName</option>
                     </select>
                     <span asp-validation-for="CompanyQuestion.UserId" class="text-danger small"></span>
                 </div>

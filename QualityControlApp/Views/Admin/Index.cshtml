@@ -1,67 +1,275 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
 }
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+<style>
+    .stat-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        float: right;
+    }
+
+        .stat-icon-wrapper i {
+            font-size: 1.5rem;
+        }
+
+    .bg-primary-soft {
+        background-color: rgba(var(--bs-primary-rgb), 0.15);
+    }
+
+    .bg-success-soft {
+        background-color: rgba(var(--bs-success-rgb), 0.15);
+    }
+
+    .bg-info-soft {
+        background-color: rgba(var(--bs-info-rgb), 0.15);
+    }
+
+    .bg-warning-soft {
+        background-color: rgba(var(--bs-warning-rgb), 0.15);
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(var(--bs-danger-rgb), 0.15);
+    }
+
+    .bg-purple-soft {
+        background-color: rgba(111, 66, 193, 0.15);
+    }
+
+    .bg-teal-soft {
+        background-color: rgba(32, 201, 151, 0.15);
+    }
+
+    /* لتحسين مظهر مؤشر التحميل مع ApexCharts */
+    .apexcharts-canvas { /* التأكد من أن الشارت لا يظهر فوق مؤشر التحميل مبدئياً */
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .chart-loading .apexcharts-canvas {
+        opacity: 0.3; /* جعل الشارت باهتاً أثناء التحميل */
+    }
+
+    .chart-container {
+        min-height: 250px; /* ارتفاع مبدئي لحاوية الشارت لتجنب القفز */
+    }
+
+
+
+    /* --- CSS جديد لقسم الصورة --- */
+    .hero-banner {
+        width: 100%;
+        height: 300px; /* يمكنك تعديل الارتفاع حسب رغبتك */
+        background-image: url('/img/Captin.jpg');
+        background-size: cover; /* لجعل الصورة تغطي المساحة بالكامل */
+        background-position: center center; /* لتوسيط الصورة */
+        background-repeat: no-repeat;
+        margin-bottom: 1.5rem; /* لإضافة مسافة أسفل الصورة وقبل الكروت */
+        border-radius: 0.375rem; /* نفس تقويس الكروت (اختياري) */
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); /* ظل خفيف (اختياري) */
+        display: flex; /* لتوسيط أي محتوى داخل البانر إذا أردت */
+        align-items: center;
+        justify-content: center;
+        color: white; /* لون النص إذا أضفت نصًا فوق الصورة */
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* ظل للنص لجعله أوضح (إذا أضفت نصًا) */
+    }
+
+        .hero-banner h1 { /* مثال لتنسيق عنوان فوق الصورة */
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+</style>
 <div class="row mt-3">
-
-    <div class="col-md-3 ">
-        <div class="card  mb-3">
+    <div class="col-12">
+        <div class="hero-banner">
+        </div>
+    </div>
+</div>
+<!-- الكروت الإحصائية العلوية (تبقى كما هي) -->
+<div class="row mt-3">
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-8">
-                        <p class="card-text">Users</p>
-                        <h5 class="card-title">@ViewBag.usersCount</h5>
-                    </div>
-                    <div class="col-4 d-flex align-items-center">
-                        <i class="bi bi-people fs-1 text-secondary"></i>
-                    </div>
+                <div class="stat-icon-wrapper bg-primary-soft">
+                    <i class="bi bi-people-fill text-primary"></i>
                 </div>
+                <h3 class="card-title fw-bold mb-0">Users</h3>
+                <p class="card-text text-muted">@ViewBag.usersCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-success-soft">
+                    <i class="bi bi-person-check-fill text-success"></i>
+                </div>
+                <h3 class="card-title fw-bold mb-0">Active Users</h3>
+                <p class="card-text text-muted">@ViewBag.ActiveUsers</p>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3 ">
-        <div class="card  mb-3">
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-8">
-                        <p class="card-text">Active Users</p>
-                        <h5 class="card-title">@ViewBag.ActiveUsers</h5>
+                <div class="stat-icon-wrapper bg-teal-soft">
+                    <i class="bi bi-arrow-bar-up text-teal"></i>
+                </div>
+                <h3 class="card-text text-muted">Air Request</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.AirRequest</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-teal-soft">
+                    <i class="bi bi-geo-alt-fill text-teal"></i>
+                </div>
+                <h3 class="card-text text-muted">Landing Request</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.landing</p>
+            </div>
+        </div>
+    </div>
+   @*  <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-info-soft">
+                    <i class="bi bi-buildings-fill text-info"></i>
+                </div>
+                <h3 class="card-title fw-bold mb-0">Companies</h3>
+                <p class="card-text text-muted">@ViewBag.companies</p>
+            </div>
+        </div>
+    </div> *@
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-warning-soft">
+                    <i class="bi bi-patch-question-fill text-warning"></i>
+                </div>
+                <h3 class="card-text text-muted">Questions</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.question</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-danger-soft">
+                    <i class="bi bi-tools text-danger"></i>
+                </div>
+                <h3 class="card-text text-muted">Ops Inspector</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.Ops</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-teal-soft">
+                    <i class="bi bi-airplane-engines-fill text-teal"></i>
+                </div>
+                <h3 class="card-text text-muted">Air Inspector</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.Air</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="stat-icon-wrapper bg-purple-soft">
+                    <i class="bi bi-building-gear text-purple"></i>
+                </div>
+                <h3 class="card-text text-muted">BEL Inspector</h3>
+                <p class="card-title fw-bold mb-0">@ViewBag.Bel</p>
+            </div>
+        </div>
+    </div>
+   
+</div>
+
+<!-- صف الشارتات -->
+<div class="row mt-3 g-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-center">Over Site Status & Filter</h5>
+                <form method="get" asp-action="Index" id="filterForm" class="mb-3">
+                    <div class="mb-2">
+                        <label for="companyId" class="form-label visually-hidden">Company</label>
+                        <select name="companyId" id="companyId" class="form-select form-select-sm" asp-items="@(new SelectList(ViewBag.CompaniesList, "Id", "Name", ViewBag.SelectedCompanyId))">
+                            <option value="">All Companies</option>
+                        </select>
                     </div>
-                    <div class="col-4 d-flex align-items-center">
-                        <i class="bi bi-person-video3 fs-1 text-secondary"></i>
+                    <div class="row gx-2 mb-2">
+                        <div class="col">
+                            <label for="fromDate" class="form-label visually-hidden">From</label>
+                            <input type="date" name="fromDate" id="fromDate" class="form-control form-control-sm" placeholder="From Date" />
+                        </div>
+                        <div class="col">
+                            <label for="toDate" class="form-label visually-hidden">To</label>
+                            <input type="date" name="toDate" id="toDate" class="form-control form-control-sm" placeholder="To Date" />
+                        </div>
                     </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+                </form>
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container">
+                    <div id="questionsChart"></div> <!-- تغيير إلى div لـ ApexCharts -->
+                    <div id="questionsChartLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
+                        <p class="mb-0 small">Loading Over Site...</p>
+                        <p class="chart-error-message" style="color: red; display: none;"></p>
+                    </div>
+                </div>
+                @* يمكنك إضافة div لعرض أعداد Active/Inactive هنا إذا أردت، بنفس نمط الشارتات الأخرى *@
+                <div id="questionsStatusCounts" class="text-center small mt-2" style="display:none;">
+                    <span class="me-2">Active: <strong id="questionsActiveCount">0</strong></span>
+                    <span>Inactive: <strong id="questionsInactiveCount">0</strong></span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 ">
-        <div class="card  mb-3">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-8">
-                        <p class="card-text">Companies</p>
-                        <h5 class="card-title">@ViewBag.companies</h5>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-center">AirRequest Status</h5>
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container mb-2">
+                    <div id="requestStatusChart"></div> <!-- تغيير إلى div -->
+                    <div id="requestStatusLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
+                        <p class="mb-0 small">Loading AirRequests...</p>
+                        <p class="chart-error-message" style="color: red; display: none;"></p>
                     </div>
-                    <div class="col-4 d-flex align-items-center">
-                        <i class="bi bi-diagram-3 fs-1 text-secondary"></i>
-                    </div>
+                </div>
+                <div id="requestStatusCounts" class="text-center small">
+                    <span class="me-2">Pending: <strong id="requestPendingCount">0</strong></span>
+                    <span class="me-2">Approved: <strong id="requestApprovedCount">0</strong></span>
+                    <span>Rejected: <strong id="requestRejectedCount">0</strong></span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 ">
-        <div class="card  mb-3">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-8">
-                        <p class="card-text">Questions</p>
-                        <h5 class="card-title">@ViewBag.question</h5>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-center">Landing Requests Status</h5>
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container mb-2">
+                    <div id="landingRequestStatusChart"></div> <!-- تغيير إلى div -->
+                    <div id="landingRequestStatusLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
+                        <p class="mb-0 small">Loading Landing Requests...</p>
+                        <p class="chart-error-message" style="color: red; display: none;"></p>
                     </div>
-                    <div class="col-4 d-flex align-items-center">
-                        <i class="bi bi-newspaper fs-1 text-secondary"></i>
-                    </div>
+                </div>
+                <div id="landingStatusCounts" class="text-center small">
+                    <span class="me-2">Pending: <strong id="landingPendingCount">0</strong></span>
+                    <span class="me-2">Approved: <strong id="landingApprovedCount">0</strong></span>
+                    <span>Rejected: <strong id="landingRejectedCount">0</strong></span>
                 </div>
             </div>
         </div>
@@ -69,16 +277,336 @@
 </div>
 
 @section scripts {
+    <!-- 1. تضمين مكتبة ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script>
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF';
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- دالة مساعدة لإظهار/إخفاء مؤشر التحميل وعرض الأخطاء ---
+            function handleLoadingState(chartId, isLoading, error = null) {
+                const loadingIndicator = document.getElementById(`${chartId}LoadingIndicator`);
+                const chartElement = document.getElementById(chartId);
+                const errorMessageElement = loadingIndicator?.querySelector('.chart-error-message');
+
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = isLoading ? 'block' : 'none';
+                }
+                if (chartElement) {
+                     // إضافة/إزالة كلاس للتحكم في شفافية الشارت أثناء التحميل
+                    if (isLoading) {
+                        chartElement.classList.add('chart-loading');
+                    } else {
+                        chartElement.classList.remove('chart-loading');
+                    }
+                }
+                if (errorMessageElement) {
+                    errorMessageElement.style.display = error ? 'block' : 'none';
+                    errorMessageElement.textContent = error ? `فشل تحميل البيانات: ${error}` : '';
+                }
             }
-            return color;
-        }
+
+
+            // --- إعدادات ألوان مشتركة (يمكنك تعديلها) ---
+            const apexChartColors = {
+                active: '#28a745',    // أخضر
+                inactive: '#dc3545',  // أحمر
+                pending: '#ffc107',   // أصفر
+                approved: '#17a2b8',  // سماوي/أزرق فاتح
+                rejected: '#6c757d',  // رمادي
+            };
+
+             // --- إعدادات ApexCharts الافتراضية (اختياري، لتحسين المظهر العام) ---
+            Apex.chart = {
+                fontFamily: 'inherit', // استخدام خط الصفحة
+                toolbar: {
+                    show: false // إخفاء شريط الأدوات الافتراضي إذا لم تكن بحاجته
+                }
+            };
+            Apex.tooltip = {
+                theme: 'dark' // أو 'light'
+            };
+
+
+            // -----------------------------------------------------------------
+            // الشارت الأول: Over Site Status (questionsChart) مع الفلتر
+            // -----------------------------------------------------------------
+            let questionsChartInstance;
+            const questionsChartElement = document.getElementById('questionsChart');
+            const questionsStatusCountsElement = document.getElementById('questionsStatusCounts');
+
+
+            const questionsChartOptions = {
+                series: [], // سيتم ملؤها بالبيانات
+                chart: {
+                    type: 'donut', // أو 'pie'
+                    height: 250, // يمكنك تعديل الارتفاع
+                    width: '100%'
+                },
+                labels: ['Active', 'Inactive'],
+                colors: [apexChartColors.active, apexChartColors.inactive],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                legend: {
+                    position: 'bottom'
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        const seriesIndex = opts.seriesIndex;
+                        const count = opts.w.config.series[seriesIndex];
+                        return `${val.toFixed(1)}% (${count})`;
+                    },
+                    style: {
+                        fontSize: '11px',
+                        colors: ["#fff"]
+                    },
+                     dropShadow: { // إضافة ظل للنص لجعله أوضح
+                        enabled: true,
+                        top: 1,
+                        left: 1,
+                        blur: 1,
+                        color: '#000',
+                        opacity: 0.45
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: true,
+                                    offsetY: -10
+                                },
+                                value: {
+                                    show: true,
+                                    offsetY: 10,
+                                    formatter: function (val) {
+                                        return val; // يعرض العدد الفعلي في المنتصف
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    showAlways: true,
+                                    label: 'Total',
+                                    formatter: function (w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => {
+                                            return a + b
+                                        }, 0)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (questionsChartElement) {
+                questionsChartInstance = new ApexCharts(questionsChartElement, questionsChartOptions);
+                questionsChartInstance.render();
+            }
+
+            function updateQuestionsChartData(active, inactive) {
+                handleLoadingState('questionsChart', false);
+                if (questionsChartInstance) {
+                    questionsChartInstance.updateSeries([active, inactive]);
+                }
+                 if (questionsStatusCountsElement) {
+                    document.getElementById('questionsActiveCount').textContent = active;
+                    document.getElementById('questionsInactiveCount').textContent = inactive;
+                    questionsStatusCountsElement.style.display = 'block';
+                }
+            }
+             // تحميل البيانات الأولية للشارت الأول
+            if (questionsChartElement) {
+                updateQuestionsChartData(@ViewBag.ActiveQuestions, @ViewBag.InactiveQuestions);
+            }
+
+
+            const filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                filterForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    handleLoadingState('questionsChart', true);
+                    // إخفاء الأعداد أثناء التحميل
+                    if (questionsStatusCountsElement) questionsStatusCountsElement.style.display = 'none';
+
+
+                    const fromDate = document.getElementById('fromDate').value;
+                    const toDate = document.getElementById('toDate').value;
+                    const companyIdField = document.querySelector('select[name="companyId"]');
+                    const companyId = companyIdField ? companyIdField.value : '';
+
+                    let generatedUrl = '@Url.Action("GetChartData", "Admin")';
+                    let fetchUrl = `${generatedUrl}?`;
+                    if (fromDate) fetchUrl += `fromDate=${encodeURIComponent(fromDate)}&`;
+                    if (toDate) fetchUrl += `toDate=${encodeURIComponent(toDate)}&`;
+                    if (companyId) fetchUrl += `companyId=${encodeURIComponent(companyId)}&`;
+                    if (fetchUrl.endsWith('&') || fetchUrl.endsWith('?')) fetchUrl = fetchUrl.slice(0, -1);
+
+                    fetch(fetchUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                   throw new Error(`${response.status} ${text || response.statusText}`);
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && typeof data.activeQuestions !== 'undefined' && typeof data.inactiveQuestions !== 'undefined') {
+                                updateQuestionsChartData(data.activeQuestions, data.inactiveQuestions);
+                            } else {
+                                throw new Error('Data format error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching Over Site chart data:', error);
+                            handleLoadingState('questionsChart', false, error.message);
+                        });
+                });
+            }
+
+
+            // -----------------------------------------------------------------
+            // الشارت الثاني: AirRequest Status (requestStatusChart)
+            // -----------------------------------------------------------------
+            let requestStatusChartInstance;
+            const requestStatusChartElement = document.getElementById('requestStatusChart');
+
+            const requestStatusChartOptions = {
+                series: [],
+                chart: { type: 'donut', height: 250, width: '100%' },
+                labels: ['Pending', 'Approved', 'Rejected'],
+                colors: [apexChartColors.pending, apexChartColors.approved, apexChartColors.rejected],
+                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
+                legend: { position: 'bottom' },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        const count = opts.w.config.series[opts.seriesIndex];
+                        return `${val.toFixed(1)}% (${count})`;
+                    },
+                    style: { fontSize: '11px', colors: ["#fff"] },
+                    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.45 }
+                },
+                 plotOptions: { pie: { donut: { labels: { show: true, name: {show:true, offsetY: -5}, value: {show:true, offsetY: 5, formatter: (val) => val }, total: { show: true, showAlways: true, label: 'Total', formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }
+            };
+
+            if (requestStatusChartElement) {
+                requestStatusChartInstance = new ApexCharts(requestStatusChartElement, requestStatusChartOptions);
+                requestStatusChartInstance.render();
+            }
+
+            function updateRequestStatusChartData(data) {
+                handleLoadingState('requestStatusChart', false);
+                if (requestStatusChartInstance) {
+                    requestStatusChartInstance.updateSeries([data.pending, data.approved, data.rejected]);
+                }
+                document.getElementById('requestPendingCount').textContent = data.pending;
+                document.getElementById('requestApprovedCount').textContent = data.approved;
+                document.getElementById('requestRejectedCount').textContent = data.rejected;
+            }
+
+            function fetchRequestStatusData() {
+                if (!requestStatusChartElement) return;
+                handleLoadingState('requestStatusChart', true);
+
+                fetch('@Url.Action("GetRequestStatusChartData", "Admin")')
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(`${response.status} ${text || response.statusText}`); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        updateRequestStatusChartData({
+                            pending: data.pending, approved: data.approved, rejected: data.rejected
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AirRequest chart data:', error);
+                        handleLoadingState('requestStatusChart', false, error.message);
+                    });
+            }
+
+
+            // -----------------------------------------------------------------
+            // الشارت الثالث: Landing Request Status (landingRequestStatusChart)
+            // -----------------------------------------------------------------
+            let landingRequestChartInstance;
+            const landingRequestChartElement = document.getElementById('landingRequestStatusChart');
+
+            const landingRequestChartOptions = {
+                series: [],
+                chart: { type: 'donut', height: 250, width: '100%' },
+                labels: ['Pending', 'Approved', 'Rejected'],
+                colors: [apexChartColors.pending, apexChartColors.approved, apexChartColors.rejected], // يمكنك استخدام نفس الألوان أو تغييرها
+                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
+                legend: { position: 'bottom' },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        const count = opts.w.config.series[opts.seriesIndex];
+                        return `${val.toFixed(1)}% (${count})`;
+                    },
+                     style: { fontSize: '11px', colors: ["#fff"] },
+                    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.45 }
+                },
+                plotOptions: { pie: { donut: { labels: { show: true, name: {show:true, offsetY: -5}, value: {show:true, offsetY: 5, formatter: (val) => val }, total: { show: true, showAlways: true, label: 'Total', formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }
+            };
+
+            if (landingRequestChartElement) {
+                landingRequestChartInstance = new ApexCharts(landingRequestChartElement, landingRequestChartOptions);
+                landingRequestChartInstance.render();
+            }
+
+            function updateLandingRequestChartData(data) {
+                handleLoadingState('landingRequestStatusChart', false);
+                if (landingRequestChartInstance) {
+                    landingRequestChartInstance.updateSeries([data.pending, data.approved, data.rejected]);
+                }
+                document.getElementById('landingPendingCount').textContent = data.pending;
+                document.getElementById('landingApprovedCount').textContent = data.approved;
+                document.getElementById('landingRejectedCount').textContent = data.rejected;
+            }
+
+            function fetchLandingRequestData() {
+                if (!landingRequestChartElement) return;
+                handleLoadingState('landingRequestStatusChart', true);
+
+                fetch('@Url.Action("GetLandingRequestStatusChartData", "Admin")')
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(`${response.status} ${text || response.statusText}`); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        updateLandingRequestChartData({
+                            pending: data.pending, approved: data.approved, rejected: data.rejected
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching LandingRequest chart data:', error);
+                        handleLoadingState('landingRequestStatusChart', false, error.message);
+                    });
+            }
+
+            // استدعاء دوال جلب البيانات لكل شارت عند تحميل الصفحة
+            if (requestStatusChartElement) fetchRequestStatusData();
+            if (landingRequestChartElement) fetchLandingRequestData();
+
+        });
     </script>
 }

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\pictures\landing\aoc\" />
     <Folder Include="wwwroot\pictures\requestfiles\" />
     <Folder Include="wwwroot\pictures\Site\" />

@@ -22,6 +22,21 @@ namespace QualityControlApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CompanyQuestionAssignedUsers", b =>
+                {
+                    b.Property<Guid>("AssignedCompanyQuestionsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AssignedUsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AssignedCompanyQuestionsId", "AssignedUsersId");
+
+                    b.HasIndex("AssignedUsersId");
+
+                    b.ToTable("CompanyQuestionAssignedUsers");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -51,8 +66,8 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f3c80870-3b59-4be9-898e-48d19c4c933d",
-                            ConcurrencyStamp = "748ca691-c0c3-4951-9948-65f6fa366410",
+                            Id = "071dbc1b-f453-4417-b8fc-a151cafb07a3",
+                            ConcurrencyStamp = "1a3f23ae-16d8-48c8-b4fb-bdf11b2acac7",
                             Name = "Prog",
                             NormalizedName = "PROG"
                         });
@@ -217,6 +232,13 @@ namespace QualityControlApp.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "698b899d-78e6-4a9f-8ce9-f21e23c570d1",
+                            RoleId = "071dbc1b-f453-4417-b8fc-a151cafb07a3"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -471,6 +493,10 @@ namespace QualityControlApp.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+                  
+
                     b.Property<Guid?>("LocationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -489,18 +515,12 @@ namespace QualityControlApp.Migrations
                     b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
 
-                    b.HasIndex("LocationId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+                    b.HasIndex("LocationId");
 
                     b.ToTable("CompanyQuestion");
                 });
@@ -635,8 +655,8 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3a0f4266-cf4b-43f3-a784-2b92195d9e6b"),
-                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(6162),
+                            Id = new Guid("403bed52-50ea-4fbe-beaa-86d91b5821fb"),
+                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5478),
                             Email = "libyanlacc@gmail.com",
                             Facebook = "- Facebook",
                             Instagram = "- Instagram",
@@ -978,10 +998,10 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e07775bf-b676-4147-92a4-f7a79f7280ca"),
+                            Id = new Guid("0ab0351e-0064-4a50-8bf8-76b5b18fa46a"),
                             About = "",
                             Activity = "LACC site",
-                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(5941),
+                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5326),
                             Name = "LACC"
                         });
                 });
@@ -1013,9 +1033,9 @@ namespace QualityControlApp.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("587e8ffd-2d66-4a8c-8ede-26786c4d4811"),
+                            Id = new Guid("5d335bb4-94a1-40c0-9991-90b8c9f53c7f"),
                             ClosingMessage = "The site is temporarily closed for development",
-                            Created = new DateTime(2025, 5, 13, 14, 54, 24, 865, DateTimeKind.Local).AddTicks(6203),
+                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5503),
                             State = true
                         });
                 });
@@ -1075,6 +1095,45 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "698b899d-78e6-4a9f-8ce9-f21e23c570d1",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "79c14e0c-de72-4aa9-bf50-fa5417d925fa",
+                            Email = "libyanlacc@gmail.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "LIBYANLACC@GMAIL.COM",
+                            NormalizedUserName = "LIBYANLACC@GMAIL.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEC+P2cmr1/QT2JVGMUQPVVG7tc2/NYSyH6XpnstXW46TpQgCHJmV27m1U0zkalkzXw==",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "f1503583-40d0-4ed3-aa4f-1c553ac98d09",
+                            TwoFactorEnabled = false,
+                            UserName = "libyanlacc@gmail.com",
+                            Age = 0,
+                            CreatedDate = new DateTime(2025, 5, 19, 18, 44, 58, 394, DateTimeKind.Utc).AddTicks(5764)
+                        });
+                });
+
+            modelBuilder.Entity("CompanyQuestionAssignedUsers", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.CompanyQuestion", "CompanyQuestion")
+                        .WithMany()
+                        .HasForeignKey("AssignedCompanyQuestionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("AssignedUsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CompanyQuestion");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1192,17 +1251,14 @@ namespace QualityControlApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+
                     b.HasOne("QualityControlApp.Models.Entities.Location", "Location")
                         .WithMany("CompanyQuestion")
                         .HasForeignKey("LocationId");
 
-                    b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "ApplicationUser")
-                        .WithOne("CompanyQuestion")
-                        .HasForeignKey("QualityControlApp.Models.Entities.CompanyQuestion", "UserId");
-
-                    b.Navigation("ApplicationUser");
-
                     b.Navigation("Company");
+
+                    b.Navigation("Creator");
 
                     b.Navigation("Location");
                 });
@@ -1348,16 +1404,13 @@ namespace QualityControlApp.Migrations
                 {
                     b.Navigation("AirportRequest");
 
-                    b.Navigation("CompanyQuestion")
-                        .IsRequired();
+                    b.Navigation("CreatedCompanyQuestions");
 
-                    b.Navigation("Employee")
-                        .IsRequired();
+                    b.Navigation("Employee");
 
                     b.Navigation("Landing");
 
-                    b.Navigation("UserProfile")
-                        .IsRequired();
+                    b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
         }
