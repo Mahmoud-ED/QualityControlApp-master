@@ -236,8 +236,6 @@ namespace QualityControlApp.Controllers
 
 
 
-
-
             string Id = viewModel.UserId.ToString();
             var userForEmail = await _applicationUser.Entity.GetByIdAsync(Id);
             if (userForEmail == null)
@@ -257,14 +255,30 @@ namespace QualityControlApp.Controllers
             var filePath = Path.Combine(_host.WebRootPath, "templates", "StartCompanyQuestion.html");
             if (System.IO.File.Exists(filePath))
             {
+
+
+                var allUsers2 = await _applicationUser.Entity
+      .Include(u => u.UserProfile)
+      .OrderBy(u => u.UserProfile != null ? u.UserProfile.DisplayName : u.UserName)
+      .ToListAsync();
+
                 StreamReader htmlFile = new StreamReader(filePath);
                 string emailContent = await htmlFile.ReadToEndAsync();
                 htmlFile.Close();
                 emailContent = emailContent.Replace("{Subject}", userForEmail.UserName); // أو أي عنوان مناسب
-                emailContent = emailContent.Replace("{Content}", $"A new quality task of type '{viewModel.Type}' has been initiated for company: {companyForEmail.Name}.");
+                emailContent = emailContent.Replace("{Content}", $"A new OverSight has been initiated for company: {companyForEmail.Name}.");
 
-                // افترض أن Message و _emailSender مهيئان بشكل صحيح
-                var message = new Message(new string[] { userForEmail.Email }, $"Quality Task Started: {companyForEmail.Name}", emailContent, null);
+                emailContent = emailContent + " Inspectors ( ";
+                foreach (var user in allUsers2)
+                {
+                    var email = user.Email;
+                    emailContent = emailContent + "-";
+
+                }
+                emailContent = emailContent + ")";
+
+                  // افترض أن Message و _emailSender مهيئان بشكل صحيح
+                  var message = new Message(new string[] { userForEmail.Email }, $"Quality Task Started: {companyForEmail.Name}", emailContent, null);
 
                 try
                 {
@@ -276,6 +290,38 @@ namespace QualityControlApp.Controllers
                     // Log the exception (ex)
                     TempData["WarningMessage"] = "Quality task created, but failed to send email notification. Error: " + ex.Message;
                 }
+
+
+
+                foreach (var user in allUsers2)
+                {
+                    var email = user.Email; // Access the Email property directly from the user object
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        var displayName = user.UserProfile != null && !string.IsNullOrEmpty(user.UserProfile.DisplayName)
+                            ? user.UserProfile.DisplayName
+                            : user.UserName;
+
+                        var message2 = new Message(
+                            new string[] { email },
+                            $"Quality Task Started: {companyForEmail.Name}",
+                            emailContent,
+                            null
+                        );
+
+                        try
+                        {
+                            await _emailSender.SendEmailAsync(message2);
+                            TempData["SuccessMessage"] = $"Email sent successfully to {displayName}.";
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData["WarningMessage"] = $"Failed to send email to {displayName}. Error: {ex.Message}";
+                        }
+                    }
+                }
+
+
             }
             else
             {

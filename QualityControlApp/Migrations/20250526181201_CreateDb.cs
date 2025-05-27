@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QualityControlApp.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateMagration : Migration
+    public partial class CreateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,6 +54,21 @@ namespace QualityControlApp.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChronicDisease",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChronicDisease", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -327,6 +342,10 @@ namespace QualityControlApp.Migrations
                     Specialization = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Bio = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    MotherName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MaritalStatus = table.Column<int>(type: "int", nullable: false),
+                    Gender = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -475,6 +494,35 @@ namespace QualityControlApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "HealthRecord",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChronicDiseaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DiagnosisDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HealthRecord", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_HealthRecord_ChronicDisease_ChronicDiseaseId",
+                        column: x => x.ChronicDiseaseId,
+                        principalTable: "ChronicDisease",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_HealthRecord_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AirPortRequestFiles",
                 columns: table => new
                 {
@@ -538,8 +586,8 @@ namespace QualityControlApp.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatorId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Active = table.Column<bool>(type: "bit", nullable: false),
                     SaftyGrid = table.Column<int>(type: "int", nullable: false),
                     SqurtyGrid = table.Column<int>(type: "int", nullable: false),
@@ -553,10 +601,11 @@ namespace QualityControlApp.Migrations
                 {
                     table.PrimaryKey("PK_CompanyQuestion", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CompanyQuestion_AspNetUsers_CreatorId1",
-                        column: x => x.CreatorId1,
+                        name: "FK_CompanyQuestion_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CompanyQuestion_Company_CompanyId",
                         column: x => x.CompanyId,
@@ -648,26 +697,6 @@ namespace QualityControlApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "0e04a268-2296-47dc-b190-9f4149eeef36", "06462af7-da1e-404b-9d8d-811395e67ce5", "Prog", "PROG" });
-
-            migrationBuilder.InsertData(
-                table: "Contact",
-                columns: new[] { "Id", "Created", "Email", "Facebook", "Instagram", "Modified", "Phone", "Twitter" },
-                values: new object[] { new Guid("e36e5069-8b66-4c92-a685-cde57ea30f68"), new DateTime(2025, 5, 18, 18, 9, 35, 570, DateTimeKind.Local).AddTicks(7006), "libyanlacc@gmail.com", "- Facebook", "- Instagram", null, "+218913832221", "- Twitter" });
-
-            migrationBuilder.InsertData(
-                table: "SiteInfo",
-                columns: new[] { "Id", "About", "Activity", "CoverImageUrl", "Created", "LogoUrl", "Modified", "Name" },
-                values: new object[] { new Guid("b76d2c4c-4679-4baf-8446-7c4e1fb0b432"), "", "LACC site", null, new DateTime(2025, 5, 18, 18, 9, 35, 570, DateTimeKind.Local).AddTicks(6806), null, null, "LACC" });
-
-            migrationBuilder.InsertData(
-                table: "SiteState",
-                columns: new[] { "Id", "ClosingMessage", "Created", "Modified", "State" },
-                values: new object[] { new Guid("3172a6a0-1b56-4a18-aeca-6536bed79aaf"), "The site is temporarily closed for development", new DateTime(2025, 5, 18, 18, 9, 35, 570, DateTimeKind.Local).AddTicks(7054), null, true });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AirPortRequestFiles_AirPortRequestId",
                 table: "AirPortRequestFiles",
@@ -743,9 +772,9 @@ namespace QualityControlApp.Migrations
                 column: "CompanyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CompanyQuestion_CreatorId1",
+                name: "IX_CompanyQuestion_CreatorId",
                 table: "CompanyQuestion",
-                column: "CreatorId1");
+                column: "CreatorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CompanyQuestion_LocationId",
@@ -783,6 +812,16 @@ namespace QualityControlApp.Migrations
                 column: "UserId",
                 unique: true,
                 filter: "[UserId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HealthRecord_ChronicDiseaseId",
+                table: "HealthRecord",
+                column: "ChronicDiseaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HealthRecord_EmployeeId",
+                table: "HealthRecord",
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Landing_ApproverUserId",
@@ -844,7 +883,7 @@ namespace QualityControlApp.Migrations
                 name: "Contact");
 
             migrationBuilder.DropTable(
-                name: "Employees");
+                name: "HealthRecord");
 
             migrationBuilder.DropTable(
                 name: "SiteInfo");
@@ -874,7 +913,10 @@ namespace QualityControlApp.Migrations
                 name: "Question");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "ChronicDisease");
+
+            migrationBuilder.DropTable(
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Company");
@@ -884,6 +926,9 @@ namespace QualityControlApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "QuestionType");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "CompanyType");

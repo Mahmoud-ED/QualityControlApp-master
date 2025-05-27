@@ -21,6 +21,8 @@ namespace QualityControlApp.Models
         public DbSet<Contact> Contact { get; set; }
         public DbSet<Question> Question { get; set; }
         public DbSet<QuestionType> QuestionType { get; set; }
+        public DbSet<ChronicDisease> ChronicDisease { get; set; }
+        public DbSet<HealthRecord> HealthRecord { get; set; }
         public DbSet<CompanyQuestion> CompanyQuestion { get; set; }
         public DbSet<CompanyQuestionContent> CompanyQuestionContent { get; set; }
         public DbSet<QuestionCategoryType> QuestionCategoryType { get; set; }
@@ -63,6 +65,8 @@ namespace QualityControlApp.Models
             modelBuilder.Entity<Location>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<CompanyType>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<CompanyTypeCategoryAvailable>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<HealthRecord>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<ChronicDisease>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
 
             modelBuilder.Seed(_serviceProvider);
 
@@ -139,14 +143,25 @@ namespace QualityControlApp.Models
                 .HasForeignKey(x => x.AssignedUsersId);
 
 
-        //    modelBuilder.Entity<CompanyQuestion>()
-        //.HasOne(q => q.Creator)
-        //.WithMany(u => u.CreatedCompanyQuestions)
-        //.HasForeignKey(q => q.CreatorId) // <-- استخدم اسم الخاصية المعدل
-        //.OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<CompanyQuestion>()
+        .HasOne(q => q.Creator)
+        .WithMany(u => u.CreatedCompanyQuestions)
+        .HasForeignKey(q => q.CreatorId) // <-- استخدم اسم الخاصية المعدل
+        .OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<HealthRecord>()
+               .HasOne(hr => hr.Employee)
+               .WithMany(e => e.HealthRecords)
+               .HasForeignKey(hr => hr.EmployeeId)
+               .OnDelete(DeleteBehavior.Restrict);
 
+            // HealthRecord to ChronicDisease (Many-to-One)
+            modelBuilder.Entity<HealthRecord>()
+                .HasOne(hr => hr.ChronicDisease)
+                .WithMany(cd => cd.HealthRecords) // Assumes ChronicDisease has ICollection<HealthRecord>
+                .HasForeignKey(hr => hr.ChronicDiseaseId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
 

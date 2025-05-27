@@ -1,21 +1,21 @@
 ﻿@model IEnumerable<QualityControlApp.Models.Entities.FileType>
 
 @{
-    ViewBag.Title = "أنواع الملفات";
+    ViewBag.Title = "File Types";
 }
 
-<h2 class="mb-4">أنواع الملفات</h2>
+<h2 class="mb-4">File Types</h2>
 
 <div class="mb-3">
-    <a asp-action="Create" class="btn btn-primary">إضافة نوع جديد</a>
+    <a asp-action="Create" class="btn btn-primary">Create A new</a>
 </div>
 
 <table class="table table-bordered table-striped">
     <thead class="table-light">
         <tr>
-            <th>الرقم</th>
-            <th>نوع الملف</th>
-            <th>الإجراءات</th>
+            <th>N</th>
+            <th>Name</th>
+            <th> </th>
         </tr>
     </thead>
     <tbody>
@@ -28,8 +28,8 @@
                     <td>@index</td>
                     <td>@item.TypeName</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">تعديل</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من الحذف؟');">حذف</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Update</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Delete Type؟');">Delete</a>
                     </td>
                 </tr>
                 index++;
@@ -38,7 +38,7 @@
         else
         {
             <tr>
-                <td colspan="3" class="text-center text-muted">لا توجد أنواع ملفات حالياً.</td>
+                <td colspan="3" class="text-center text-muted">No Types.</td>
             </tr>
         }
     </tbody>

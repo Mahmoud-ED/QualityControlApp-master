@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using QualityControlApp.Models.Entities;
-using QualityControlApp.Models.Interfaces;
-using QualityControlApp.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using QualityControlApp.Classes;
+using QualityControlApp.Models;
+using QualityControlApp.Models.Entities;
+using QualityControlApp.Models.Interfaces;
 
 namespace QualityControlApp.Controllers
 {
+    [ViewLayout("_LayoutDashboard")]
     public class FileTypeController : BaseController
     {
 

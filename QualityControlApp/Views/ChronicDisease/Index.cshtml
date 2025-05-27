@@ -1,0 +1,113 @@
+﻿@* Views/ChronicDisease/Index.cshtml *@
+@model QualityControlApp.ViewModels.ChronicDiseaseIndexViewModel
+
+@{
+    ViewData["Title"] = "الأمراض المزمنة";
+}
+
+@* Display TempData messages *@
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <h5 class="mb-4">@ViewData["Title"]</h5>
+
+                @* Form for Adding New Chronic Disease *@
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">إضافة مرض مزمن جديد</h6>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Create" method="post">
+                            @* It's important that asp-for paths match the ViewModel structure *@
+                            @* e.g., asp-for="NewChronicDisease.Name" *@
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NewChronicDisease.Name" class="form-label"></label>
+                                    <input asp-for="NewChronicDisease.Name" class="form-control" />
+                                    <span asp-validation-for="NewChronicDisease.Name" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NewChronicDisease.Description" class="form-label"></label>
+                                    <input asp-for="NewChronicDisease.Description" class="form-control" />
+                                    <span asp-validation-for="NewChronicDisease.Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">إضافة المرض</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                @* Table for Displaying Existing Chronic Diseases *@
+                <h6 class="mb-3">قائمة الأمراض المزمنة الحالية</h6>
+                @if (Model.ChronicDiseases != null && Model.ChronicDiseases.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.NewChronicDisease.Name)</th>
+                                    <th>@Html.DisplayNameFor(model => model.NewChronicDisease.Description)</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ChronicDiseases)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                        <td>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1">
+                                                <i class="fas fa-edit"></i> تعديل
+                                            </a>
+                                            @* Delete Button/Form - using a form for POST delete *@
+                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا المرض المزمن؟');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i> حذف
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        لا توجد أمراض مزمنة مسجلة حاليًا.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

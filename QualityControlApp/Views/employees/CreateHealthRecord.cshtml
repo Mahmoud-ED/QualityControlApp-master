@@ -1,0 +1,78 @@
+﻿@model QualityControlApp.ViewModels.CreateHealthRecordViewModel
+
+@{
+    ViewData["Title"] = $"إضافة سجل صحي جديد لـ {Model.EmployeeName}";
+    Layout = "_LayoutDashboard"; // Or your specific layout
+}
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">@ViewData["Title"]</h5>
+                    <a asp-action="Details" asp-controller="Employees" asp-route-id="@Model.HealthRecord.EmployeeId" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> العودة إلى تفاصيل الموظف
+                    </a>
+                </div>
+
+                @if (TempData["error"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">@TempData["error"]</div>
+                }
+
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">بيانات السجل الصحي</h6>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="CreateHealthRecordForEmployee" asp-controller="Employees" method="post">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            @* Hidden field for EmployeeId - this is crucial and comes from the ViewModel *@
+                            <input type="hidden" asp-for="HealthRecord.EmployeeId" />
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="HealthRecord.ChronicDiseaseId" class="form-label"></label>
+                                    <select asp-for="HealthRecord.ChronicDiseaseId" class="form-select" asp-items="Model.ChronicDiseaseOptions">
+                                        <option value="">-- اختر المرض المزمن --</option>
+                                    </select>
+                                    <span asp-validation-for="HealthRecord.ChronicDiseaseId" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="HealthRecord.DiagnosisDate" class="form-label"></label>
+                                    <input asp-for="HealthRecord.DiagnosisDate" type="date" class="form-control" />
+                                    <span asp-validation-for="HealthRecord.DiagnosisDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="HealthRecord.Notes" class="form-label"></label>
+                                <textarea asp-for="HealthRecord.Notes" class="form-control" rows="4" placeholder="أدخل ملاحظات إضافية إذا لزم الأمر..."></textarea>
+                                <span asp-validation-for="HealthRecord.Notes" class="text-danger"></span>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="fas fa-save me-1"></i> حفظ السجل الصحي
+                                </button>
+                                <a asp-action="Details" asp-controller="Employees" asp-route-id="@Model.HealthRecord.EmployeeId" class="btn btn-secondary px-4 ms-2">
+                                    إلغاء
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

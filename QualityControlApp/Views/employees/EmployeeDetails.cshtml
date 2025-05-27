@@ -1,0 +1,183 @@
+﻿@model QualityControlApp.ViewModels.EmployeeDetailsViewModel
+
+@{
+    ViewData["Title"] = "تفاصيل الموظف - " + (Model.Employee?.Name ?? "غير متوفر");
+    Layout = "_Layout"; // Ensure your layout is correctly referenced
+}
+
+@* Display TempData messages *@
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+    </div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق"></button>
+    </div>
+}
+
+
+@if (Model.Employee == null)
+{
+
+}
+else
+{
+    <div class="container-fluid mt-4 px-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-user-tie me-2"></i>تفاصيل الموظف: @Model.Employee.Name</h4>
+
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-info-circle me-2"></i>المعلومات الشخصية</h5>
+                        <hr />
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.Name)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Employee.Name)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.Gender)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Employee.Gender)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.DateOfBirth)</dt>
+                            <dd class="col-sm-8">@Model.Employee.DateOfBirth.ToString("yyyy/MM/dd")</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.MotherName)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Employee.MotherName)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.MaritalStatus)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Employee.MaritalStatus)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.PhoneNumber)</dt>
+                            <dd class="col-sm-8"><span dir="ltr">@Html.DisplayFor(model => model.Employee.PhoneNumber)</span></dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Employee.Address)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Employee.Address)</dd>
+
+                            @if (Model.Employee.ApplicationUser != null)
+                            {
+                                <dt class="col-sm-4">البريد الإلكتروني (الحساب)</dt>
+                                <dd class="col-sm-8">@Model.Employee.ApplicationUser.Email</dd>
+                            }
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-briefcase me-2"></i>المعلومات المهنية</h5>
+                        <hr />
+                        <dl class="row">
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.Employee.Specialization)</dt>
+                            <dd class="col-sm-7">@Html.DisplayFor(model => model.Employee.Specialization)</dd>
+
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.Employee.YearsOfExperience)</dt>
+                            <dd class="col-sm-7">@Html.DisplayFor(model => model.Employee.YearsOfExperience) سنة/سنوات</dd>
+                        </dl>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Employee.Bio))
+                        {
+                            <h5 class="mt-3">@Html.DisplayNameFor(model => model.Employee.Bio)</h5>
+                            <hr />
+                            <div class="p-3 bg-light border rounded" style="white-space: pre-wrap;">
+                                @Html.DisplayFor(model => model.Employee.Bio)
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <a asp-controller="Employees" asp-action="PrintEmployeeCard" asp-route-id="@Model.Employee.Id" class="btn btn-info" target="_blank">
+                            <i class="fas fa-id-card"></i> طباعة بطاقة الهوية
+                        </a>
+                        @* For Delete, using a form is safer for POST operations *@
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* --- القسم الخاص بالسجلات الصحية --- *@
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-file-medical me-2"></i>السجل الصحي للموظف</h4>
+            </div>
+            <div class="card-body">
+                @* --- نموذج إضافة سجل صحي جديد --- *@
+
+
+                <hr class="my-4" />
+
+                @* --- عرض السجلات الصحية الحالية --- *@
+                <h5><i class="fas fa-list-alt me-2"></i>السجلات الصحية المسجلة</h5>
+                @if (Model.HealthRecords.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.NewHealthRecord.ChronicDisease.Name)</th>
+                                    <th>@Html.DisplayNameFor(model => model.NewHealthRecord.DiagnosisDate)</th>
+                                    <th>@Html.DisplayNameFor(model => model.NewHealthRecord.Notes)</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    @* <th>إجراءات</th> *@ @* Add Edit/Delete for health records later if needed *@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var record in Model.HealthRecords)
+                                {
+                                    <tr>
+                                        <td>@record.ChronicDisease?.Name</td> @* Safe navigation for ChronicDisease name *@
+                                        <td>@record.DiagnosisDate.ToString("yyyy/MM/dd")</td>
+                                        <td>@Html.DisplayFor(modelItem => record.Notes)</td>
+                                        <td>@record.Created.ToString("yyyy/MM/dd HH:mm")</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        لا توجد سجلات صحية مسجلة لهذا الموظف حاليًا.
+                    </div>
+                }
+            </div>
+        </div>
+
+
+
+    </div>
+}
+
+<style>
+    .card-header h3, .card-header h4 {
+        margin-bottom: 0;
+    }
+
+    dt {
+        font-weight: 600;
+    }
+
+    .bg-light { /* For Bio section */
+        background-color: #f8f9fa !important;
+    }
+
+    .table th {
+        font-weight: 600;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

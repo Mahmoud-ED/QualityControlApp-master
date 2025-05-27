@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using PasswordGenerator;
 using QualityControlApp.Classes;
 using QualityControlApp.Models.Entities;
 using QualityControlApp.Models.Interfaces;
+using QualityControlApp.ViewModels;
 using QualityControlApp.ViewModels.Identity;
-using PasswordGenerator;
+using SkiaSharp;
 
 namespace QualityControlApp.Controllers
 {
@@ -15,18 +18,24 @@ namespace QualityControlApp.Controllers
     public class employeesController : BaseController
     {
         private readonly IUnitOfWork<Employee> _employee;
+        private readonly IUnitOfWork<HealthRecord> _healthRecord;
+        private readonly IUnitOfWork<ChronicDisease> _chronicDisease;
         private readonly IEmailSender _emailSender;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public employeesController(IUnitOfWork<Employee> employee,
+            IUnitOfWork<HealthRecord> healthRecord,
+            IUnitOfWork<ChronicDisease> ChronicDisease,
                                    IWebHostEnvironment host,
                                    IEmailSender emailSender,
                                    UserManager<ApplicationUser> userManager,
                                    SignInManager<ApplicationUser> signInManager,
                                    RoleManager<IdentityRole> roleManager) : base(host)
         {
+            _healthRecord = healthRecord;
+            _chronicDisease = ChronicDisease;
             _employee = employee;
             _emailSender = emailSender;
             _userManager = userManager;
@@ -315,9 +324,168 @@ namespace QualityControlApp.Controllers
 
 
         }
+        public async Task<IActionResult> PrintEmployeeCard(Guid id)
+        {
+            var employee = await _employee.Entity.Include(e => e.ApplicationUser).Where(i => i.Id == id).FirstOrDefaultAsync();
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            // يمكنك إنشاء ViewModel إذا كنت تريد تمرير بيانات إضافية
+            return View("PrintEmployeeCard", employee);
+        }
+
+        // Action to display multiple employee cards for printing (if needed)
+        public async Task<IActionResult> PrintAllEmployeeCards()
+        {
+            var employees = await _employee.Entity.Include(e => e.ApplicationUser)
+                                          .ToListAsync();
+            return View("PrintMultipleEmployeeCards", employees); // استخدم View منفصل إذا كان التخطيط مختلفًا
+        }
 
 
+        public async Task<IActionResult> Details(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound("Employee ID is missing.");
+            }
+
+            var employee = await _employee.Entity.GetByIdAsync(id.Value);
+
+            if (employee == null)
+            {
+                TempData["error"] = "الموظف غير موجود.";
+                return RedirectToAction(nameof(Index)); // Or your employee list action
+            }
+
+            var healthRecords = await _healthRecord.Entity
+                                        .Include(hr => hr.ChronicDisease) // To display ChronicDisease.Name
+                                        .Where(hr => hr.EmployeeId == id)
+                                        .OrderByDescending(hr => hr.DiagnosisDate)
+                                        .ToListAsync();
+
+            // Fetch Chronic Diseases for the dropdown in the "Add Health Record" form
+            var chronicDiseases =  _chronicDisease.Entity.GetAll(); // Assuming GetAllAsync exists
+
+            var viewModel = new EmployeeDetailsViewModel
+            {
+                Employee = employee,
+                HealthRecords = healthRecords,
+                NewHealthRecord = new HealthRecord { EmployeeId = id.Value, DiagnosisDate = DateTime.Today }, // Pre-fill EmployeeId and a default date
+                ChronicDiseaseOptions = chronicDiseases.Select(cd => new SelectListItem
+                {
+                    Value = cd.Id.ToString(),
+                    Text = cd.Name
+                }).ToList()
+            };
+
+            return View("Details", viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateHealthRecordForEmployee(Guid employeeId)
+        {
+            if (employeeId == Guid.Empty)
+            {
+                TempData["error"] = "معرف الموظف غير صالح.";
+                return RedirectToAction("Index", "Employees"); // Or appropriate error page
+            }
+
+            var employee = await _employee.Entity.GetByIdAsync(employeeId); //_context.Employees.FindAsync(employeeId);
+            if (employee == null)
+            {
+                TempData["error"] = "الموظف غير موجود.";
+                return RedirectToAction("Index", "Employees");
+            }
+
+            var chronicDiseases = _chronicDisease.Entity.GetAll(); //_context.ChronicDiseases.OrderBy(cd => cd.Name).ToListAsync();
+
+            var viewModel = new CreateHealthRecordViewModel
+            {
+                HealthRecord = new HealthRecord
+                {
+                    EmployeeId = employeeId,
+                    DiagnosisDate = DateTime.Today // Default diagnosis date
+                },
+                EmployeeName = employee.Name,
+                ChronicDiseaseOptions = chronicDiseases.Select(cd => new SelectListItem
+                {
+                    Value = cd.Id.ToString(),
+                    Text = cd.Name
+                }).ToList()
+            };
+
+            return View("CreateHealthRecord", viewModel); // Specify view name if action name differs
+        }
+
+        // POST: Employees/CreateHealthRecordForEmployee (or HealthRecords/Create)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateHealthRecordForEmployee(CreateHealthRecordViewModel viewModel)
+        {
+            // Remove navigation properties from ModelState if they cause issues
+            // and you are not intending to validate them fully here.
+            ModelState.Remove("HealthRecord.Employee");
+            ModelState.Remove("HealthRecord.ChronicDisease");
 
 
+            if (ModelState.IsValid) // Validates viewModel.HealthRecord based on its DataAnnotations
+            {
+                try
+                {
+                    // Ensure EmployeeId is set if somehow it wasn't bound (though hidden field should handle it)
+                    if (viewModel.HealthRecord.EmployeeId == Guid.Empty)
+                    {
+                        // This case should ideally not happen if the form is set up correctly
+                        TempData["error"] = "فقدان معرف الموظف عند الإرسال.";
+                        // Repopulate and return
+                        var employeeForName = await _employee.Entity.GetByIdAsync(viewModel.HealthRecord.EmployeeId); // This line might be problematic if EmployeeId is empty
+                        viewModel.EmployeeName = employeeForName?.Name ?? "غير معروف";
+                        var chronicDiseasesList = _chronicDisease.Entity.GetAll();
+                        viewModel.ChronicDiseaseOptions = chronicDiseasesList.Select(cd => new SelectListItem
+                        {
+                            Value = cd.Id.ToString(),
+                            Text = cd.Name
+                        }).ToList();
+                        return View("CreateHealthRecord", viewModel);
+                    }
+
+
+                    _healthRecord.Entity.Insert(viewModel.HealthRecord);
+                    await _healthRecord.SaveAsync();
+                    TempData["success"] = $"تم إضافة سجل صحي للموظف بنجاح.";
+                    // Redirect to the employee's details page
+                    return RedirectToAction("Details", "Employees", new { id = viewModel.HealthRecord.EmployeeId });
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception (ex)
+                    TempData["error"] = "حدث خطأ أثناء إضافة السجل الصحي.";
+                    // Fall through to re-render the form with error
+                }
+            }
+            else
+            {
+                TempData["error"] = "فشل إضافة السجل الصحي. يرجى مراجعة البيانات المدخلة.";
+            }
+
+            // If ModelState is invalid or an error occurred, repopulate necessary data for the view model
+            var employee = await _employee.Entity.GetByIdAsync(viewModel.HealthRecord.EmployeeId); //_context.Employees.FindAsync(viewModel.HealthRecord.EmployeeId);
+            viewModel.EmployeeName = employee?.Name ?? "غير معروف"; // Handle if employee somehow not found
+
+            var chronicDiseases =  _chronicDisease.Entity.GetAll(); //_context.ChronicDiseases.OrderBy(cd => cd.Name).ToListAsync();
+            viewModel.ChronicDiseaseOptions = chronicDiseases.Select(cd => new SelectListItem
+            {
+                Value = cd.Id.ToString(),
+                Text = cd.Name
+            }).ToList();
+            // The viewModel.HealthRecord already contains the user's input and validation errors
+
+            return View("CreateHealthRecord", viewModel);
+        }
     }
+
+
+
 }

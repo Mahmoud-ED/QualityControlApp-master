@@ -1,0 +1,572 @@
+﻿@model Employee
+@inject IUnitOfWork<SiteInfo> _siteInfo
+@inject IUnitOfWork<Contact> _contact
+@{
+    ViewBag.Title = $"Employee ID - {Model.Name}";
+    Layout = null;
+
+    string scheme = Context.Request.Scheme;
+    string host = Context.Request.Host.Host;
+
+    string qrContent = Url.Action("EmployeeDetails", "EmployeesInfo", new { id = Model.Id }, scheme, host)
+                       ?? $"Fallback: Name: {Model.Name}, ID: {Model.Id}";
+
+    string displayEmployeeId = Model.Id.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .print-controls {
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: calc(337px * 2 + 40px); /* Approximate width of two cards + gap */
+            max-width: 95%;
+        }
+
+            .print-controls button, .print-controls a {
+                padding: 10px 20px;
+                font-size: 15px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                margin: 5px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .print-controls a {
+                background-color: #6c757d;
+            }
+
+            .print-controls button:hover {
+                background-color: #0056b3;
+            }
+
+            .print-controls a:hover {
+                background-color: #545b62;
+            }
+
+        .card-wrapper {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .id-card-container {
+            width: 337px;
+            height: 212px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            color: #333;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Front Card Specific Styles --- */
+        /* --- Front Card Specific Styles --- */
+        .card-front .card-header-section {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            height: 28px;
+        }
+
+        .card-front .id-title {
+            font-size: 0.65em;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .card-front .sim-chip {
+            width: 32px;
+            height: 22px;
+            background-color: #d4af37;
+            border: 1px solid #b8860b;
+            border-radius: 3px;
+            position: absolute;
+            top: 17px; /* MOVED DOWN: Was 15px, now 17px */
+            left: 18px; /* In RTL, this is visually the RIGHT side of the card container */
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+            .card-front .sim-chip::before {
+                content: '';
+                width: 70%;
+                height: 1px;
+                background-color: #b8860b;
+                position: absolute;
+                top: 35%;
+            }
+
+            .card-front .sim-chip::after {
+                content: '';
+                width: 1px;
+                height: 60%;
+                background-color: #b8860b;
+                position: absolute;
+                left: 40%;
+            }
+
+        .card-front .card-main-content {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center; /* Align items vertically center */
+            flex-grow: 1;
+            margin-top: 10px;
+            gap: 10px;
+            overflow: hidden; /* Helps contain children if they are still too wide */
+        }
+
+        .card-front .employee-info-cluster {
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* Align photo and details vertically */
+            flex-grow: 1;
+            gap: 8px; /* Slightly reduced gap */
+            min-width: 0; /* Important for flex item to shrink if needed */
+        }
+
+        .card-front .employee-photo-container {
+            flex-shrink: 0;
+        }
+
+        .card-front .employee-photo-bank {
+            width: 75px; /* Slightly reduced photo size */
+            height: 75px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .card-front .employee-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1; /* Allow details to take remaining space in cluster */
+            min-width: 0; /* Important for text to wrap */
+        }
+
+            .card-front .employee-details .name {
+                font-size: 1em;
+                font-weight: 600;
+                color: #1a2533;
+                margin-bottom: 2px;
+                line-height: 1.2;
+            }
+
+            .card-front .employee-details .specialization {
+                font-size: 0.7em;
+                color: #50667b;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+            }
+
+            .card-front .employee-details .id-number-label {
+                font-size: 0.55em;
+                color: #777;
+                margin-bottom: 1px;
+                text-transform: uppercase;
+            }
+
+            .card-front .employee-details .id-number {
+                font-size: 0.8em; /* Reduced font size */
+                font-family: 'Courier New', Courier, monospace;
+                color: #2c3e50;
+                font-weight: bold;
+                word-break: break-all; /* Allow long IDs to break and wrap */
+                line-height: 1.1;
+            }
+
+        .card-front .qr-code-container-bank {
+            box-sizing: border-box;
+            width: 95px; /* Reduced width for QR */
+            height: 95px; /* Reduced height for QR */
+            border: 1px solid #ccc;
+            padding: 4px; /* Adjusted padding */
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .card-front .qr-code-container-bank img,
+            .card-front .qr-code-container-bank canvas {
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+        /* --- Back Card Specific Styles --- */
+        .card-back {
+            background: linear-gradient(135deg, #e1e5ea 0%, #bac8d9 100%);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.7em;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            line-height: 1.3;
+        }
+
+            .card-back .back-header {
+                font-weight: bold;
+                font-size: 0.85em;
+                margin-bottom: 8px;
+                color: #333;
+            }
+
+            .card-back .contact-info p {
+                margin: 2px 0;
+                font-size: 0.8em;
+            }
+
+            .card-back .magnetic-stripe {
+                height: 25px;
+                background-color: #333;
+                margin: 12px -10px;
+            }
+
+            .card-back .terms {
+                font-size: 0.6em;
+                color: #555;
+                margin-top: auto;
+            }
+
+            .card-back .signature-area {
+                margin-top: 8px;
+                border-top: 1px solid #888;
+                padding-top: 4px;
+                font-size: 0.65em;
+                color: #555;
+            }
+
+            .card-back .company-logo-small {
+                max-height: 18px;
+                opacity: 0.7;
+                margin-top: 8px;
+                object-fit: contain;
+            }
+
+        /* أنماط الطباعة */
+        @@media print {
+            body {
+                background-color: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .print-controls {
+                display: none !important;
+            }
+
+            .card-wrapper {
+                display: block !important;
+            }
+
+            .id-card-container {
+                width: 85.6mm !important;
+                height: 53.98mm !important;
+                box-shadow: none !important;
+                border: 0.2mm solid #444 !important;
+                margin: 5mm auto !important;
+                padding: 2.5mm !important;
+                page-break-inside: avoid !important;
+                overflow: hidden !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-sizing: border-box !important;
+            }
+
+            .card-front {
+                page-break-after: always !important;
+            }
+
+            .card-back {
+                page-break-after: avoid !important;
+            }
+
+            .card-front .card-header-section {
+                margin-bottom: 1.5mm !important;
+                padding-bottom: 1mm !important;
+                height: auto !important; /* Adjust height if needed for print */
+            }
+
+            .card-front .id-title {
+                font-size: 5pt !important;
+            }
+
+            .card-front .sim-chip {
+                width: 7mm !important;
+                height: 5mm !important;
+                top: 2.5mm !important;
+                left: 3mm !important; /* RTL: Visual Right */
+                border-width: 0.15mm !important;
+            }
+
+            .card-front .card-main-content {
+                margin-top: 2mm !important;
+                gap: 1.5mm !important;
+            }
+
+            .card-front .employee-info-cluster {
+                gap: 1.5mm !important;
+            }
+
+            .card-front .employee-photo-bank {
+                width: 18mm !important;
+                height: 18mm !important; /* Slightly smaller photo for print */
+                border-radius: 2mm !important;
+                border-width: 0.3mm !important;
+            }
+
+            .card-front .employee-details .name {
+                font-size: 7.5pt !important;
+                margin-bottom: 0.5mm !important;
+            }
+
+            .card-front .employee-details .specialization {
+                font-size: 5pt !important;
+                margin-bottom: 1mm !important;
+            }
+
+            .card-front .employee-details .id-number-label {
+                font-size: 4.5pt !important;
+                margin-bottom: 0mm !important;
+            }
+
+            .card-front .employee-details .id-number {
+                font-size: 6.5pt !important;
+                line-height: 1.1 !important;
+            }
+
+            .card-front .qr-code-container-bank {
+                width: 20mm !important; /* Reduced print QR size */
+                height: 20mm !important; /* Reduced print QR size */
+                padding: 1mm !important;
+            }
+
+            .card-back .back-header {
+                font-size: 6.5pt !important;
+                margin-bottom: 1.5mm !important;
+            }
+
+            .card-back .contact-info p {
+                font-size: 5.5pt !important;
+                margin: 0.4mm 0 !important;
+            }
+
+            .card-back .magnetic-stripe {
+                height: 6mm !important;
+                margin: 2.5mm -2.5mm !important;
+            }
+
+            .card-back .terms {
+                font-size: 4.5pt !important;
+            }
+
+            .card-back .signature-area {
+                margin-top: 1.5mm !important;
+                padding-top: 1mm !important;
+                font-size: 5pt !important;
+                border-top-width: 0.15mm !important;
+            }
+
+            .card-back .company-logo-small {
+                max-height: 4mm !important;
+                margin-top: 1.5mm !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls">
+        <button onclick="initiatePrint();"><i class="fas fa-print"></i> طباعة البطاقة (الوجهين)</button>
+        <a href="@Url.Action("Index", "Employees")"><i class="fas fa-list"></i> العودة للقائمة</a>
+    </div>
+
+    <div class="card-wrapper">
+        <!-- ======== FRONT OF THE CARD ======== -->
+        <div class="id-card-container card-front" id="employeeCardFront_@Model.Id">
+            <div class="card-header-section">
+                <span class="id-title">بطاقة تعريف موظف</span>
+            </div>
+
+            <div class="card-main-content">
+                <div class="employee-info-cluster">
+                    <div class="employee-photo-container">
+                        <img src="~/img/AlSharef.jpg" alt="صورة @Model.Name" class="employee-photo-bank">
+                    </div>
+                    <div class="employee-details">
+                        <div class="name">@Model.Name</div>
+                        <div class="specialization">@Model.Specialization</div>
+                        <div class="id-number-label">الرقم الوظيفي</div>
+                        <div class="id-number">@displayEmployeeId</div>
+                    </div>
+                </div>
+
+                <div class="qr-code-container-bank" id="qrCode_@Model.Id" data-qr-content="@qrContent">
+                    <!-- QR Code will be generated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        @{
+            var siteInfo = _siteInfo.Entity.GetAll().SingleOrDefault();
+            var contact = _contact.Entity.GetAll().SingleOrDefault();
+        }
+
+        @if (siteInfo != null && contact != null)
+        {
+            <div class="id-card-container card-back" id="employeeCardBack_@Model.Id">
+                <div class="back-header">@siteInfo.Name</div>
+                <div class="magnetic-stripe"></div>
+                <div class="contact-info">
+                    <p>في حال العثور عليها، يرجى الاتصال:</p>
+                    <p>@contact.Phone | بريد: @contact.Email</p>
+                </div>
+                <div class="signature-area">
+                    توقيع حامل البطاقة
+                </div>
+                <div class="terms">
+                    هذه البطاقة شخصية. يجب إبرازها عند الطلب.
+                    <br />تاريخ الإصدار: @Model.Created.ToString("yyyy/MM/dd")
+                </div>
+                @if (!string.IsNullOrEmpty(siteInfo.LogoUrl))
+                {
+                    <img src="@Url.Content(siteInfo.LogoUrl)" alt="شعار الشركة" class="company-logo-small">
+                }
+            </div>
+        }
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var qrElement = document.getElementById('qrCode_@Model.Id');
+            if (qrElement) {
+                var content = qrElement.getAttribute('data-qr-content');
+                if (!content) {
+                    console.error("QR Code content is missing for element:", qrElement);
+                    qrElement.innerHTML = "محتوى QR مفقود";
+                    return;
+                }
+
+                const computedStyle = window.getComputedStyle(qrElement);
+                // Use clientWidth/Height which includes padding but not border/margin if box-sizing is content-box
+                // For border-box, clientWidth is width - border.
+                // We want the area INSIDE padding for the QR code.
+
+                // Get dimensions *including* padding, *excluding* border.
+                let availableWidth = qrElement.clientWidth;
+                let availableHeight = qrElement.clientHeight;
+
+                // Subtract padding to get the pure content area.
+                let targetSize = Math.min(
+                    availableWidth - (parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight)),
+                    availableHeight - (parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom))
+                );
+
+                targetSize = Math.max(10, Math.floor(targetSize));
+
+                if (targetSize > 0) {
+                    try {
+                        new QRCode(qrElement, {
+                            text: content,
+                            width: targetSize,
+                            height: targetSize,
+                            colorDark: "#000000",
+                            colorLight: "#ffffff",
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+                    } catch (e) {
+                        console.error("Error generating QR Code:", e);
+                        qrElement.innerHTML = "خطأ في توليد QR";
+                    }
+                } else {
+                    console.error("Calculated target size for QR code is invalid:", targetSize, "Container clientW:", qrElement.clientWidth, "Container clientH:", qrElement.clientHeight);
+                    qrElement.innerHTML = "حجم QR غير صالح";
+                }
+            }
+        });
+
+        function initiatePrint() {
+            var images = Array.from(document.images).filter(img => !img.closest('.print-controls'));
+
+            if (images.length === 0) {
+                setTimeout(function() { window.print(); }, 100); // Delay for canvas QR
+                return;
+            }
+
+            let loadedImageCount = 0;
+            let allImagesAttempted = false;
+
+            function checkAndPrint() {
+                if (loadedImageCount === images.length && !allImagesAttempted) {
+                    allImagesAttempted = true; // Prevent multiple print calls
+                    setTimeout(function() { window.print(); }, 150);
+                }
+            }
+
+            images.forEach(img => {
+                if (img.complete && img.naturalHeight !== 0) {
+                    loadedImageCount++;
+                } else {
+                    img.onload = img.onerror = () => {
+                        loadedImageCount++;
+                        checkAndPrint();
+                    };
+                }
+            });
+            checkAndPrint(); // Check if all images were already loaded
+        }
+    </script>
+</body>
+</html>

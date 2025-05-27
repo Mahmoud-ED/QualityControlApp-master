@@ -62,15 +62,6 @@ namespace QualityControlApp.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "071dbc1b-f453-4417-b8fc-a151cafb07a3",
-                            ConcurrencyStamp = "1a3f23ae-16d8-48c8-b4fb-bdf11b2acac7",
-                            Name = "Prog",
-                            NormalizedName = "PROG"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -232,13 +223,6 @@ namespace QualityControlApp.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "698b899d-78e6-4a9f-8ce9-f21e23c570d1",
-                            RoleId = "071dbc1b-f453-4417-b8fc-a151cafb07a3"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -448,6 +432,33 @@ namespace QualityControlApp.Migrations
                     b.ToTable("BookingAppointment");
                 });
 
+            modelBuilder.Entity("QualityControlApp.Models.Entities.ChronicDisease", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChronicDisease");
+                });
+
             modelBuilder.Entity("QualityControlApp.Models.Entities.Company", b =>
                 {
                     b.Property<Guid>("Id")
@@ -493,9 +504,8 @@ namespace QualityControlApp.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-                  
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid?>("LocationId")
                         .HasColumnType("uniqueidentifier");
@@ -515,10 +525,14 @@ namespace QualityControlApp.Migrations
                     b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
 
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("LocationId");
 
@@ -651,18 +665,6 @@ namespace QualityControlApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Contact");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("403bed52-50ea-4fbe-beaa-86d91b5821fb"),
-                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5478),
-                            Email = "libyanlacc@gmail.com",
-                            Facebook = "- Facebook",
-                            Instagram = "- Instagram",
-                            Phone = "+218913832221",
-                            Twitter = "- Twitter"
-                        });
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Employee", b =>
@@ -685,8 +687,21 @@ namespace QualityControlApp.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaritalStatus")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("Modified")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("MotherName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -737,6 +752,41 @@ namespace QualityControlApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FileType");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.HealthRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<Guid>("ChronicDiseaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DiagnosisDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChronicDiseaseId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("HealthRecord");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>
@@ -994,16 +1044,6 @@ namespace QualityControlApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SiteInfo");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("0ab0351e-0064-4a50-8bf8-76b5b18fa46a"),
-                            About = "",
-                            Activity = "LACC site",
-                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5326),
-                            Name = "LACC"
-                        });
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.SiteState", b =>
@@ -1029,15 +1069,6 @@ namespace QualityControlApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SiteState");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5d335bb4-94a1-40c0-9991-90b8c9f53c7f"),
-                            ClosingMessage = "The site is temporarily closed for development",
-                            Created = new DateTime(2025, 5, 19, 20, 44, 58, 394, DateTimeKind.Local).AddTicks(5503),
-                            State = true
-                        });
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.UserProfile", b =>
@@ -1095,26 +1126,6 @@ namespace QualityControlApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "698b899d-78e6-4a9f-8ce9-f21e23c570d1",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "79c14e0c-de72-4aa9-bf50-fa5417d925fa",
-                            Email = "libyanlacc@gmail.com",
-                            EmailConfirmed = true,
-                            LockoutEnabled = true,
-                            NormalizedEmail = "LIBYANLACC@GMAIL.COM",
-                            NormalizedUserName = "LIBYANLACC@GMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEC+P2cmr1/QT2JVGMUQPVVG7tc2/NYSyH6XpnstXW46TpQgCHJmV27m1U0zkalkzXw==",
-                            PhoneNumberConfirmed = true,
-                            SecurityStamp = "f1503583-40d0-4ed3-aa4f-1c553ac98d09",
-                            TwoFactorEnabled = false,
-                            UserName = "libyanlacc@gmail.com",
-                            Age = 0,
-                            CreatedDate = new DateTime(2025, 5, 19, 18, 44, 58, 394, DateTimeKind.Utc).AddTicks(5764)
-                        });
                 });
 
             modelBuilder.Entity("CompanyQuestionAssignedUsers", b =>
@@ -1251,6 +1262,10 @@ namespace QualityControlApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "Creator")
+                        .WithMany("CreatedCompanyQuestions")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("QualityControlApp.Models.Entities.Location", "Location")
                         .WithMany("CompanyQuestion")
@@ -1311,6 +1326,25 @@ namespace QualityControlApp.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
+            modelBuilder.Entity("QualityControlApp.Models.Entities.HealthRecord", b =>
+                {
+                    b.HasOne("QualityControlApp.Models.Entities.ChronicDisease", "ChronicDisease")
+                        .WithMany("HealthRecords")
+                        .HasForeignKey("ChronicDiseaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("QualityControlApp.Models.Entities.Employee", "Employee")
+                        .WithMany("HealthRecords")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ChronicDisease");
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>
                 {
                     b.HasOne("QualityControlApp.Models.Entities.ApplicationUser", "ApplicationUser")
@@ -1356,6 +1390,11 @@ namespace QualityControlApp.Migrations
                     b.Navigation("RequestFiles");
                 });
 
+            modelBuilder.Entity("QualityControlApp.Models.Entities.ChronicDisease", b =>
+                {
+                    b.Navigation("HealthRecords");
+                });
+
             modelBuilder.Entity("QualityControlApp.Models.Entities.Company", b =>
                 {
                     b.Navigation("BookingAppointment");
@@ -1373,6 +1412,11 @@ namespace QualityControlApp.Migrations
                     b.Navigation("AvailableCategories");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("QualityControlApp.Models.Entities.Employee", b =>
+                {
+                    b.Navigation("HealthRecords");
                 });
 
             modelBuilder.Entity("QualityControlApp.Models.Entities.Landing", b =>

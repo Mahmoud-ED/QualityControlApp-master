@@ -1,11 +1,14 @@
-﻿using QualityControlApp.Models.Entities;
-using QualityControlApp.Models.Interfaces;
-using QualityControlApp.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QualityControlApp.Classes;
+using QualityControlApp.Models;
+using QualityControlApp.Models.Entities;
+using QualityControlApp.Models.Interfaces;
 
 namespace QualityControlApp.Controllers
 {
+    [ViewLayout("_LayoutDashboard")]
+
     public class LocationController :BaseController
     {
         private readonly ApplicationDbContext _context;
