@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Models.Entities;
@@ -21,6 +21,7 @@ namespace QualityControlApp.Models
         public DbSet<Contact> Contact { get; set; }
         public DbSet<Question> Question { get; set; }
         public DbSet<QuestionType> QuestionType { get; set; }
+        public DbSet<ImgeForViews> ImgeForViews { get; set; }
         public DbSet<ChronicDisease> ChronicDisease { get; set; }
         public DbSet<HealthRecord> HealthRecord { get; set; }
         public DbSet<CompanyQuestion> CompanyQuestion { get; set; }
@@ -42,7 +43,12 @@ namespace QualityControlApp.Models
         public DbSet<CompanyTypeCategoryAvailable> CompanyTypeCategoryAvailable { get; set; }
         public DbSet<FileType> FileType { get; set; }
         public DbSet<CompanyType> CompanyType { get; set; }
-
+        public DbSet<SystemActivityLog> SystemActivityLogs { get; set; } // <--- أضف هذا
+        public DbSet<FcmToken> FcmTokens { get; set; }
+        public DbSet<FcmNotification> FcmNotifications { get; set; }
+        public DbSet<FcmNotificationLog> FcmNotificationLogs { get; set; }
+        public DbSet<Medicine> Medicines { get; set; }
+        public DbSet<HealthRecordMedication> HealthRecordMedications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -67,6 +73,13 @@ namespace QualityControlApp.Models
             modelBuilder.Entity<CompanyTypeCategoryAvailable>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<HealthRecord>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<ChronicDisease>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<ImgeForViews>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<SystemActivityLog>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<FcmToken>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<FcmNotification>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<FcmNotificationLog>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<Medicine>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<HealthRecordMedication>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
 
             modelBuilder.Seed(_serviceProvider);
 
@@ -163,10 +176,51 @@ namespace QualityControlApp.Models
                 .HasForeignKey(hr => hr.ChronicDiseaseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // FCM Token relationships
+            modelBuilder.Entity<FcmToken>()
+                .HasOne(ft => ft.User)
+                .WithMany()
+                .HasForeignKey(ft => ft.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
+            // FCM Notification relationships
+            modelBuilder.Entity<FcmNotification>()
+                .HasOne(fn => fn.TargetUser)
+                .WithMany()
+                .HasForeignKey(fn => fn.TargetUserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
+            // FCM Notification Log relationships
+            modelBuilder.Entity<FcmNotificationLog>()
+                .HasOne(fnl => fnl.Notification)
+                .WithMany()
+                .HasForeignKey(fnl => fnl.NotificationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<FcmNotificationLog>()
+                .HasOne(fnl => fnl.Token)
+                .WithMany()
+                .HasForeignKey(fnl => fnl.TokenId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<FcmNotificationLog>()
+                .HasOne(fnl => fnl.User)
+                .WithMany()
+                .HasForeignKey(fnl => fnl.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // HealthRecordMedication relationships
+            modelBuilder.Entity<HealthRecordMedication>()
+                .HasOne(hrm => hrm.HealthRecord)
+                .WithMany(hr => hr.HealthRecordMedications)
+                .HasForeignKey(hrm => hrm.HealthRecordId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HealthRecordMedication>()
+                .HasOne(hrm => hrm.Medicine)
+                .WithMany(m => m.HealthRecordMedications)
+                .HasForeignKey(hrm => hrm.MedicineId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

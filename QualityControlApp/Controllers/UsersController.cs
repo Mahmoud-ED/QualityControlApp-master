@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -40,7 +40,8 @@ namespace QualityControlApp.Classes
                                IEmailSender emailSender,
                                UserSessionTracker userSessionTracker,
                                IServiceProvider serviceProvider,
-                               IWebHostEnvironment host) : base(host)
+                                                               IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -141,7 +142,7 @@ namespace QualityControlApp.Classes
             }
 
 
-            ViewBag.userId = user.Id; //ViewComponent لاستعمالها في
+            ViewBag.userId = user.Id; //ViewComponent ?????????? ??
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var userClaims = await _userManager.GetClaimsAsync(user);
@@ -193,7 +194,7 @@ namespace QualityControlApp.Classes
 
             foreach (var error in result.Errors)
             {
-                //ModelState.AddModelError(string.Empty, error.Description); // RedirectToAction لا تظهر لأنه لا يبقى في نفس الصفحة لأنه يقوم بتحميل الصفحة من جديد عن طريق
+                //ModelState.AddModelError(string.Empty, error.Description); // RedirectToAction ?? ???? ???? ?? ???? ?? ??? ?????? ???? ???? ?????? ?????? ?? ???? ?? ????
                 TempData["ErrorMessage"] = error.Description;
             }
 
@@ -224,15 +225,15 @@ namespace QualityControlApp.Classes
 
             IdentityResult result;
 
-            if (user.LockoutEnd == null) // في حال المستخدم غير موقوف
+            if (user.LockoutEnd == null) // ?? ??? ???????? ??? ?????
             {
                 result = await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);
             }
-            else if (DateTime.UtcNow > user.LockoutEnd) // في حال المستخدم غير موقوف
+            else if (DateTime.UtcNow > user.LockoutEnd) // ?? ??? ???????? ??? ?????
             {
                 result = await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);
             }
-            else //موقوف
+            else //?????
             {
                 result = await _userManager.SetLockoutEndDateAsync(user, null);
             }
@@ -245,7 +246,7 @@ namespace QualityControlApp.Classes
 
             foreach (var error in result.Errors)
             {
-                //ModelState.AddModelError(string.Empty, error.Description); // RedirectToAction لا تظهر لأنه لا يبقى في نفس الصفحة لأنه يقوم بتحميل الصفحة من جديد عن طريق
+                //ModelState.AddModelError(string.Empty, error.Description); // RedirectToAction ?? ???? ???? ?? ???? ?? ??? ?????? ???? ???? ?????? ?????? ?? ???? ?? ????
                 TempData["ErrorMessage"] = error.Description;
             }
 
@@ -361,7 +362,7 @@ namespace QualityControlApp.Classes
 
         public async Task<IActionResult> CreateUser()
         {
-            //-----AllowAnnonymous- الا في حال الوظائف التي خصصنا لها-Authorize لا داعي لمثل هذه الشروط بسبب وجود---------------------
+            //-----AllowAnnonymous- ??? ?? ??? ??????? ???? ????? ???-Authorize ?? ???? ???? ??? ?????? ???? ????---------------------
             {
                 //if (_signInManager.IsSignedIn(User) & !User.IsInRole("Admin") & !User.IsInRole("Prog"))
                 //{
@@ -487,7 +488,7 @@ namespace QualityControlApp.Classes
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            if ((await _userManager.RemoveFromRolesAsync(user, roles)).Succeeded)//var result = await _userManager.RemoveFromRoleAsync(user, "EmployeeRequest"); // لحذف صلاحية واحدة فقط
+            if ((await _userManager.RemoveFromRolesAsync(user, roles)).Succeeded)//var result = await _userManager.RemoveFromRoleAsync(user, "EmployeeRequest"); // ???? ?????? ????? ???
             {
                 if ((await _userManager.AddToRolesAsync(user, model.Where(s => s.IsSelected).Select(r => r.RoleName))).Succeeded)
                 {
@@ -495,7 +496,7 @@ namespace QualityControlApp.Classes
                     return RedirectToAction("EditUser", new { Id = userId });
 
 
-                    //SiteState - EditUser//اختبار هل اليوزر ليس ادمن او مبرمج يتم سحب الصلاحيتين لأنهم سيختفو ويبقو مفعلين
+                    //SiteState - EditUser//?????? ?? ?????? ??? ???? ?? ????? ??? ??? ?????????? ????? ?????? ????? ??????
 
                 }
             }
@@ -521,7 +522,7 @@ namespace QualityControlApp.Classes
             }
 
             var claims = await _userManager.GetClaimsAsync(user);
-            var result = await _userManager.RemoveClaimsAsync(user, claims); //var result = await _userManager.RemoveFromClaimAsync(user, "Edit"); // لسحب مطالبة واحدة فقط
+            var result = await _userManager.RemoveClaimsAsync(user, claims); //var result = await _userManager.RemoveFromClaimAsync(user, "Edit"); // ???? ?????? ????? ???
             if (result.Succeeded)
             {
                 result = await _userManager.AddClaimsAsync(user, userClaimListVM.Claims
@@ -543,4 +544,5 @@ namespace QualityControlApp.Classes
 
     }
 }
+
 

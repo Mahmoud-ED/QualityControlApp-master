@@ -24,7 +24,10 @@
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
-            
+
+                @* -- الحقول المخفية لتخزين الإحداثيات -- *@
+                <input asp-for="Latitude" type="hidden" />
+                <input asp-for="Longitude" type="hidden" />
                 <div class="alert alert-info" role="alert" style="width:max-content">
                     <p>
                         <b>@Html.DisplayNameFor(model => model.Created):</b>

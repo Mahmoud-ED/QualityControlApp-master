@@ -1,0 +1,649 @@
+@model IEnumerable<QualityControlApp.Models.Entities.Landing>
+
+@{
+    ViewData["Title"] = "Landing Reports Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-chart-bar me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Comprehensive analytics and reporting for landing requests.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index", "Landing")" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                <i class="fas fa-arrow-left me-2"></i> Back to Landings
+            </a>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Total Landings</p>
+                            <h3 class="mb-0 text-primary fw-bold" id="totalLandings">@(ViewBag.TotalLandings?.ToString("N0") ?? "0")</h3>
+                        </div>
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-plane-arrival fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Pending Requests</p>
+                            <h3 class="mb-0 text-warning fw-bold" id="pendingRequests">@(ViewBag.PendingRequests?.ToString("N0") ?? "0")</h3>
+                        </div>
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Approved Requests</p>
+                            <h3 class="mb-0 text-success fw-bold" id="approvedRequests">@(ViewBag.ApprovedRequests?.ToString("N0") ?? "0")</h3>
+                        </div>
+                        <div class="icon-circle bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 small fw-semibold">Rejected Requests</p>
+                            <h3 class="mb-0 text-danger fw-bold" id="rejectedRequests">@(ViewBag.RejectedRequests?.ToString("N0") ?? "0")</h3>
+                        </div>
+                        <div class="icon-circle bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Chart: Passengers per Operator -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-semibold text-dark"><i class="fas fa-users me-2"></i>عدد الركاب لكل شركة</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportChartAsImage('operatorsPassengersChart','passengers-per-operator.png')"><i class="fas fa-download me-2"></i>تصدير كصورة</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="printChart('operatorsPassengersChart')"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="operatorsPassengersChart" style="width:100%; height:450px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تم إلغاء بقية الشارتات للإبقاء على شارت واحد فقط -->
+
+    <!-- Advanced sections removed -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3">
+                    <h5 class="mb-0 fw-semibold text-dark"><i class="fas fa-chart-area me-2"></i>تحليلات متقدمة للركاب والبضائع</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="card border h-100">
+                                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="fas fa-users me-2"></i>توزيع الركاب حسب الوجهة</h6>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="exportChartAsImage('passengersByDestinationChart', 'passengers-destination.png')"><i class="fas fa-download me-2"></i>تصدير كصورة</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="printChart('passengersByDestinationChart')"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="passengersByDestinationChart" style="width:100%; height:300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card border h-100">
+                                <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="fas fa-box me-2"></i>توزيع البضائع حسب النوع</h6>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="exportChartAsImage('cargoByTypeChart', 'cargo-types.png')"><i class="fas fa-download me-2"></i>تصدير كصورة</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="printChart('cargoByTypeChart')"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="cargoByTypeChart" style="width:100%; height:300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Routes and Airports Analysis -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-semibold text-dark mb-0"><i class="fas fa-route me-2"></i>أكثر المسارات نشاطاً</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportChartAsImage('routesChart', 'routes-chart.png')"><i class="fas fa-download me-2"></i>تصدير كصورة</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="printChart('routesChart')"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="routesChart" style="width:100%; height:350px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-semibold text-dark mb-0"><i class="fas fa-map-marker-alt me-2"></i>مطارات الهبوط الأكثر استخداماً</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportChartAsImage('airportsChart', 'airports-chart.png')"><i class="fas fa-download me-2"></i>تصدير كصورة</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="printChart('airportsChart')"><i class="fas fa-print me-2"></i>طباعة</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="airportsChart" style="width:100%; height:350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3 border-bottom-0">
+                    <h5 class="mb-0 fw-semibold text-dark"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("ExportToExcel")" class="btn btn-outline-primary w-100 py-3 rounded-3 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-file-excel fa-2x me-3"></i>
+                                <div class="text-start">
+                                    <div class="fw-semibold">Export to Excel</div>
+                                    <small class="text-muted">Download all data</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("ExportToPDF")" class="btn btn-outline-danger w-100 py-3 rounded-3 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-file-pdf fa-2x me-3"></i>
+                                <div class="text-start">
+                                    <div class="fw-semibold">Export to PDF</div>
+                                    <small class="text-muted">Generate report</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <button class="btn btn-outline-info w-100 py-3 rounded-3 d-flex align-items-center justify-content-center" onclick="printPage()">
+                                <i class="fas fa-print fa-2x me-3"></i>
+                                <div class="text-start">
+                                    <div class="fw-semibold">Print Report</div>
+                                    <small class="text-muted">Current view</small>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <button class="btn btn-outline-secondary w-100 py-3 rounded-3 d-flex align-items-center justify-content-center" onclick="refreshData()">
+                                <i class="fas fa-sync-alt fa-2x me-3"></i>
+                                <div class="text-start">
+                                    <div class="fw-semibold">Refresh Data</div>
+                                    <small class="text-muted">Update statistics</small>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .report-card {
+            transition: all 0.3s ease;
+            border-color: #e9ecef !important;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+            border-color: #0d6efd !important;
+        }
+
+        .report-icon {
+            opacity: 0.8;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+        }
+
+        .table th {
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    @* استبدال مكتبة الشارت إلى Apache ECharts *@
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+
+    <script>
+        let charts = {};
+        function showNoData(elId, message) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#999;">${message || 'لا توجد بيانات'}</div>`;
+        }
+        function safeDispose(elId) {
+            if (charts[elId]) { charts[elId].dispose(); delete charts[elId]; }
+        }
+
+        // دالة لإنشاء شارت دائري تفاعلي مع انميشن
+        function createAnimatedPieChart(elId, data, title) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            safeDispose(elId);
+            const chart = echarts.init(el, null, { renderer: 'canvas' });
+            charts[elId] = chart;
+            const option = {
+                title: { text: title, left: 'center' },
+                tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+                legend: { bottom: 0, type: 'scroll' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    roseType: false,
+                    itemStyle: { borderRadius: 8 },
+                    data: data.map(x => ({ name: x.label, value: x.value }))
+                }]
+            };
+            chart.setOption(option);
+        }
+
+        // دالة لإنشاء شارت خطي مع انميشن
+        function createAnimatedLineChart(elId, data, title, xLabel, yLabel) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            safeDispose(elId);
+            const chart = echarts.init(el);
+            charts[elId] = chart;
+            const option = {
+                title: { text: title, left: 'center' },
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: data.labels },
+                yAxis: { type: 'value' },
+                series: [{
+                    name: yLabel,
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {},
+                    data: data.values
+                }]
+            };
+            chart.setOption(option);
+        }
+
+        // دالة لإنشاء شارت أعمدة مع انميشن
+        function createAnimatedBarChart(elId, data, title, xLabel, yLabel) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            safeDispose(elId);
+            const chart = echarts.init(el);
+            charts[elId] = chart;
+            const option = {
+                title: { text: title, left: 'center' },
+                tooltip: { trigger: 'axis' },
+                xAxis: { type: 'category', data: data.labels },
+                yAxis: { type: 'value' },
+                series: [{
+                    name: yLabel,
+                    type: 'bar',
+                    data: data.values,
+                    itemStyle: { borderRadius: [6,6,0,0] }
+                }]
+            };
+            chart.setOption(option);
+        }
+
+        // دالة لتحديث البيانات
+        function updateChartData() {
+            // تحديث البيانات من السيرفر
+            fetch('/Landing/GetLandingChartsData')
+                .then(response => response.json())
+                .then(data => {
+                    // تحديث الشارتس بالبيانات الجديدة
+                    if (charts['operatorsChart']) {
+                        charts['operatorsChart'].data.labels = data.operators.labels;
+                        charts['operatorsChart'].data.datasets[0].data = data.operators.data;
+                        charts['operatorsChart'].update('active');
+                    }
+
+                    if (charts['monthlyTrendsChart']) {
+                        charts['monthlyTrendsChart'].data.labels = data.monthly.labels;
+                        charts['monthlyTrendsChart'].data.datasets[0].data = data.monthly.data;
+                        charts['monthlyTrendsChart'].update('active');
+                    }
+
+                    // تحديث الإحصائيات
+                    document.getElementById('totalLandings').textContent = data.stats.total;
+                    document.getElementById('pendingRequests').textContent = data.stats.pending;
+                    document.getElementById('approvedRequests').textContent = data.stats.approved;
+                    document.getElementById('rejectedRequests').textContent = data.stats.rejected;
+                })
+                .catch(error => console.error('Error updating chart data:', error));
+        }
+
+        // دوال التحكم
+        function printPage() {
+            window.print();
+        }
+
+        function refreshData() {
+            updateChartData();
+            showNotification('تم تحديث البيانات بنجاح!', 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // تحميل البيانات من API
+        async function loadChartData() {
+            try {
+                const response = await fetch('/Landing/GetLandingChartsData');
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('تم تحميل البيانات بنجاح:', result);
+
+                    // تحديث الإحصائيات
+                    updateStats(result.stats);
+
+                    // إنشاء الشارتس بالبيانات الحقيقية
+                    if (result.operators && result.operators.labels && result.operators.labels.length > 0) {
+                        const operatorsData = result.operators.labels.map((label, index) => ({
+                            label: label || 'غير محدد',
+                            value: result.operators.data[index] || 0
+                        }));
+                        createAnimatedPieChart('operatorsChart', operatorsData, 'توزيع الطلبات حسب المشغل');
+                    } else { showNoData('operatorsChart', 'لا توجد بيانات للمشغلين'); }
+
+                    if (result.monthly && result.monthly.labels && result.monthly.labels.length > 0) {
+                        createAnimatedLineChart('monthlyTrendsChart', {
+                            labels: result.monthly.labels,
+                            values: result.monthly.data
+                        }, 'الاتجاهات الشهرية', 'الشهر', 'عدد الطلبات');
+                    } else { showNoData('monthlyTrendsChart', 'لا توجد بيانات شهرية'); }
+
+                    if (result.aircraftTypes && result.aircraftTypes.labels && result.aircraftTypes.labels.length > 0) {
+                        createAnimatedBarChart('aircraftTypesChart', {
+                            labels: result.aircraftTypes.labels,
+                            values: result.aircraftTypes.data
+                        }, 'توزيع أنواع الطائرات', 'نوع الطائرة', 'عدد الرحلات');
+                    } else { showNoData('aircraftTypesChart', 'لا توجد بيانات لأنواع الطائرات'); }
+
+                    // شارتس الركاب والبضائع
+                    if (result.passengersByDestination && result.passengersByDestination.labels && result.passengersByDestination.labels.length > 0) {
+                        createAnimatedBarChart('passengersByDestinationChart', {
+                            labels: result.passengersByDestination.labels,
+                            values: result.passengersByDestination.data,
+                            colors: ['rgba(13, 110, 253, 0.8)', 'rgba(25, 135, 84, 0.8)', 'rgba(255, 193, 7, 0.8)', 'rgba(220, 53, 69, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)']
+                        }, 'توزيع الركاب حسب الوجهة', 'الوجهة', 'عدد الركاب');
+                    } else { showNoData('passengersByDestinationChart', 'لا توجد بيانات للوجهات'); }
+
+                    if (result.cargoTypes && result.cargoTypes.labels && result.cargoTypes.labels.length > 0) {
+                        createAnimatedBarChart('cargoByTypeChart', {
+                            labels: result.cargoTypes.labels,
+                            values: result.cargoTypes.data,
+                            colors: ['rgba(25, 135, 84, 0.8)', 'rgba(255, 193, 7, 0.8)', 'rgba(13, 110, 253, 0.8)', 'rgba(220, 53, 69, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)']
+                        }, 'توزيع البضائع حسب النوع', 'نوع البضائع', 'كمية البضائع');
+                    } else { showNoData('cargoByTypeChart', 'لا توجد بيانات للبضائع'); }
+
+                    // شارتس المسارات والمطارات
+                    if (result.routes && result.routes.labels && result.routes.labels.length > 0) {
+                        createAnimatedBarChart('routesChart', {
+                            labels: result.routes.labels,
+                            values: result.routes.data
+                        }, 'أكثر المسارات نشاطاً', 'المسار', 'عدد الرحلات');
+                    } else { showNoData('routesChart', 'لا توجد بيانات للمسارات'); }
+
+                    if (result.airports && result.airports.labels && result.airports.labels.length > 0) {
+                        createAnimatedBarChart('airportsChart', {
+                            labels: result.airports.labels,
+                            values: result.airports.data
+                        }, 'مطارات الهبوط الأكثر استخداماً', 'المطار', 'عدد الرحلات');
+                    } else { showNoData('airportsChart', 'لا توجد بيانات للمطارات'); }
+
+                    showNotification('تم تحديث البيانات بنجاح!', 'success');
+
+                } else {
+                    console.error('Failed to load chart data:', result.message);
+                    showNotification('فشل في تحميل البيانات من قاعدة البيانات', 'danger');
+                    loadFallbackData();
+                }
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                showNotification('خطأ في الاتصال بقاعدة البيانات', 'danger');
+                loadFallbackData();
+            }
+        }
+
+        // تحديث الإحصائيات في الواجهة
+        function updateStats(stats) {
+            console.log('تحديث الإحصائيات:', stats);
+
+            const totalElement = document.getElementById('totalLandings');
+            const pendingElement = document.getElementById('pendingRequests');
+            const approvedElement = document.getElementById('approvedRequests');
+            const rejectedElement = document.getElementById('rejectedRequests');
+
+            if (totalElement && stats) {
+                totalElement.textContent = (stats.total || 0).toLocaleString();
+                console.log('تم تحديث totalLandings:', stats.total);
+            }
+            if (pendingElement && stats) {
+                pendingElement.textContent = (stats.pending || 0).toLocaleString();
+                console.log('تم تحديث pendingRequests:', stats.pending);
+            }
+            if (approvedElement && stats) {
+                approvedElement.textContent = (stats.approved || 0).toLocaleString();
+                console.log('تم تحديث approvedRequests:', stats.approved);
+            }
+            if (rejectedElement && stats) {
+                rejectedElement.textContent = (stats.rejected || 0).toLocaleString();
+                console.log('تم تحديث rejectedRequests:', stats.rejected);
+            }
+        }
+
+        // بيانات احتياطية في حالة فشل الاتصال
+        function loadFallbackData() {
+            console.log('Loading fallback data...');
+
+            // بيانات تجريبية للشارتس
+            const operatorsData = [
+                { label: 'شركة الطيران السعودية', value: 45 },
+                { label: 'الخطوط الجوية الإماراتية', value: 32 },
+                { label: 'طيران ناس', value: 28 },
+                { label: 'طيران أديل', value: 22 },
+                { label: 'فلاي دبي', value: 18 },
+                { label: 'الخطوط الجوية القطرية', value: 15 }
+            ];
+
+            const monthlyData = {
+                labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                values: [12, 19, 15, 25, 22, 30, 28, 35, 32, 28, 24, 20]
+            };
+
+            const aircraftTypesData = [
+                { label: 'Boeing 737', value: 25 },
+                { label: 'Airbus A320', value: 30 },
+                { label: 'Boeing 777', value: 15 },
+                { label: 'Airbus A330', value: 12 },
+                { label: 'Boeing 787', value: 8 },
+                { label: 'Embraer E190', value: 10 }
+            ];
+
+            // إنشاء الشارتس بالبيانات التجريبية
+            createAnimatedPieChart('operatorsChart', operatorsData, 'توزيع الطلبات حسب المشغل');
+            createAnimatedLineChart('monthlyTrendsChart', monthlyData, 'الاتجاهات الشهرية', 'الشهر', 'عدد الطلبات');
+            createAnimatedBarChart('aircraftTypesChart', {
+                labels: aircraftTypesData.map(item => item.label),
+                values: aircraftTypesData.map(item => item.value)
+            }, 'توزيع أنواع الطائرات', 'نوع الطائرة', 'عدد الرحلات');
+        }
+
+        // تحميل البيانات عند بدء الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadChartData();
+
+            // إضافة event listeners للأزرار
+            const exportButtons = document.querySelectorAll('a[href*="Export"]');
+            exportButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري المعالجة...';
+                    this.classList.add('disabled');
+
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                        this.classList.remove('disabled');
+                    }, 3000);
+                });
+            });
+
+            // تحديث تلقائي كل دقيقة
+            setInterval(() => {
+                console.log('تحديث تلقائي للبيانات...');
+                loadChartData();
+            }, 60000);
+
+            // Resize على تغيير حجم النافذة
+            window.addEventListener('resize', () => {
+                Object.values(charts).forEach(ch => { try { ch.resize(); } catch(e){} });
+            });
+        });
+
+        // دالة لتصدير الشارت كصورة
+        function exportChartAsImage(chartId, filename) {
+            const chart = charts[chartId];
+            if (chart) {
+                const link = document.createElement('a');
+                link.download = filename || 'chart.png';
+                link.href = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+                link.click();
+            }
+        }
+
+        // دالة للطباعة
+        function printChart(chartId) {
+            const chart = charts[chartId];
+            if (chart) {
+                const dataUrl = chart.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#fff' });
+                const windowContent = `
+                    <html>
+                        <head><title>Print Chart</title></head>
+                        <body style="text-align: center;">
+                            <img src="${dataUrl}" style="max-width: 100%; height: auto;" />
+                        </body>
+                    </html>
+                `;
+                const printWindow = window.open('', '_blank');
+                printWindow.document.open();
+                printWindow.document.write(windowContent);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        }
+    </script>
+}

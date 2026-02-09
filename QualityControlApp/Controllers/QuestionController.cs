@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using QualityControlApp.Classes;
 using QualityControlApp.Models.Interfaces;
 using QualityControlApp.Models;
@@ -29,12 +29,13 @@ namespace QualityControlApp.Controllers
                               ApplicationDbContext context,
                               IUnitOfWork<Question> question,
                               IUnitOfWork<QuestionType> questionType,
-                              IWebHostEnvironment host) : base(host)
+                                                              IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _context = context;
             _question = question;
             _questionType = questionType;
-            //_host = host; // نفعله فقط لو احتجناه في هذا الكونترولر
+            //_host = host; // ????? ??? ?? ??????? ?? ??? ??????????
         }
 
 
@@ -63,13 +64,13 @@ namespace QualityControlApp.Controllers
         //}
 
 
-        // في QuestionController.cs
+        // ?? QuestionController.cs
 
-        // ... (Constructor وحقن التبعيات كما هي) ...
+        // ... (Constructor ???? ???????? ??? ??) ...
 
-        public async Task<IActionResult> Index(Guid? questionTypeId) // تم تغيير اسم البارامتر هنا ليكون أوضح
+        public async Task<IActionResult> Index(Guid? questionTypeId) // ?? ????? ??? ????????? ??? ????? ????
         {
-            // 1. جلب كل أنواع الأسئلة لعرضها كفلاتر
+            // 1. ??? ?? ????? ??????? ?????? ??????
             var allQuestionTypes = await _questionType.Entity.GetAll()
                                              .OrderBy(qt => qt.Created)
                                              
@@ -83,7 +84,7 @@ namespace QualityControlApp.Controllers
             
 
 
-            // ... (الكود اللاحق لفلترة questionTypeId وتجميع الـ ViewModel) ...
+            // ... (????? ?????? ?????? questionTypeId ?????? ??? ViewModel) ...
 
 
 
@@ -106,7 +107,7 @@ namespace QualityControlApp.Controllers
                 PageTitle = pageTitle
             };
 
-            ViewBag.Section = viewModel.PageTitle; // لتحديث عنوان التبويب أو أي مكان آخر تستخدمه
+            ViewBag.Section = viewModel.PageTitle; // ?????? ????? ??????? ?? ?? ???? ??? ???????
 
             return View(viewModel);
         }
@@ -248,14 +249,14 @@ namespace QualityControlApp.Controllers
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!questionExists(question.Id)) //في حال محذوف
+                    if (!questionExists(question.Id)) //?? ??? ?????
                     {
                         return View("NotFound");
                     }
                     else
                     {
                         ViewBag.ErrorTitle = "The basic data not found in the database ";
-                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                         return View("Error");
                     }
                 }
@@ -289,7 +290,7 @@ namespace QualityControlApp.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorTitle = "The basic data not found in the database ";
-                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                 return View("Error");
 
             }
@@ -309,3 +310,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

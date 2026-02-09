@@ -1,191 +1,368 @@
-﻿@inject SignInManager<ApplicationUser> _signInManager
+@inject SignInManager<ApplicationUser> _signInManager
 @inject UserManager<ApplicationUser> _userManager
 @inject IUnitOfWork<UserProfile> _userProfile
+@inject IUnitOfWork<SystemActivityLog> _systemActivityLog
 @inject IUnitOfWork<SiteInfo> _siteInfo
+@inject IUnitOfWork<QualityControlApp.Models.Entities.ImgeForViews> _imgeForViews
+@inject IConfiguration Configuration
 
+@{
+    // --- معلومات الموقع والشعار ---
+    var siteInfo = _siteInfo.Entity.GetAll().SingleOrDefault();
+    string siteName = "E-CAA"; // اسم افتراضي
+    string logoUrlForIcon = "~/img/logo.png"; // أيقونة افتراضية
+    string logoUrlForViewBag = null; // للشعار في ViewBag
 
-
-<!DOCTYPE html>
-
-@* <html lang="en" dir="ltr"> *@
-<head>
-    <meta name="viewport" content="width=device-width" />
-    @* --------------------------------------------------------------- *@
-    @{
-        var siteInfo = _siteInfo.Entity.GetAll().SingleOrDefault();
-
-        if (siteInfo != null)
-
+    if (siteInfo != null)
+    {
+        siteName = siteInfo.Name ?? siteName;
+        if (!string.IsNullOrEmpty(siteInfo.LogoUrl))
         {
-
-            if (siteInfo.LogoUrl != null)
-
-            {
-                <link rel="Shortcut Icon" href="~/pictures/@siteInfo.LogoUrl" />
-            }
-
-            else
-
-            {
-                <link rel="Shortcut Icon" href="~/img/logo.png" />
-            }
-
-
-
-            if (@ViewData["Title"] != null)
-
-            {
-                <title>@ViewData["Title"] - @siteInfo.Name</title>
-            }
-
-            else
-
-            {
-                <title>@siteInfo.Name</title>
-            }
-
-
-
-            ViewBag.SiteName = @siteInfo?.Name;
-
-            ViewBag.LogoUrl = @siteInfo?.LogoUrl;
-
+            logoUrlForIcon = $"~/pictures/{siteInfo.LogoUrl}";
+            logoUrlForViewBag = siteInfo.LogoUrl; // فقط اسم الملف بدون ~/pictures/
         }
     }
-    @* --------------------------------------------------------------- *@
+    ViewBag.SiteName = siteName;
+    ViewBag.LogoUrl = logoUrlForViewBag; // سيتم استخدامه في الـ navbar مع ~/pictures/
+
+    // --- جلب الصورة للـ hero-banner بناءً على اسم الـ View الحالي ---
+    string heroViewIdentifier = ViewData["HeroViewName"] as string;
+
+    if (string.IsNullOrEmpty(heroViewIdentifier))
+    {
+        string currentViewPath = ViewContext.View.Path;
+        if (!string.IsNullOrEmpty(currentViewPath))
+        {
+            heroViewIdentifier = currentViewPath.Replace("/Views/", "")
+                                                .Replace(".cshtml", "")
+                                                .Replace("/", "_");
+        }
+    }
+
+    if (string.IsNullOrEmpty(heroViewIdentifier) || heroViewIdentifier.Equals("Home_Index", StringComparison.OrdinalIgnoreCase))
+    {
+        heroViewIdentifier = "DefaultHero"; // اسم افتراضي للصورة الرئيسية إذا لم يتم تحديدها
+    }
+
+    var heroImageEntry = _imgeForViews.Entity
+                            .GetWhere(img => img.ViewName != null && img.ViewName.ToLower() == heroViewIdentifier.ToLower())
+                            .FirstOrDefault();
+
+    string resolvedHeroImageUrl = heroImageEntry?.CoverImageUrl ?? "/img/Captin.jpg"; // صورة افتراضية للكفر
+
+    // --- جلب أحدث نشاط للنظام لشريط الأخبار ---
+    var latestActivityForTicker = _systemActivityLog.Entity
+                                .GetAll() // تأكد أن هذا لا يجلب كمية ضخمة من البيانات إذا كان الجدول كبيرًا جدًا
+                                .OrderByDescending(sa => sa.ActivityDate)
+                                .FirstOrDefault();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+ @* إضافة lang attribute *@
+<head>
+    <meta charset="utf-8" /> @* إضافة charset *@
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> @* تعديل طفيف هنا *@
+
+    @if (!string.IsNullOrEmpty(logoUrlForIcon))
+    {
+        <link rel="Shortcut Icon" href="@Url.Content(logoUrlForIcon)" />
+    }
+
+    @if (!string.IsNullOrEmpty(ViewData["Title"] as string))
+    {
+        <title>@ViewData["Title"] - @siteName</title>
+    }
+    else
+    {
+        <title>@siteName</title>
+    }
+
     <environment include="Development">
         <link href="~/lib/twitter-bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     </environment>
-    <environment include="Staging,Production">
+    <environment exclude="Development">
+        @* استخدام exclude للإنتاج وما شابه *@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     </environment>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    @*------------------------------ Dashboard template -------------------------------*@
+    @* ترتيب ملفات CSS مهم، MDI و style.css الخاص بـ template قد يعتمدان على Bootstrap *@
     <link rel="stylesheet" href="~/assets1/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="~/assets1/css/style.css">
-    @* ------------------------------------------------------------------------------ *@
-  @*   <link href="~/css/template.css" rel="stylesheet" /> *@
-     @* <link href="~/css/dashboard.css" rel="stylesheet" /> *@
+    <link rel="stylesheet" href="~/QualityControlApp.styles.css" asp-append-version="true" />
+    <link href="~/css/loader.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+    
+    <!-- Firebase SDK for FCM -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+    
+    <!-- Inject Firebase configuration for FCM -->
+    <script>
+        window.firebaseConfig = {
+            apiKey: "@Configuration["Firebase:ApiKey"]",
+            authDomain: "@Configuration["Firebase:AuthDomain"]",
+            projectId: "@Configuration["Firebase:ProjectId"]",
+            storageBucket: "@Configuration["Firebase:StorageBucket"]",
+            messagingSenderId: "@Configuration["Firebase:MessagingSenderId"]",
+            appId: "@Configuration["Firebase:AppId"]"
+        };
+        window.firebaseVapidKey = "@Configuration["Firebase:VapidKey"]";
+    </script>
+    
+    <!-- FCM Client -->
+    <script src="~/js/fcm.js"></script>
+    <style>
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 300px; /* يمكنك تعديل هذا الارتفاع */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff !important;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            overflow: hidden; /* مهم للمنحنى السفلي */
+        }
 
+            .hero-banner::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 80px; /* ارتفاع المنحنى */
+                background: #fff !important; /* لون خلفية الصفحة الرئيسية */
+                border-top-left-radius: 100% 80px; /* تعديل قيم الانحناء */
+                border-top-right-radius: 100% 80px; /* تعديل قيم الانحناء */
+                z-index: 1;
+            }
+
+            .hero-banner h1 {
+                font-size: 2.5rem; /* يمكنك تعديل حجم الخط */
+                font-weight: bold;
+                position: relative;
+                z-index: 2; /* فوق المنحنى */
+            }
+
+        .datetime-display {
+            padding: 0.5rem 0.75rem;
+            color: var(--bs-navbar-color, rgba(0,0,0,.55));
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-dark .datetime-display {
+            color: var(--bs-navbar-dark-color, rgba(255,255,255,.55));
+        }
+
+  
+           .news-ticker-container {
+        overflow: hidden;
+        flex-grow: 1;
+        white-space: nowrap;
+        height: 100%; /* ليأخذ ارتفاع النافبار */
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+        margin-right: 1rem;
+        position: relative; /* مهم لبعض التأثيرات مثل الخطوط */
+        /* يمكنك تجربة خلفية خفيفة جدًا */
+        /* background-color: rgba(0, 0, 0, 0.03); */
+        /* border-radius: 4px; */ /* إذا أردت حواف دائرية */
+    }
+
+    /* تخصيص للـ navbar الداكن */
+    .navbar-dark .news-ticker-container .news-ticker-content span {
+         color: rgba(255,255,255,.9); /* لون نص أوضح قليلاً في الوضع الداكن */
+    }
+    /* .navbar-dark .news-ticker-container { */
+        /* background-color: rgba(255, 255, 255, 0.05); */ /* خلفية خفيفة للوضع الداكن */
+    /* } */
+
+
+    .news-ticker-content {
+        display: inline-block;
+        padding-left: 100%; /* يبدأ من خارج الشاشة على اليمين */
+        animation: news-ticker-animation 30s linear infinite; /* عدل المدة (30s) */
+        white-space: nowrap;
+    }
+
+    .news-ticker-content span {
+       display: inline-block;
+       font-size: 0.875em; /* حجم خط مناسب */
+       color: #333; /* لون نص أساسي - عدله حسب تصميمك */
+       /* text-shadow: 0px 0px 1px rgba(255,255,255,0.5); */ /* ظل خفيف للنص إذا كان الخلفية داكنة */
+       vertical-align: middle; /* لمحاذاة الأيقونة والنص بشكل أفضل */
+    }
+
+    .news-ticker-content span .mdi { /* لتخصيص الأيقونة */
+        font-size: 1.1em; /* حجم أكبر قليلاً للأيقونة */
+        vertical-align: middle; /* محاذاة أفضل مع النص */
+        margin-right: 0.3rem; /* مسافة بين الأيقونة والنص */
+        color: var(--bs-primary, #0d6efd); /* استخدام لون Bootstrap الأساسي للأيقونة، أو أي لون تريده */
+    }
+    .navbar-dark .news-ticker-content span .mdi {
+        color: rgba(255,255,255,.7); /* لون أيقونة في الوضع الداكن */
+    }
+
+
+    @@keyframes news-ticker-animation {
+        0% {
+            transform: translateX(0);
+        }
+        /* يمكنك إضافة توقف في البداية والنهاية إذا أردت */
+        /* 5% { transform: translateX(0); } */ /* توقف لمدة قصيرة في البداية */
+        100% {
+            transform: translateX(-105%); /* اجعلها تتحرك أبعد قليلاً لتختفي تمامًا + مسافة صغيرة */
+        }
+        /* 95% { transform: translateX(-100%); } */ /* إذا أردت توقف في النهاية قبل التكرار */
+    }
+
+    .news-ticker-container:hover .news-ticker-content {
+        animation-play-state: paused;
+    }
+
+    /* (اختياري) إضافة خطوط فاصلة رقيقة على جانبي الشريط */
+   .news-ticker-container::before,
+    .news-ticker-container::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 60%; 
+        width: 1px;
+        background-color: rgba(0,0,0,0.1);
+    }
+    .news-ticker-container::before {
+        left: -10px; 
+    }
+    .news-ticker-container::after {
+        right: -10px;
+    }
+    .navbar-dark .news-ticker-container::before,
+    .navbar-dark .news-ticker-container::after {
+        background-color: rgba(255,255,255,0.1);
+    } 
+        
+
+     
+    </style>
+    @RenderSection("Styles", required: false) <!-- مكان إضافي للـ Styles من الـ Views -->
 </head>
 <body>
-
     <div class="container-scroller">
-        <!-- partial:partials/_navbar.html -->
         <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row border-bottom">
-            <!-- منطقة الشعار -->
             <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-
                 @if (ViewBag.LogoUrl != null)
-
                 {
-                    <a class="navbar-brand brand-logo" asp-controller="Home" asp-action="Index"><img src="~/pictures/@ViewBag.LogoUrl" alt="logo" style="width:40px;height:40px;" /></a>
-                    <a class="navbar-brand brand-logo-mini" asp-controller="Home" asp-action="Index"><img src="~/pictures/@ViewBag.LogoUrl" alt="logo" style="width:40px;height:40px;" /></a>
+                    <a class="navbar-brand brand-logo" asp-controller="Home" asp-action="Index"><img src="@Url.Content($"~/pictures/{ViewBag.LogoUrl}")" alt="logo" style="width:auto; height:40px; max-width:150px;" /></a>
+                    <a class="navbar-brand brand-logo-mini" asp-controller="Home" asp-action="Index"><img src="@Url.Content($"~/pictures/{ViewBag.LogoUrl}")" alt="logo" style="width:40px; height:40px;" /></a>
                 }
-
                 else
-
                 {
-
-                    <a class="navbar-brand brand-logo" asp-controller="Home" asp-action="Index"><img src="~/img/logo.png" alt="logo" style="width:40px;height:40px;" /></a>
-                    <a class="navbar-brand brand-logo-mini" asp-controller="Home" asp-action="Index"><img src="~/img/logo.png" alt="logo" style="width:40px;height:40px;" /></a>
+                    <a class="navbar-brand brand-logo" asp-controller="Home" asp-action="Index"><img src="@Url.Content("~/img/logo.png")" alt="logo" style="width:auto; height:40px; max-width:150px;" /></a>
+                    <a class="navbar-brand brand-logo-mini" asp-controller="Home" asp-action="Index"><img src="@Url.Content("~/img/logo.png")" alt="logo" style="width:40px; height:40px;" /></a>
                 }
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-stretch">
-                <a class="navbar-toggler navbar-toggler align-self-center mt-4 fs-2" style="cursor:pointer" data-toggle="minimize">
+                <a role="button" class="navbar-toggler navbar-toggler align-self-center" data-toggle="minimize" style="cursor:pointer">
                     <span class="mdi mdi-menu"></span>
                 </a>
 
+                <!-- ===== شريط الأخبار المتحرك ===== -->
+                @if (latestActivityForTicker != null && !string.IsNullOrWhiteSpace(latestActivityForTicker.Description))
+                {
+                    <div class="news-ticker-container">
+                        <div class="news-ticker-content">
+                            <span><i class="mdi mdi-newspaper-variant-outline me-1" aria-hidden="true"></i> @latestActivityForTicker.Description</span>
+                        </div>
+                    </div>
+                }
+                <!-- ===== نهاية شريط الأخبار المتحرك ===== -->
+
                 <ul class="navbar-nav navbar-nav-right">
                     <li class="nav-item nav-profile dropdown">
-                        <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
-
-                            <!--------------------------------------------------------------------------------->
+                        <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            @* استخدم data-bs-toggle لـ Bootstrap 5 *@
                             @{
                                 var userProfile = _userProfile.Entity.GetWhere(a => a.UserId == _userManager.GetUserId(User)).FirstOrDefault();
+                                string userImageUrl = "~/img/User.png"; // صورة افتراضية
+                                string userDisplayName = User.Identity?.IsAuthenticated == true ? (userProfile?.DisplayName ?? User.Identity.Name) : "Guest";
 
-                                if (userProfile != null)
-
+                                if (userProfile != null && !string.IsNullOrEmpty(userProfile.ImageUrl))
                                 {
-                                    <div class="nav-profile-img">
-                                        <img src="~/pictures/userProfile/@userProfile.ImageUrl" alt="no img" />
-                                    </div>
-                                    <div class="nav-profile-text">
-                                        <p class="mb-1 text-black">@userProfile.DisplayName</p>
-                                    </div>
-
-                                    ViewBag.ImageUrl = userProfile.ImageUrl;
-
+                                    userImageUrl = $"~/pictures/userProfile/{userProfile.ImageUrl}";
                                 }
-
-                                else
-
-                                {
-                                    <div class="nav-profile-img">
-                                        <img src="~/img/User.png" alt="no img" />
-                                    </div>
-                                    <div class="nav-profile-text">
-                                        <p class="mb-1 text-black">@User.Identity.Name</p>
-                                    </div>
-                                }
-
                             }
-
-                            <!--------------------------------------------------------------------------------->
+                            <div class="nav-profile-img">
+                                <img src="@Url.Content(userImageUrl)" alt="profile" />
+                            </div>
+                            <div class="nav-profile-text">
+                                <p class="mb-1 text-black">@userDisplayName</p>
+                            </div>
                         </a>
-
-                        <div class="dropdown-menu navbar-dropdown dropdown-menu-right p-0 border-0 font-size-sm" aria-labelledby="profileDropdown" data-x-placement="bottom-end">
+                        <div class="dropdown-menu navbar-dropdown dropdown-menu-end p-0 border-0 font-size-sm" aria-labelledby="profileDropdown">
+                            @* dropdown-menu-end لـ Bootstrap 5 *@
                             <div class="p-3 text-center bg-primary">
-                                <img class="img-avatar img-avatar48 img-avatar-thumb" src="~/pictures/userProfile/@ViewBag.ImageUrl" alt="">
+                                <img class="img-avatar img-avatar48 img-avatar-thumb" src="@Url.Content(userImageUrl)" alt="profile dropdown">
                             </div>
                             <div class="p-2">
-                                @if (User.IsInRole("EmployeeRequest") || User.IsInRole("Employee"))
-
+                                @if (User.Identity?.IsAuthenticated == true)
                                 {
-                                    <a class="dropdown-item fs-6" asp-action="EmployeeProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)">
-                                        Employee Profile<i class="bi badge-info" style="float:right"></i>
+                                    if (User.IsInRole("EmployeeRequest") || User.IsInRole("Employee"))
+                                    {
+                                        <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="EmployeeProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)">
+                                            <span>Employee Profile</span>
+                                            <i class="mdi mdi-account-card-details-outline ms-1"></i>
+                                        </a>
+                                    }
+                                    <h5 class="dropdown-header text-uppercase ps-2 text-dark mt-2">Account</h5>
+                                    <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="UserProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)">
+                                        <span>Profile</span>
+                                        <i class="mdi mdi-account-outline ms-1"></i>
+                                    </a>
+                                    <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="#">
+                                        @* رابط الإعدادات إذا كان متاحًا *@
+                                        <span>Settings</span>
+                                        <i class="mdi mdi-settings ms-1"></i>
+                                    </a>
+                                    <div role="separator" class="dropdown-divider"></div>
+                                    <h5 class="dropdown-header text-uppercase ps-2 text-dark mt-2">Signed in</h5>
+                                    <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="Logout" asp-controller="Account">
+                                        <span>Log Out</span>
+                                        <i class="mdi mdi-logout ms-1"></i>
                                     </a>
                                 }
-                                <h5 class="dropdown-header text-uppercase  pl-2 text-dark mt-2">Account</h5>
-
-                                <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="UserProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)" target="_blank">
-                                    <span>Profile</span>
-                                    <span class="p-0">
-                                        <span class="badge badge-success"></span>
-                                        <i class="mdi mdi-account-outline ml-1"></i>
-                                    </span>
-                                </a>
-                                <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="javascript:void(0)">
-                                    <span>Settings</span>
-                                    <i class="mdi mdi-settings"></i>
-                                </a>
-                                <div role="separator" class="dropdown-divider"></div>
-                                <h5 class="dropdown-header text-uppercase  pl-2 text-dark mt-2">Signed in</h5>
-
-                                <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="Logout" asp-controller="Account">
-                                    <span>Log Out</span>
-                                    <i class="mdi mdi-logout ml-1"></i>
-                                </a>
+                                else
+                                {
+                                    <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" asp-action="Login" asp-controller="Account">
+                                        <span>Login</span>
+                                        <i class="mdi mdi-login ms-1"></i>
+                                    </a>
+                                }
                             </div>
                         </div>
                     </li>
                 </ul>
+                <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+                    <span class="mdi mdi-menu"></span>
+                </button>
             </div>
-            @* يظهر في الشاشات الصغيرة *@
-            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center me-2 fs-3" type="button" data-toggle="offcanvas">
-                <span class="mdi mdi-menu"></span>
-            </button>
         </nav>
 
-        <!-- partial -->
-
-        <div class="container-fluid page-body-wrapper ">
-            <!-- partial:partials/_sidebar.html -->
-            <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="container-fluid page-body-wrapper">
+            <nav class="sidebar sidebar-offcanvas bg-body-secondary" id="sidebar">
                 <ul class="nav">
                     <li class="nav-item">
                         <a class="nav-link mt-3" asp-controller="Admin" asp-action="Index">
@@ -195,243 +372,220 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-route-Type="New" asp-controller="CompanyQuestion" asp-action="Index">
-                            <span class=""><i class=" menu-icon"></i></span>
-                            <span class="menu-title"> Over Sight </span>
+                            <span class="icon-bg"><i class="mdi mdi-radar menu-icon"></i></span> @* أيقونة مختلفة *@
+                            <span class="menu-title">Over Sight</span>
                         </a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" asp-route-Type="Old" asp-controller="CompanyQuestion" asp-action="Index">
-                            <span class=""><i class=" menu-icon"></i></span>
-                            <span class="menu-title">All Opratris</span>
+                            <span class="icon-bg"><i class="mdi mdi-briefcase-search-outline menu-icon"></i></span>  @* أيقونة مختلفة *@
+                            <span class="menu-title">All Operators</span> @* تعديل طفيف *@
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="AirPortRequests" asp-action="Index">
-                            <span class="icon-bg"><i class=" menu-icon"></i></span>
-                            <span class="menu-title"> Overflight Requests </span>
+                            @* إزالة ajax-link إذا كنت لا تستخدم SPA خاصًا *@
+                            <span class="icon-bg"><i class="mdi mdi-airplane-takeoff menu-icon"></i></span>
+                            <span class="menu-title">Overflight Requests</span>
                         </a>
                     </li>
-
-
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Landing" asp-action="Index">
-                            <span class="icon-bg "><i class=" menu-icon"></i></span> <!-- أيقونة مناسبة لـ Over Air Request -->
-                            <span class="menu-title">Landing Requests</span> <!-- تم تحسين الاسم قليلاً -->
+                        <a class="nav-link" asp-controller="AirPortRequests" asp-action="Reports">
+                            <span class="icon-bg"><i class="mdi mdi-chart-line menu-icon"></i></span>
+                            <span class="menu-title">Reports</span>
                         </a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="BookingAppointment" asp-action="Index">
-                            <span class="icon-bg"><i class=" menu-icon"></i></span>
-                            <span class="menu-title"> Create Appointment </span>
+                        <a class="nav-link" data-bs-toggle="collapse" href="#landingReportsMenu" role="button" aria-expanded="false" aria-controls="landingReportsMenu">
+                            <span class="icon-bg"><i class="mdi mdi-airplane-landing menu-icon"></i></span>
+                            <span class="menu-title">Landing Requests</span>
+                            <i class="menu-arrow mdi mdi-chevron-down"></i>
                         </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-route-Type="Old" asp-controller="CompanyQuestion" asp-action="Index">
-                            <span class="icon-bg"><i class=" menu-icon"></i></span>
-                            <span class="menu-title">All Opratris</span>
-                        </a>
-                    </li>
-
-
-                    <li class="nav-item">
-                        <a class="nav-link mt-3" asp-controller="Company" asp-action="Index">
-                            <span class="icon-bg"><i class=" menu-icon"></i></span>
-                            <span class="menu-title">Company</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link mt-3" data-bs-toggle="collapse" href="#questionsCategoriesMenu" role="button" aria-expanded="false" aria-controls="questionsCategoriesMenu">
-                            <span class="icon-bg"><i class="mdi mdi-file-question-outline menu-icon"></i></span> <!-- أيقونة مناسبة للمجموعة -->
-                            <span class="menu-title">Questions & Categories</span>
-                            <i class="menu-arrow mdi mdi-chevron-down"></i> <!-- سهم للإشارة إلى القائمة المنسدلة -->
-                        </a>
-                        <div class="collapse" id="questionsCategoriesMenu">
+                        <div class="collapse" id="landingReportsMenu">
                             <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Question" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-help-circle menu-icon"></i></span>
-                                        <span class="menu-title">Check List</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="TypeQuestion" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-format-list-bulleted menu-icon"></i></span>
-                                        <span class="menu-title">Check List Type</span>
-                                    </a>
-                                </li>
-
-                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="ChronicDisease" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-format-list-bulleted "></i></span>
-                                        <span class="menu-title">Chronic Disease</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="QuestionCategoryType" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-tag menu-icon"></i></span>
-                                        <span class="menu-title">Question Category</span> <!-- تم تعديلها قليلاً لتكون أوضح -->
-                                    </a>
-                                </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-format-list-bulleted menu-icon"></i></span>View Requests</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="Create"><span class="icon-bg ms-3"><i class="mdi mdi-plus-circle-outline menu-icon"></i></span>New Request</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="Reports"><span class="icon-bg ms-3"><i class="mdi mdi-chart-bar menu-icon"></i></span>Reports Dashboard</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="DetailedReport"><span class="icon-bg ms-3"><i class="mdi mdi-file-chart-outline menu-icon"></i></span>Detailed Report</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="StatusReport"><span class="icon-bg ms-3"><i class="mdi mdi-chart-pie menu-icon"></i></span>Status Report</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="DateRangeReport"><span class="icon-bg ms-3"><i class="mdi mdi-calendar-range menu-icon"></i></span>Date Range Report</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Landing" asp-action="AdvancedCharts"><span class="icon-bg ms-3"><i class="mdi mdi-chart-areaspline menu-icon"></i></span>Advanced Analytics</a> </li>
                             </ul>
                         </div>
                     </li>
-
-
                     <li class="nav-item">
-                        <a class="nav-link mt-3" data-bs-toggle="collapse" href="#airportManagementMenu" role="button" aria-expanded="false" aria-controls="airportManagementMenu">
-                            <span class="icon-bg"><i class="mdi mdi-airport menu-icon"></i></span> <!-- أيقونة مناسبة للمجموعة مثل مطار -->
+                        <a class="nav-link" asp-controller="BookingAppointment" asp-action="Index">
+                            <span class="icon-bg"><i class="mdi mdi-calendar-clock menu-icon"></i></span>
+                            <span class="menu-title">Create Appointment</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Company" asp-action="Index">
+                            <span class="icon-bg"><i class="mdi mdi-domain menu-icon"></i></span>
+                            <span class="menu-title">Companies</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#questionsCategoriesMenu" role="button" aria-expanded="false" aria-controls="questionsCategoriesMenu">
+                            <span class="icon-bg"><i class="mdi mdi-file-question-outline menu-icon"></i></span>
+                            <span class="menu-title">Questions & Categories</span>
+                            <i class="menu-arrow mdi mdi-chevron-down"></i>
+                        </a>
+                        <div class="collapse" id="questionsCategoriesMenu">
+                            <ul class="nav flex-column sub-menu">
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Question" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-help-circle-outline menu-icon"></i></span>Check List</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="TypeQuestion" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-format-list-bulleted-type menu-icon"></i></span>Check List Type</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="ChronicDisease" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-heart-pulse menu-icon"></i></span>Chronic Disease</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="QuestionCategoryType" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-tag-multiple-outline menu-icon"></i></span>Question Category</a> </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#airportManagementMenu" aria-expanded="false" aria-controls="airportManagementMenu">
+                            <span class="icon-bg"><i class="mdi mdi-airport menu-icon"></i></span>
                             <span class="menu-title">Airport Management</span>
                             <i class="menu-arrow mdi mdi-chevron-down"></i>
                         </a>
                         <div class="collapse" id="airportManagementMenu">
                             <ul class="nav flex-column sub-menu">
-                               
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="FileType" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-file-document-outline menu-icon"></i></span> <!-- أيقونة مناسبة لـ File Types -->
-                                        <span class="menu-title">File Types</span> <!-- تم تحسين الاسم قليلاً -->
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Location" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-map-marker-radius-outline menu-icon"></i></span> <!-- أيقونة مناسبة لـ Locations -->
-                                        <span class="menu-title">Airports & Locations</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="CompanyType" asp-action="Index">
-                                        <span class="icon-bg ms-3"><i class="mdi mdi-domain menu-icon"></i></span> <!-- أيقونة مناسبة لـ Company Types -->
-                                        <span class="menu-title">Company Types</span> <!-- تم تحسين الاسم قليلاً -->
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" data-toggle="collapse" href="#users" aria-expanded="false" aria-controls="auth">
-                            <span class="icon-bg"><i class="bi bi-people menu-icon"></i></span>
-                            <span class="menu-title">Users</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="collapse" id="users">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Users" asp-action="Users">
-                                        <span class="icon-bg"></span>
-                                        <span class="menu-title">Users</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-action="Roles" asp-controller="Roles">
-                                        Roles
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="nav-item ">
-                        <a class="nav-link" data-toggle="collapse" href="#settings" aria-expanded="false" aria-controls="auth">
-                            <span class="icon-bg"><i class="bi bi-gear menu-icon"></i></span>
-                            <span class="menu-title">Settings</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="collapse" id="settings">
-                            <ul class="nav flex-column sub-menu">
-
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="SiteState">
-                                        Site state
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="SiteDetails">
-                                        Site info & contact
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Mail" asp-action="EmailSettings">
-                                        Email Settings
-                                    </a>
-                                </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="FileType" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-file-document-outline menu-icon"></i></span>File Types</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Location" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-map-marker-radius-outline menu-icon"></i></span>Airports & Locations</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="CompanyType" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-briefcase-variant-outline menu-icon"></i></span>Company Types</a> </li>
                             </ul>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Mail" asp-action="SendEmail">
-                            <span class="icon-bg"><i class="bi bi-envelope-arrow-up menu-icon"></i></span>
-                            <span class="menu-title">Email send</span>
+                        <a class="nav-link" asp-controller="Employees" asp-action="Index">
+                            <span class="icon-bg"><i class="mdi mdi-account-tie menu-icon"></i></span>
+                            <span class="menu-title">Employees</span>
                         </a>
                     </li>
-
-                    <li class="nav-item documentation-link">
-                        <a class="nav-link" asp-action="UserProfile" asp-controller="Account" asp-route-UserId="" target="_blank">
-                            <span class="icon-bg">
-                                <i class="mdi mdi-file-document-box menu-icon"></i>
-                            </span>
-                            <span class="menu-title">Profile</span>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#healthManagementMenu" aria-expanded="false" aria-controls="healthManagementMenu">
+                            <span class="icon-bg"><i class="mdi mdi-hospital-box menu-icon"></i></span>
+                            <span class="menu-title">Health Management</span>
+                            <i class="menu-arrow mdi mdi-chevron-down"></i>
                         </a>
+                        <div class="collapse" id="healthManagementMenu">
+                            <ul class="nav flex-column sub-menu">
+                                <li class="nav-item"> <a class="nav-link" asp-controller="Medicines" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-pill menu-icon"></i></span>Medicines</a> </li>
+                                <li class="nav-item"> <a class="nav-link" asp-controller="ChronicDisease" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-heart-pulse menu-icon"></i></span>Chronic Diseases</a> </li>
+                            </ul>
+                        </div>
                     </li>
-                    <li class="nav-item sidebar-user-actions">
-                        <div class="sidebar-user-menu">
-                            <a asp-action="Logout" asp-controller="Account" class="nav-link">
-                                <i class="mdi mdi-logout menu-icon"></i>
-                                <span class="menu-title">Log Out</span>
+                   
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#usersMenu" aria-expanded="false" aria-controls="usersMenu">
+                                @* استخدم data-bs-toggle لـ BS5 *@
+                                <span class="icon-bg"><i class="mdi mdi-account-group-outline menu-icon"></i></span>
+                                <span class="menu-title">Users</span>
+                                <i class="menu-arrow mdi mdi-chevron-down"></i>
                             </a>
-                        </div>
+                            <div class="collapse" id="usersMenu">
+                                <ul class="nav flex-column sub-menu">
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="Users" asp-action="Users"><span class="icon-bg ms-3"><i class="mdi mdi-account-multiple-outline menu-icon"></i></span>Users</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" asp-action="Roles" asp-controller="Roles"><span class="icon-bg ms-3"><i class="mdi mdi-shield-account-outline menu-icon"></i></span>Roles</a> </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#settingsMenu" aria-expanded="false" aria-controls="settingsMenu">
+                                <span class="icon-bg"><i class="mdi mdi-cog-outline menu-icon"></i></span>
+                                <span class="menu-title">Settings</span>
+                                <i class="menu-arrow mdi mdi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="settingsMenu">
+                                <ul class="nav flex-column sub-menu">
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="SiteState"><span class="icon-bg ms-3"><i class="mdi mdi-power-settings menu-icon"></i></span>Site State</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="Admin" asp-action="SiteDetails"><span class="icon-bg ms-3"><i class="mdi mdi-information-outline menu-icon"></i></span>Site Info & Contact</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="SystemActivityLogs" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-history menu-icon"></i></span>System Activity</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="ImgeForViews" asp-action="Index"><span class="icon-bg ms-3"><i class="mdi mdi-image-area menu-icon"></i></span>Image Covers</a> </li>
+                                    <li class="nav-item"> <a class="nav-link" asp-controller="Mail" asp-action="EmailSettings"><span class="icon-bg ms-3"><i class="mdi mdi-email-cog-outline menu-icon"></i></span>Email Settings</a> </li>
+                                </ul>
+                            </div>
+                        </li>
+                    <li class="nav-item">
+             
+                        
+                        <a class="nav-link" asp-controller="Mail" asp-action="SendEmail">
+                            <span class="icon-bg"><i class="mdi mdi-email-send-outline menu-icon"></i></span>
+                            <span class="menu-title">Send Email</span>
+                        </a>
                     </li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item documentation-link">
+                            <a class="nav-link" asp-action="UserProfile" asp-controller="Account" asp-route-UserId="@_userManager.GetUserId(User)" target="_blank">
+                                <span class="icon-bg">
+                                    <i class="mdi mdi-account-circle-outline menu-icon"></i>
+                                </span>
+                                <span class="menu-title">My Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item sidebar-user-actions">
+                            <div class="sidebar-user-menu">
+                                <a asp-action="Logout" asp-controller="Account" class="nav-link">
+                                    <i class="mdi mdi-logout menu-icon"></i>
+                                    <span class="menu-title">Log Out</span>
+                                </a>
+                            </div>
+                        </li>
+                    }
                 </ul>
             </nav>
-            <!-- partial -->
+
             <div class="main-panel">
-                <div class="m-3">
+                @if (!(ViewContext.RouteData.Values["controller"].ToString() == "Home" && ViewContext.RouteData.Values["action"].ToString() == "Index"))
+                {
+                    <div class="row mt-3 mb-0">
+                        @* إزالة الهامش السفلي من هنا إذا كان hero-banner له هامش سفلي خاص به *@
+                        <div class="col-12 px-0">
+                            @* إزالة الـ padding الافتراضي للعمود *@
+                            <div class="hero-banner" style="background-image: url('@Url.Content(resolvedHeroImageUrl)');">
+                                @if (!string.IsNullOrEmpty(ViewData["Title"] as string))
+                                {
+                                    <h1>@ViewData["Title"]</h1>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="content-wrapper">
+                    @* إضافة content-wrapper حول RenderBody *@
                     @RenderBody()
                 </div>
                 <footer class="footer">
                     <div class="footer-inner-wraper">
                         <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                            &copy; @DateTime.Now.Year - @ViewBag.SiteName | All rights reserved.
+                            <span>© @DateTime.Now.Year - @ViewBag.SiteName | All rights reserved.</span>
                         </div>
                     </div>
                 </footer>
             </div>
         </div>
-
-
-
-
     </div>
 
-  
-
-    @*------------------------------ Dashboard template -------------------------------*@
     <script src="~/assets1/vendors/js/vendor.bundle.base.js"></script>
     <script src="~/assets1/js/off-canvas.js"></script>
     <script src="~/assets1/js/misc.js"></script>
-    @* ------------------------------------------------------------------------------ *@
 
     <environment include="Development">
         <script src="~/lib/jquery/jquery.min.js"></script>
-        <script src="~/lib/jquery/jquery.min.js"></script>
-
-        <script src="~/lib/twitter-bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="~/lib/twitter-bootstrap/js/bootstrap.bundle.min.js"></script>
     </environment>
-    <environment include="Staging,Production">
+    <environment exclude="Development">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </environment>
 
-    @* --------------------------------- *@
-    <partial name="Partial/_toast"></partial>
-    @* --------------------------------- *@
+    <partial name="Partial/_toast" /> @* تأكد أن هذا الـ Partial موجود ويعمل بشكل صحيح *@
 
-    @RenderSection("Scripts", required: false)
-    @RenderSection("Styles", required: false)
-
+    @* إذا كنت تستخدم SPA مخصصًا مع هذه الملفات، اتركها. وإلا، قد لا تكون ضرورية. *@
+    @* <script src="~/js/layoutAjax-spa.js"></script> *@
+    @* <script src="~/js/layoutajaxloader.js"></script> *@
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

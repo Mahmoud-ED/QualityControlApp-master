@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +21,13 @@ namespace QualityControlApp.Controllers
         public FileTypeController(
                               ApplicationDbContext context,
                               IUnitOfWork<FileType> filetype,
-                              IWebHostEnvironment host) : base(host)
+                                                              IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         
         {
             _context = context;
             _filetype = filetype;
-            //_host = host; // نفعله فقط لو احتجناه في هذا الكونترولر
+            //_host = host; // ????? ??? ?? ??????? ?? ??? ??????????
         }
 
 
@@ -131,7 +132,7 @@ namespace QualityControlApp.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorTitle = "The basic data not found in the database ";
-                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                 return View("Error");
 
             }
@@ -151,3 +152,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

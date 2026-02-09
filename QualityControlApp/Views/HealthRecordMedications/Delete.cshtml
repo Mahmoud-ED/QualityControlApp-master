@@ -1,0 +1,77 @@
+@model HealthRecordMedication
+
+@{
+    ViewData["Title"] = "حذف الدواء من السجل الصحي";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> تأكيد حذف الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>تحذير:</strong> هل أنت متأكد من حذف هذا الدواء من السجل الصحي؟
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">الموظف:</dt>
+                        <dd class="col-sm-8"><strong>@Model.HealthRecord.Employee.Name</strong></dd>
+
+                        <dt class="col-sm-4">المرض:</dt>
+                        <dd class="col-sm-8">@Model.HealthRecord.ChronicDisease.Name</dd>
+
+                        <dt class="col-sm-4">الدواء:</dt>
+                        <dd class="col-sm-8"><strong>@Model.Medicine.Name</strong></dd>
+
+                        <dt class="col-sm-4">الجرعة:</dt>
+                        <dd class="col-sm-8">@Model.Dosage</dd>
+
+                        <dt class="col-sm-4">التكرار:</dt>
+                        <dd class="col-sm-8">@Model.Frequency</dd>
+
+                        @if (Model.StartDate.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ البدء:</dt>
+                            <dd class="col-sm-8">@Model.StartDate.Value.ToString("yyyy/MM/dd")</dd>
+                        }
+
+                        @if (Model.EndDate.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ الانتهاء:</dt>
+                            <dd class="col-sm-8">@Model.EndDate.Value.ToString("yyyy/MM/dd")</dd>
+                        }
+
+                        <dt class="col-sm-4">الحالة:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">نشط</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">غير نشط</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> تأكيد الحذف
+                            </button>
+                            <a asp-controller="Employees" asp-action="Details" asp-route-id="@Model.HealthRecord.EmployeeId" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using QualityControlApp.Classes;
 using QualityControlApp.Models.Entities;
 using QualityControlApp.Models.Interfaces;
@@ -37,9 +37,10 @@ namespace QualityControlApp.Controllers
             IUnitOfWork<Employee> employee,
             IUnitOfWork<ApplicationUser> applicationUser,
             IWebHostEnvironment host,
+                               IConfiguration configuration,
             IServiceProvider serviceProvider,
             IViewHelper viewHelper
-            ) : base(host)
+            ) : base(host, configuration)
         {
             _context = context;
             _siteInfo = siteInfo;
@@ -99,7 +100,7 @@ namespace QualityControlApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // إنشاء كائن جديد من BookingAppointment
+                // ????? ???? ???? ?? BookingAppointment
                 var bookingAppointment = new BookingAppointment
                 {
                     CompanyId = model.CompanyId,
@@ -107,19 +108,19 @@ namespace QualityControlApp.Controllers
                     Notes = model.Notes
                 };
 
-                // حفظ الكائن في قاعدة البيانات
+                // ??? ?????? ?? ????? ????????
                 _bookingappointment.Entity.Insert(bookingAppointment);
                 await _bookingappointment.SaveAsync();
 
-                // إعادة التوجيه إلى قائمة الحجوزات أو أي صفحة أخرى بعد الحفظ
-                return RedirectToAction("Index"); // أو أي اسم آخر للإجراء الذي يعرض قائمة الحجوزات
+                // ????? ??????? ??? ????? ???????? ?? ?? ???? ???? ??? ?????
+                return RedirectToAction("Index"); // ?? ?? ??? ??? ??????? ???? ???? ????? ????????
             }
 
-            // إذا كان الـ ModelState غير صالح، نعيد تحميل الـ SelectList للشركات في حالة حدوث خطأ
+            // ??? ??? ??? ModelState ??? ????? ???? ????? ??? SelectList ??????? ?? ???? ???? ???
             var companies = await _company.Entity.GetAll().ToListAsync();
             model.CompanySelectList = new SelectList(companies, "Id", "Name");
 
-            // إعادة عرض النموذج مع رسائل الخطأ
+            // ????? ??? ??????? ?? ????? ?????
             return View(model);
         }
 
@@ -130,30 +131,30 @@ namespace QualityControlApp.Controllers
 
             if (!start.HasValue || !end.HasValue)
             {
-                // يمكنك تحديد نطاق افتراضي أو إرجاع خطأ
+                // ????? ????? ???? ??????? ?? ????? ???
                 start = DateTime.Today.AddMonths(-1);
                 end = DateTime.Today.AddMonths(2);
             }
 
             var events = await _bookingappointment.Entity
-                                .Include(b => b.Company) // تحميل اسم الشركة
-                                .Select(b => new // تحويل إلى تنسيق FullCalendar Event Object
+                                .Include(b => b.Company) // ????? ??? ??????
+                                .Select(b => new // ????? ??? ????? FullCalendar Event Object
                                 {
-                                    id = b.Id, // معرف الحجز (اختياري لكن مفيد)
-                                    title = b.Company != null ? b.Company.Name : "شركة غير محددة", // اسم الشركة كعنوان للحدث
-                                    start = b.BookingDate.ToString("yyyy-MM-dd"), // تاريخ البدء (تنسيق ISO 8601)
-                                                                                  // يمكنك إضافة خصائص أخرى هنا
-                                                                                  // backgroundColor = GetCompanyColor(b.CompanyId), // لتلوين الحدث بناءً على الشركة
+                                    id = b.Id, // ???? ????? (??????? ??? ????)
+                                    title = b.Company != null ? b.Company.Name : "???? ??? ?????", // ??? ?????? ?????? ?????
+                                    start = b.BookingDate.ToString("yyyy-MM-dd"), // ????? ????? (????? ISO 8601)
+                                                                                  // ????? ????? ????? ???? ???
+                                                                                  // backgroundColor = GetCompanyColor(b.CompanyId), // ?????? ????? ????? ??? ??????
                                                                                   // borderColor = GetCompanyColor(b.CompanyId)
                                     extendedProps = new
-                                    { // لحمل بيانات إضافية
+                                    { // ???? ?????? ??????
                                         notes = b.Notes,
                                         companyId = b.CompanyId
                                     }
                                 })
                                 .ToListAsync();
 
-            return Json(events); // إرجاع البيانات كـ JSON
+            return Json(events); // ????? ???????? ?? JSON
         }
 
 
@@ -230,7 +231,7 @@ namespace QualityControlApp.Controllers
 
                     // Redirect back to the index page (or details page) after successful update
                     // Add TempData message for user feedback (optional)
-                    TempData["SuccessMessage"] = "تم تعديل الحجز بنجاح.";
+                    TempData["SuccessMessage"] = "?? ????? ????? ?????.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
@@ -243,13 +244,13 @@ namespace QualityControlApp.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "تم تعديل هذا السجل بواسطة مستخدم آخر. تم إلغاء التغييرات الخاصة بك. الرجاء المحاولة مرة أخرى.");
+                        ModelState.AddModelError(string.Empty, "?? ????? ??? ????? ?????? ?????? ???. ?? ????? ????????? ?????? ??. ?????? ???????? ??? ????.");
                         // Optionally reload data or provide specific instructions
                     }
                 }
                 catch (Exception ex) // Catch other potential exceptions during save
                 {
-                    ModelState.AddModelError(string.Empty, "حدث خطأ غير متوقع أثناء محاولة حفظ التعديلات.");
+                    ModelState.AddModelError(string.Empty, "??? ??? ??? ????? ????? ?????? ??? ?????????.");
                 }
             }
 
@@ -318,7 +319,7 @@ namespace QualityControlApp.Controllers
             }
             catch (Exception ex)
             {
-                return Content("<div class='alert alert-danger text-center mt-3'>حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</div>");
+                return Content("<div class='alert alert-danger text-center mt-3'>??? ??? ????? ????? ????????. ???? ???????? ??? ????.</div>");
             }
         }
     }
@@ -337,6 +338,7 @@ namespace QualityControlApp.Controllers
 
 
     }
+
 
 
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Classes;
@@ -23,7 +23,8 @@ namespace QualityControlApp.Controllers
 
             public QuestionCategoryTypeController(ApplicationDbContext context,
                                       IUnitOfWork<QuestionCategoryType> questioncategoryType,
-                              IWebHostEnvironment host) : base(host)
+                                                              IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
             {
                 _context = context;
                 _questioncategoryType = questioncategoryType;
@@ -45,7 +46,7 @@ namespace QualityControlApp.Controllers
             //[ViewLayout("_Layout")]
             public async Task<IActionResult> Details(Guid? id)
             {
-                if (id == null) // عند مسح خانة من المعرف
+                if (id == null) // ??? ??? ???? ?? ??????
                 {
                     //return NotFound();  // 404
                     return View("NotFound");
@@ -78,7 +79,7 @@ namespace QualityControlApp.Controllers
                     {
 
                         var exists = await _questioncategoryType .Entity
-                                          .GetWhere(a => a.CategoryName  == QuestionCategoryType.CategoryName ) // لا يهم التحويل الى حروف كبيرة لأنه غير حساس لحالة الأحرف
+                                          .GetWhere(a => a.CategoryName  == QuestionCategoryType.CategoryName ) // ?? ??? ??????? ??? ???? ????? ???? ??? ???? ????? ??????
                                           .FirstOrDefaultAsync();
 
                         if (exists != null)
@@ -107,7 +108,7 @@ namespace QualityControlApp.Controllers
             public async Task<JsonResult> NameExists(string name)
             {
                 var exists = await _questioncategoryType.Entity.GetAll()
-                                      .FirstOrDefaultAsync(n => n.CategoryName == name.Trim()); // لا يهم التحويل الى حروف كبيرة لأنه غير حساس لحالة الأحرف
+                                      .FirstOrDefaultAsync(n => n.CategoryName == name.Trim()); // ?? ??? ??????? ??? ???? ????? ???? ??? ???? ????? ??????
 
                 if (exists == null)
                 {
@@ -141,7 +142,7 @@ namespace QualityControlApp.Controllers
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> Edit(Guid id, [Bind("TypeName,Id,Created,Modified,Type")] QuestionCategoryType QuestionCategoryType)
             {
-                //لمنع حدوث هجمات CSRF (Cross-Site Request Forgery):
+                //???? ???? ????? CSRF (Cross-Site Request Forgery):
                 if (id != QuestionCategoryType.Id)
                 {
                     return View("NotFound");
@@ -168,11 +169,11 @@ namespace QualityControlApp.Controllers
                 {
                     if (!QuestionTypeNameExists(QuestionCategoryType.Id))
                     {
-                        return View("NotFound"); // في حال غير موجود
+                        return View("NotFound"); // ?? ??? ??? ?????
                     }
                     else
                     {
-                        //throw; //  صفحة الخطأ الإفتراضية للمتصفح
+                        //throw; //  ???? ????? ?????????? ???????
                         ViewBag.ErrorTitle = "The basic data not found in the database ";
                         ViewBag.ErrorMessage = "Missing data row- " + ex;
                         return View("Error");
@@ -232,4 +233,5 @@ namespace QualityControlApp.Controllers
 
         }
     }
+
 

@@ -9,6 +9,7 @@ using QualityControlApp.Models.UnitOfWork;
 using System.Security.Claims;
 using QualityControlApp.Controllers;
 using ScottPlot.Statistics;
+using QualityControlApp.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,6 +105,16 @@ builder.Services.AddSingleton(emailconfig);
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IViewHelper, ViewHelper>();
+builder.Services.AddScoped<IFcmService, FcmService>();
+
+// Register new services
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
+builder.Services.AddScoped<ILoggingService, LoggingService>();
+builder.Services.AddScoped<ICacheService, CacheService>();
+
+// Add memory cache
+builder.Services.AddMemoryCache();
 
 
 

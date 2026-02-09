@@ -1,0 +1,336 @@
+@model QualityControlApp.ViewModels.AirPortRequestReportResultVM
+@{
+    ViewData["Title"] = "نتائج التقرير";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Report Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        نتائج التقرير - @Model.Filters.ReportType
+                    </h3>
+                    <div class="card-tools">
+                        <button class="btn btn-primary" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            طباعة
+                        </button>
+                        <a href="@Url.Action("Reports")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            العودة للتقارير
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>تاريخ الإنشاء:</strong> @Model.GeneratedAt.ToString("yyyy-MM-dd HH:mm")</p>
+                            <p><strong>نوع التقرير:</strong> @Model.Filters.ReportType</p>
+                            <p><strong>إجمالي النتائج:</strong> @Model.Requests.Count</p>
+                        </div>
+                        <div class="col-md-6">
+                            @if (Model.Filters.DateFrom.HasValue)
+                            {
+                                <p><strong>من تاريخ:</strong> @Model.Filters.DateFrom.Value.ToString("yyyy-MM-dd")</p>
+                            }
+                            @if (Model.Filters.DateTo.HasValue)
+                            {
+                                <p><strong>إلى تاريخ:</strong> @Model.Filters.DateTo.Value.ToString("yyyy-MM-dd")</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Filters.CompanyName))
+                            {
+                                <p><strong>الشركة:</strong> @Model.Filters.CompanyName</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">إحصائيات التقرير</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-primary"><i class="fas fa-list"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">إجمالي الطلبات</span>
+                                    <span class="info-box-number">@Model.Summary.TotalRequests</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">معلقة</span>
+                                    <span class="info-box-number">@Model.Summary.PendingRequests</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">معتمدة</span>
+                                    <span class="info-box-number">@Model.Summary.ApprovedRequests</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-danger"><i class="fas fa-times"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">مرفوضة</span>
+                                    <span class="info-box-number">@Model.Summary.RejectedRequests</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">إجمالي الطاقم</span>
+                                    <span class="info-box-number">@Model.Summary.TotalCrewCount</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-secondary"><i class="fas fa-building"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">الشركات</span>
+                                    <span class="info-box-number">@Model.Summary.UniqueCompanies</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">التوزيع حسب الحالة</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">أهم الشركات</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="companyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">تفاصيل الطلبات</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="requestsTable">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>اسم الشركة</th>
+                                    <th>القسم</th>
+                                    <th>تاريخ الطلب</th>
+                                    <th>تاريخ الرحلة</th>
+                                    <th>نوع الطائرة</th>
+                                    <th>رقم الرحلة</th>
+                                    <th>اسم الطيار</th>
+                                    <th>عدد الطاقم</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var request in Model.Requests)
+                                {
+                                    <tr>
+                                        <td>@request.Id.ToString().Substring(0, 8)...</td>
+                                        <td>@request.CompanyName</td>
+                                        <td>@request.Department</td>
+                                        <td>@request.RequestTime.ToString("yyyy-MM-dd")</td>
+                                        <td>@request.FlightDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@request.AircraftType</td>
+                                        <td>@(request.FlightNumber ?? "-")</td>
+                                        <td>@(request.PilotName ?? "-")</td>
+                                        <td>@(request.CrewCount?.ToString() ?? "-")</td>
+                                        <td>
+                                            <span class="badge badge-@(request.RequestStatus == "Approved" ? "success" : request.RequestStatus == "Rejected" ? "danger" : "warning")">
+                                                @request.RequestStatus
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("Details", new { id = request.Id })" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                                عرض
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Statistics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">التوزيع حسب نوع الطائرة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>نوع الطائرة</th>
+                                    <th>العدد</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Summary.RequestsByAircraftType)
+                                {
+                                    <tr>
+                                        <td>@item.Key</td>
+                                        <td>@item.Value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">التوزيع حسب القسم</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>القسم</th>
+                                    <th>العدد</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Summary.RequestsByDepartment)
+                                {
+                                    <tr>
+                                        <td>@item.Key</td>
+                                        <td>@item.Value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Check if DataTable is available
+            if (typeof $.fn.DataTable !== 'undefined') {
+                // Initialize DataTable
+                $('#requestsTable').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Arabic.json"
+                    },
+                    "pageLength": 25,
+                    "order": [[3, "desc"]]
+                });
+            } else {
+                console.log('DataTable not loaded, using basic table styling');
+                // Add basic styling if DataTable is not available
+                $('#requestsTable').addClass('table table-bordered table-striped');
+            }
+
+            // Status Chart
+            var statusCtx = document.getElementById('statusChart').getContext('2d');
+            var statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.Summary.RequestsByStatus.Keys.Select(k => $"'{k}'")))],
+                    datasets: [{
+                        data: [@string.Join(",", Model.Summary.RequestsByStatus.Values)],
+                        backgroundColor: [
+                            '#ffc107', // Warning (Pending)
+                            '#28a745', // Success (Approved)
+                            '#dc3545'  // Danger (Rejected)
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Company Chart
+            var companyCtx = document.getElementById('companyChart').getContext('2d');
+            var companyChart = new Chart(companyCtx, {
+                type: 'bar',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.Summary.RequestsByCompany.Keys.Take(5).Select(k => $"'{k}'")))],
+                    datasets: [{
+                        label: 'عدد الطلبات',
+                        data: [@string.Join(",", Model.Summary.RequestsByCompany.Values.Take(5))],
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

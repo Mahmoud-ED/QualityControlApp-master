@@ -1,4 +1,4 @@
-﻿@model QualityControlApp.Models.Entities.Landing // Changed model to Landing
+@model QualityControlApp.Models.Entities.Landing // Changed model to Landing
 
 @{
     ViewData["Title"] = "Delete Landing Record"; // Updated title
@@ -58,21 +58,24 @@
 
                         <div class="list-group">
                             <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusPending">
-                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusPending" value="Pending" @(Model.RequestStatus == "Pending" ? "checked" : "")>
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusPending" value="0" @(Model.RequestStatus == "0" ? "checked" : "")>
+
                                 <span class="pt-1 form-checked-content">
                                     <strong>Pending</strong>
                                     <small class="d-block text-muted">The request is awaiting review or further action.</small>
                                 </span>
                             </label>
                             <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusApproved">
-                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusApproved" value="Approved" @(Model.RequestStatus == "Approved" ? "checked" : "")>
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusApproved" value="1" @(Model.RequestStatus == "1" ? "checked" : "")>
+
                                 <span class="pt-1 form-checked-content">
                                     <strong>Approved</strong>
                                     <small class="d-block text-muted">The request has been officially approved.</small>
                                 </span>
                             </label>
                             <label class="list-group-item list-group-item-action d-flex gap-3 py-3" for="statusRejected">
-                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusRejected" value="Rejected" @(Model.RequestStatus == "Rejected" ? "checked" : "")>
+                                <input class="form-check-input flex-shrink-0" type="radio" name="newStatus" id="statusRejected" value="2" @(Model.RequestStatus == "2" ? "checked" : "")>
+
                                 <span class="pt-1 form-checked-content">
                                     <strong>Rejected</strong>
                                     <small class="d-block text-muted">The request has been denied.</small>

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<QualityControlApp.Models.Entities.Employee>
+@model IEnumerable<QualityControlApp.Models.Entities.Employee>
 
 @{
     ViewData["Title"] = "قائمة الموظفين";
@@ -24,7 +24,7 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded h-100 p-4">
+            <div class=" rounded h-100 p-4">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h5 class="mb-0">@ViewData["Title"]</h5>
                     <div>
@@ -66,7 +66,7 @@
                                             <a asp-controller="Employees" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1" title="تفاصيل">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1" title="تعديل">
+                                            <a asp-action="EditEmployee" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1" title="تعديل">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
@@ -76,7 +76,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                            <a asp-action="CreateHealthRecordForEmployee" asp-controller="Employees" asp-route-employeeId="@item.Id" class="btn btn-sm btn-outline-secondary ms-1" title="الملف الصحي">
+                                            <a asp-action="CreateHealthRecord" asp-controller="Employees" asp-route-employeeId="@item.Id" class="btn btn-sm btn-outline-secondary ms-1" title="الملف الصحي">
                                                 <i class="fas fa-print"></i>
                                             </a>
                                         </td>

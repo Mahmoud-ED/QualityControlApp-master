@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
@@ -37,6 +37,7 @@ namespace QualityControlApp.Controllers
                          IEmailSender emailSender,
                          UserManager<ApplicationUser> userManager,
                          IWebHostEnvironment host,
+                               IConfiguration configuration,
                             IServiceProvider serviceProvider,
                          IUnitOfWork<SiteInfo> siteInfo,
                          IUnitOfWork<Contact> contact,
@@ -47,7 +48,7 @@ namespace QualityControlApp.Controllers
                          IUnitOfWork<QuestionType> questiontype,
                          IUnitOfWork<CompanyQuestion> companyquestion,
                          IUnitOfWork<CompanyQuestionContent> companyquestionContent
-                                ) : base(host)
+                                ) : base(host, configuration)
         {
 
             _questiontype = questiontype;
@@ -82,7 +83,7 @@ namespace QualityControlApp.Controllers
  .ThenByDescending(q => q.Created)
  .ToListAsync();
 
-            // أولاً: حدد الصلاحيات التي يمتلكها المستخدم الحالي
+            // ?????: ??? ????????? ???? ??????? ???????? ??????
             bool hasOPPerm = false;
             bool hasAirPerm = false;
             bool hasBELPerm = false;
@@ -102,7 +103,7 @@ namespace QualityControlApp.Controllers
             {
                 hasBELPerm = true;
             }
-            // ثانياً: قم ببناء قائمة بأسماء التصنيفات المسموح بها بناءً على صلاحيات المستخدم
+            // ??????: ?? ????? ????? ?????? ????????? ??????? ??? ????? ??? ??????? ????????
             var allowedCategoryNames = new List<string>();
             if (hasOPPerm)
             {
@@ -121,7 +122,7 @@ namespace QualityControlApp.Controllers
 
             var category = await _questioncategorytype
         .Entity
-        .GetWhere(ct => allowedCategoryNames.Contains(ct.CategoryName)) // الشرط الثاني: الفلترة بناءً على أسماء التصنيفات المسموح بها
+        .GetWhere(ct => allowedCategoryNames.Contains(ct.CategoryName)) // ????? ??????: ??????? ????? ??? ????? ????????? ??????? ???
         .ToListAsync();
 
 
@@ -140,7 +141,7 @@ namespace QualityControlApp.Controllers
             return View(CompanyQuestionVM);
 
             //  var companyquestion = await _companyquestion.Entity
-            //.Include(q => q.Company)  // تضمين معلومات الشركة
+            //.Include(q => q.Company)  // ????? ??????? ??????
             //.Where(n => n.UserId == Id)
             //.Where(n => n.Active == false)
             //.OrderByDescending(q => q.Created)
@@ -170,7 +171,7 @@ namespace QualityControlApp.Controllers
 
             //-------------------------
 
-            // أولاً: حدد الصلاحيات التي يمتلكها المستخدم الحالي
+            // ?????: ??? ????????? ???? ??????? ???????? ??????
             bool hasOPPerm = false;
             bool hasAirPerm = false;
             bool hasBELPerm = false;
@@ -190,7 +191,7 @@ namespace QualityControlApp.Controllers
             {
                 hasBELPerm = true;
             }
-            // ثانياً: قم ببناء قائمة بأسماء التصنيفات المسموح بها بناءً على صلاحيات المستخدم
+            // ??????: ?? ????? ????? ?????? ????????? ??????? ??? ????? ??? ??????? ????????
             var allowedCategoryNames = new List<string>();
             if (hasOPPerm)
             {
@@ -208,10 +209,10 @@ namespace QualityControlApp.Controllers
 
 
             var questioncategory = await _questioncategorytype
-       .Entity // يفترض أن هذا هو DbSet<QuestionCategoryType> أو IQueryable<QuestionCategoryType>
-       .Include(n => n.QuestionType) // لتضمين أنواع الأسئلة المرتبطة بكل تصنيف فئة سؤال
-       .Where(ct => ct.Type == companyquestion.Type && // 1. فلترة حسب النوع (مثل "Old")
-                      allowedCategoryNames.Contains(ct.CategoryName)) // 2. فلترة حسب أسماء التصنيفات المسموح بها
+       .Entity // ????? ?? ??? ?? DbSet<QuestionCategoryType> ?? IQueryable<QuestionCategoryType>
+       .Include(n => n.QuestionType) // ?????? ????? ??????? ???????? ??? ????? ??? ????
+       .Where(ct => ct.Type == companyquestion.Type && // 1. ????? ??? ????? (??? "Old")
+                      allowedCategoryNames.Contains(ct.CategoryName)) // 2. ????? ??? ????? ????????? ??????? ???
        .ToListAsync();
 
 
@@ -253,7 +254,7 @@ namespace QualityControlApp.Controllers
 
 
             var companies = await _company.Entity.GetAll().ToListAsync();
-            // أولاً: حدد الصلاحيات التي يمتلكها المستخدم الحالي
+            // ?????: ??? ????????? ???? ??????? ???????? ??????
              hasOPPerm = false;
              hasAirPerm = false;
              hasBELPerm = false;
@@ -273,7 +274,7 @@ namespace QualityControlApp.Controllers
             {
                 hasBELPerm = true;
             }
-            // ثانياً: قم ببناء قائمة بأسماء التصنيفات المسموح بها بناءً على صلاحيات المستخدم
+            // ??????: ?? ????? ????? ?????? ????????? ??????? ??? ????? ??? ??????? ????????
              allowedCategoryNames = new List<string>();
             if (hasOPPerm)
             {
@@ -292,13 +293,13 @@ namespace QualityControlApp.Controllers
 
             var category = await _questioncategorytype
         .Entity
-        .GetWhere(ct => ct.Type == companyquestion.Type && // الشرط الأول: الفلترة بناءً على النوع "Old" أو "New"
-                      allowedCategoryNames.Contains(ct.CategoryName)) // الشرط الثاني: الفلترة بناءً على أسماء التصنيفات المسموح بها
+        .GetWhere(ct => ct.Type == companyquestion.Type && // ????? ?????: ??????? ????? ??? ????? "Old" ?? "New"
+                      allowedCategoryNames.Contains(ct.CategoryName)) // ????? ??????: ??????? ????? ??? ????? ????????? ??????? ???
         .ToListAsync();
 
             var user = await _applicationuser.Entity.GetAll().ToListAsync();
 
-            // تحويل البيانات إلى SelectList
+            // ????? ???????? ??? SelectList
             ViewBag.Companies = new SelectList(companies, "Id", "Name", companyquestion.CompanyId);
             ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.CreatorId);
 
@@ -321,11 +322,11 @@ namespace QualityControlApp.Controllers
         [HttpGet]
         public IActionResult GetChartData(Guid companyQuestionId, Guid typeId)
         {
-            // هنا يمكنك تصفية البيانات حسب الـ companyQuestionId و typeId إذا كانت مطلوبة
+            // ??? ????? ????? ???????? ??? ??? companyQuestionId ? typeId ??? ???? ??????
             var filteredData = _companyquestionContent.Entity
     .GetWhere(a => a.CompanyQuestionId == companyQuestionId)
     .ToList();
-            // مؤقتًا نعيد كل البيانات
+            // ?????? ???? ?? ????????
 
             return Json(filteredData);
         }
@@ -351,15 +352,15 @@ namespace QualityControlApp.Controllers
 
             var maxScores = ContentList.Select(c => c.Question.MaxGrid).ToList();
 
-            // حساب النسبة المئوية لكل درجة بالنسبة للحد الأقصى
+            // ???? ?????? ??????? ??? ???? ??????? ???? ??????
             var percentageScores = ContentList.Select(c =>
-                (c.Score * 100.0) / (c.Question.MaxGrid > 0 ? c.Question.MaxGrid : 1) // التأكد من أن MaxGrid أكبر من 0 لتجنب القسمة على صفر
+                (c.Score * 100.0) / (c.Question.MaxGrid > 0 ? c.Question.MaxGrid : 1) // ?????? ?? ?? MaxGrid ???? ?? 0 ????? ?????? ??? ???
             ).ToList();
 
-            // محتوى الأسئلة كـ "Labels"
+            // ????? ??????? ?? "Labels"
             var labels = ContentList.Select(c => c.Question.Content).ToList();
 
-            // إرسال البيانات الخاصة بالشارت كـ JSON لعرضها في الجافا سكربت
+            // ????? ???????? ?????? ??????? ?? JSON ?????? ?? ?????? ?????
             var chartData = new
             {
                 Labels = labels,
@@ -368,8 +369,8 @@ namespace QualityControlApp.Controllers
             };
             ViewBag.CompanyQuestionId = id;
             ViewBag.TypeId = TypeId;
-            // إرسال البيانات إلى الـ View
-            ViewBag.ChartData = JsonConvert.SerializeObject(chartData); // تحويل البيانات إلى JSON لتمريرها للـ View
+            // ????? ???????? ??? ??? View
+            ViewBag.ChartData = JsonConvert.SerializeObject(chartData); // ????? ???????? ??? JSON ???????? ??? View
 
             var TypeList = await _questiontype.Entity.GetWhere(n => n.QuestionCategoryTypeId == Categoryid)
                 .ToListAsync();
@@ -378,7 +379,7 @@ namespace QualityControlApp.Controllers
             var user = await _applicationuser.Entity.GetAll().ToListAsync();
 
 
-            // أولاً: حدد الصلاحيات التي يمتلكها المستخدم الحالي
+            // ?????: ??? ????????? ???? ??????? ???????? ??????
             bool hasOPPerm = false;
             bool hasAirPerm = false;
             bool hasBELPerm = false;
@@ -398,7 +399,7 @@ namespace QualityControlApp.Controllers
             {
                 hasBELPerm = true;
             }
-            // ثانياً: قم ببناء قائمة بأسماء التصنيفات المسموح بها بناءً على صلاحيات المستخدم
+            // ??????: ?? ????? ????? ?????? ????????? ??????? ??? ????? ??? ??????? ????????
             var allowedCategoryNames = new List<string>();
             if (hasOPPerm)
             {
@@ -417,8 +418,8 @@ namespace QualityControlApp.Controllers
 
             var category = await _questioncategorytype
         .Entity
-        .GetWhere(ct => ct.Type == companyquestion.Type && // الشرط الأول: الفلترة بناءً على النوع "Old" أو "New"
-                      allowedCategoryNames.Contains(ct.CategoryName)) // الشرط الثاني: الفلترة بناءً على أسماء التصنيفات المسموح بها
+        .GetWhere(ct => ct.Type == companyquestion.Type && // ????? ?????: ??????? ????? ??? ????? "Old" ?? "New"
+                      allowedCategoryNames.Contains(ct.CategoryName)) // ????? ??????: ??????? ????? ??? ????? ????????? ??????? ???
         .ToListAsync();
 
 
@@ -439,7 +440,7 @@ namespace QualityControlApp.Controllers
 
 
 
-            // تحويل البيانات إلى SelectList
+            // ????? ???????? ??? SelectList
             ViewBag.Companies = new SelectList(companies, "Id", "Name", companyquestion.CompanyId);
             ViewBag.Users = new SelectList(user, "Id", "UserName", companyquestion.CreatorId);
 
@@ -463,7 +464,7 @@ namespace QualityControlApp.Controllers
         [HttpPost]
         public IActionResult SaveScores(Dictionary<string, string> scores)
         {
-            // تأكد من أن القيم التي تم إرسالها ليست فارغة
+            // ???? ?? ?? ????? ???? ?? ??????? ???? ?????
             if (scores == null || !scores.Any())
             {
                 return Json(new { success = false });
@@ -471,40 +472,40 @@ namespace QualityControlApp.Controllers
 
             try
             {
-                // لوضع كل درجة جديدة في قاعدة البيانات بناءً على الـ ID
+                // ???? ?? ???? ????? ?? ????? ???????? ????? ??? ??? ID
                 foreach (var score in scores)
                 {
-                    var questionId = Guid.Parse(score.Key);  // تحويل ID السؤال من String إلى Guid
-                    var newScore = int.Parse(score.Value);    // أخذ الدرجة المدخلة وتحويلها إلى int
+                    var questionId = Guid.Parse(score.Key);  // ????? ID ?????? ?? String ??? Guid
+                    var newScore = int.Parse(score.Value);    // ??? ?????? ??????? ???????? ??? int
 
-                    // البحث عن السؤال في قاعدة البيانات بناءً على الـ ID
+                    // ????? ?? ?????? ?? ????? ???????? ????? ??? ??? ID
                     var question = _context.CompanyQuestionContent.FirstOrDefault(q => q.Id == questionId);
                     if (question != null)
                     {
-                        // تحديث الدرجة
+                        // ????? ??????
                         question.Score = newScore;
                     }
                 }
 
-                // حفظ التغييرات في قاعدة البيانات
+                // ??? ????????? ?? ????? ????????
                 _context.SaveChanges();
 
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                // في حالة حدوث أي خطأ
+                // ?? ???? ???? ?? ???
                 return Json(null);
             }
         }
 
 
 
-        // أكشن لحساب النسب المئوية بناءً على CompanyQuestion.Id
+        // ???? ????? ????? ??????? ????? ??? CompanyQuestion.Id
         [HttpPost]
         public async Task<IActionResult> UpdateActiveStatus(Guid id, bool active)
         {
-            // البحث عن السجل باستخدام الـ ID
+            // ????? ?? ????? ???????? ??? ID
             var companyQuestion = await _companyquestion.Entity.GetByIdAsync(id);
 
             if (companyQuestion == null)
@@ -512,14 +513,14 @@ namespace QualityControlApp.Controllers
                 return NotFound();
             }
 
-            // تحديث قيمة Active
+            // ????? ???? Active
             companyQuestion.Active = active;
 
-            // حفظ التغييرات في قاعدة البيانات
+            // ??? ????????? ?? ????? ????????
             _context.SaveChanges();
 
 
-            // إعادة توجيه المستخدم إلى نفس الصفحة أو أي صفحة أخرى حسب الحاجة
+            // ????? ????? ???????? ??? ??? ?????? ?? ?? ???? ???? ??? ??????
             return RedirectToAction("Index", new { id = companyQuestion.CreatorId });
         }
 
@@ -580,7 +581,7 @@ namespace QualityControlApp.Controllers
             {
                 return NotFound();
             }
-            // تحقق من النتيجة أو إرجاع رسالة
+            // ???? ?? ??????? ?? ????? ?????
             if (result)
             {
 
@@ -590,8 +591,8 @@ namespace QualityControlApp.Controllers
                 StreamReader htmlFile = new StreamReader(filePath);
                 string content = htmlFile.ReadToEnd();
                 htmlFile.Close();
-                //تم استعماله مرتين: مرة ضمن الرسالة ومرة اخرى في عنوان الايميل ولكنه نفس العنوان// Subject
-                content = content.Replace("{Subject}", Uesr.UserName); // يظهر داخل الرسالة
+                //?? ???????? ?????: ??? ??? ??????? ???? ???? ?? ????? ??????? ????? ??? ???????// Subject
+                content = content.Replace("{Subject}", Uesr.UserName); // ???? ???? ???????
                 content = content.Replace("{Content}", company.Name);
                 content = content.Replace("{SPL}", companyQuestion.SaftyGrid.ToString());
                 content = content.Replace("{COL}", companyQuestion.SqurtyGrid.ToString());
@@ -617,12 +618,12 @@ namespace QualityControlApp.Controllers
 
                 //-----------------------
 
-                // إعادة التوجيه إلى الفيو أو عرض رسالة النجاح
+                // ????? ??????? ??? ????? ?? ??? ????? ??????
             }
             else
             {
-                // في حالة فشل التحديث، عرض رسالة خطأ
-                TempData["ErrorMessage"] = "فشل تحديث الحالة";
+                // ?? ???? ??? ???????? ??? ????? ???
+                TempData["ErrorMessage"] = "??? ????? ??????";
             }
         
             
@@ -632,11 +633,11 @@ namespace QualityControlApp.Controllers
             
             var UseriD = _companyquestion.Entity.GetWhere(n => n.Id == companyQuestionId).Select(n => n.UserId)
 .FirstOrDefault();
-            return RedirectToAction("Index", "Employee", new { id = UseriD });  // إعادة التوجيه لفيو "Index" في Controller "Employee"
+            return RedirectToAction("Index", "Employee", new { id = UseriD });  // ????? ??????? ???? "Index" ?? Controller "Employee"
 
         }
 
-        // دالة لاستدعاء الإجراء المخزن في SQL Server
+        // ???? ???????? ??????? ?????? ?? SQL Server
         private  bool UpdateCompanyQuestionActiveOld(Guid companyQuestionId, bool newActiveValue)
         {
             if (newActiveValue == true)
@@ -661,20 +662,20 @@ namespace QualityControlApp.Controllers
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
 
-                            // إضافة المعطيات إلى الإجراء المخزن
+                            // ????? ???????? ??? ??????? ??????
                             cmd.Parameters.AddWithValue("@id", companyQuestionId);
                             cmd.Parameters.AddWithValue("@newActiveValue", newActiveValue);
 
-                            // تنفيذ الإجراء المخزن
-                            var rowsAffected = cmd.ExecuteNonQuery(); // ينفذ التحديث ويعيد عدد الأسطر المتأثرة
+                            // ????? ??????? ??????
+                            var rowsAffected = cmd.ExecuteNonQuery(); // ???? ??????? ????? ??? ?????? ????????
 
-                            return rowsAffected > 0;  // إذا كان هناك أسطر تم تحديثها بنجاح
+                            return rowsAffected > 0;  // ??? ??? ???? ???? ?? ??????? ?????
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    // في حالة حدوث أي خطأ
+                    // ?? ???? ???? ?? ???
                     Console.WriteLine("Error: " + ex.Message);
                     return false;
                 }
@@ -707,20 +708,20 @@ namespace QualityControlApp.Controllers
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
 
-                        // إضافة المعطيات إلى الإجراء المخزن
+                        // ????? ???????? ??? ??????? ??????
                         cmd.Parameters.AddWithValue("@id", companyQuestionId);
                         cmd.Parameters.AddWithValue("@newActiveValue", newActiveValue);
 
-                        // تنفيذ الإجراء المخزن
-                        var rowsAffected = cmd.ExecuteNonQuery(); // ينفذ التحديث ويعيد عدد الأسطر المتأثرة
+                        // ????? ??????? ??????
+                        var rowsAffected = cmd.ExecuteNonQuery(); // ???? ??????? ????? ??? ?????? ????????
 
-                        return rowsAffected > 0;  // إذا كان هناك أسطر تم تحديثها بنجاح
+                        return rowsAffected > 0;  // ??? ??? ???? ???? ?? ??????? ?????
                     }
                 }
             }
             catch (Exception ex)
             {
-                // في حالة حدوث أي خطأ
+                // ?? ???? ???? ?? ???
                 Console.WriteLine("Error: " + ex.Message);
                 return false;
             }
@@ -741,5 +742,6 @@ namespace QualityControlApp.Controllers
 
     }
 }
+
 
 

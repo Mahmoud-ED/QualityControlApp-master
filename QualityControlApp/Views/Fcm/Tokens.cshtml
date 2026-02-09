@@ -1,0 +1,206 @@
+@model List<QualityControlApp.ViewModels.FcmTokenVM>
+@{
+    ViewData["Title"] = "FCM Tokens";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-mobile-alt"></i> FCM Tokens Management
+                    </h3>
+                    <div class="card-tools">
+                        <form asp-action="CleanupExpiredTokens" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Are you sure you want to cleanup expired tokens?')">
+                                <i class="fas fa-trash"></i> Cleanup Expired
+                            </button>
+                        </form>
+                        <a href="@Url.Action("TestPage")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-bell"></i> Test Notifications
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="tokensTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Device Type</th>
+                                    <th>Device ID</th>
+                                    <th>Browser Info</th>
+                                    <th>Created</th>
+                                    <th>Last Used</th>
+                                    <th>Status</th>
+                                    <th>Token Preview</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var token in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(token.UserName))
+                                            {
+                                                <div>
+                                                    <strong>@token.UserName</strong><br />
+                                                    <small class="text-muted">@token.UserEmail</small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Anonymous</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@token.DeviceType</span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(token.DeviceId))
+                                            {
+                                                <code>@token.DeviceId</code>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(token.BrowserInfo))
+                                            {
+                                                <small>@token.BrowserInfo</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small>@token.CreatedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            <small>@token.LastUsedAt.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            @if (token.IsActive)
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Inactive</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <code class="token-preview" data-token="@token.Token">
+                                                @token.Token.Substring(0, Math.Min(20, token.Token.Length))...
+                                            </code>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToken('@token.Token')">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-mobile-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No FCM tokens found</h5>
+                            <p class="text-muted">Tokens will appear here when users visit your website and register for notifications.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Token Details Modal -->
+<div class="modal fade" id="tokenModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Token Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Full Token:</label>
+                    <textarea class="form-control" id="fullToken" rows="4" readonly></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="copyFullToken()">
+                    <i class="fas fa-copy"></i> Copy Full Token
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#tokensTable').DataTable({
+                "pageLength": 25,
+                "order": [[4, "desc"]], // Sort by Created date descending
+                "columnDefs": [
+                    { "orderable": false, "targets": 7 } // Disable sorting on Token Preview column
+                ]
+            });
+
+            // Handle token preview click
+            $('.token-preview').click(function() {
+                var token = $(this).data('token');
+                $('#fullToken').val(token);
+                $('#tokenModal').modal('show');
+            });
+        });
+
+        function copyToken(token) {
+            navigator.clipboard.writeText(token).then(function() {
+                // Show success message
+                var btn = event.target.closest('button');
+                var originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                setTimeout(function() {
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            });
+        }
+
+        function copyFullToken() {
+            var token = $('#fullToken').val();
+            navigator.clipboard.writeText(token).then(function() {
+                // Show success message
+                var btn = event.target;
+                var originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(function() {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+}

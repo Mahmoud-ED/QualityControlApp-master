@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,8 @@ namespace QualityControlApp.Controllers
     ApplicationDbContext context,
                          IUnitOfWork<Company> company,
                          IUnitOfWork<CompanyType> compnayType,
-                              IWebHostEnvironment host) : base(host)
+                                                              IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _context = context;
             _companytype = compnayType;
@@ -48,7 +49,7 @@ namespace QualityControlApp.Controllers
             {
                 companiesQuery = companiesQuery.Where(c => c.CompanyTypeId == companyTypeId.Value);
             }
-            var companies = await companiesQuery.OrderBy(c => c.Name).ToListAsync(); // أو أي ترتيب تفضله
+            var companies = await companiesQuery.OrderBy(c => c.Name).ToListAsync(); // ?? ?? ????? ?????
 
             var viewModel = new CompanyIndexVM
             {
@@ -96,16 +97,16 @@ namespace QualityControlApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name","AocNum", "CompanyTypeId")] Company  company )
         {
-            //هذه لا تستعمل ابدا مع المفتاح الأجنبي لكن لو احتجنا لها في حقول اخرى
-            //ModelState.Remove("Sections");// طريقة أخرى لمنع التحقق داخل وظيفة معينة وليس في الكلاس سيمنع التحقق بالمطلق لكل الوظائف
+            //??? ?? ?????? ???? ?? ??????? ??????? ??? ?? ?????? ??? ?? ???? ????
+            //ModelState.Remove("Sections");// ????? ???? ???? ?????? ???? ????? ????? ???? ?? ?????? ????? ?????? ??????? ??? ???????
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    if (companyExistsadd(company.Name)) //في حال اسم موجود
+                    if (companyExistsadd(company.Name)) //?? ??? ??? ?????
                     {
-                        ViewBag.Message = " الاسم موجود مسبقا ";
+                        ViewBag.Message = " ????? ????? ????? ";
                         return View();
                     }
 
@@ -168,9 +169,9 @@ namespace QualityControlApp.Controllers
 
             if (companyExistsEdit(company.Name, company.Id))
             {
-                ViewBag.Message = "الاسم موجود مسبقاً";
+                ViewBag.Message = "????? ????? ??????";
 
-                // إعادة تحميل الـ ViewModel
+                // ????? ????? ??? ViewModel
                 var vm = new CompanyCreateVM
                 {
                     Company = company,
@@ -204,7 +205,7 @@ namespace QualityControlApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // ModelState غير صحيح، نرجّع ViewModel
+            // ModelState ??? ????? ????? ViewModel
             var viewModel = new CompanyCreateVM
             {
                 Company = company,
@@ -256,7 +257,7 @@ namespace QualityControlApp.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorTitle = "The basic data not found in the database ";
-                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                 return View("Error");
 
             }
@@ -283,3 +284,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

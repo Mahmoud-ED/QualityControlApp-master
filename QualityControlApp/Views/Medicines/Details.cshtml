@@ -1,0 +1,129 @@
+@model Medicine
+
+@{
+    ViewData["Title"] = "تفاصيل الدواء";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-pills"></i> تفاصيل الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">اسم الدواء:</dt>
+                        <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+
+                        <dt class="col-sm-4">الاسم العلمي:</dt>
+                        <dd class="col-sm-8">@(Model.GenericName ?? "-")</dd>
+
+                        <dt class="col-sm-4">النوع:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.Type))
+                            {
+                                <span class="badge bg-info">@Model.Type</span>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">الشركة المصنعة:</dt>
+                        <dd class="col-sm-8">@(Model.Manufacturer ?? "-")</dd>
+
+                        <dt class="col-sm-4">الوصف:</dt>
+                        <dd class="col-sm-8">@(Model.Description ?? "-")</dd>
+
+                        <dt class="col-sm-4">الحالة:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsAvailable)
+                            {
+                                <span class="badge bg-success"><i class="fas fa-check"></i> متوفر</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger"><i class="fas fa-times"></i> غير متوفر</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">الملاحظات:</dt>
+                        <dd class="col-sm-8">@(Model.Notes ?? "-")</dd>
+
+                        <dt class="col-sm-4">تاريخ الإضافة:</dt>
+                        <dd class="col-sm-8">@Model.Created.ToString("yyyy/MM/dd HH:mm")</dd>
+
+                        @if (Model.Modified.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ آخر تعديل:</dt>
+                            <dd class="col-sm-8">@Model.Modified.Value.ToString("yyyy/MM/dd HH:mm")</dd>
+                        }
+                    </dl>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> حذف
+                            </a>
+                        </div>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> رجوع للقائمة
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-medical"></i> السجلات الصحية المرتبطة</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.HealthRecordMedications != null && Model.HealthRecordMedications.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var hrm in Model.HealthRecordMedications)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@hrm.HealthRecord.Employee.Name</h6>
+                                        @if (hrm.IsActive)
+                                        {
+                                            <small><span class="badge bg-success">نشط</span></small>
+                                        }
+                                        else
+                                        {
+                                            <small><span class="badge bg-secondary">غير نشط</span></small>
+                                        }
+                                    </div>
+                                    <p class="mb-1">
+                                        <small>
+                                            <strong>الجرعة:</strong> @hrm.Dosage<br />
+                                            <strong>التكرار:</strong> @hrm.Frequency
+                                        </small>
+                                    </p>
+                                    @if (hrm.StartDate.HasValue)
+                                    {
+                                        <small class="text-muted">من: @hrm.StartDate.Value.ToString("yyyy/MM/dd")</small>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">
+                            <i class="fas fa-info-circle"></i> لا توجد سجلات صحية مرتبطة بهذا الدواء
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+@model Medicine
+
+@{
+    ViewData["Title"] = "حذف الدواء";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> تأكيد حذف الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>تحذير:</strong> هل أنت متأكد من حذف هذا الدواء؟
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">اسم الدواء:</dt>
+                        <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+
+                        <dt class="col-sm-4">الاسم العلمي:</dt>
+                        <dd class="col-sm-8">@(Model.GenericName ?? "-")</dd>
+
+                        <dt class="col-sm-4">النوع:</dt>
+                        <dd class="col-sm-8">@(Model.Type ?? "-")</dd>
+
+                        <dt class="col-sm-4">الشركة المصنعة:</dt>
+                        <dd class="col-sm-8">@(Model.Manufacturer ?? "-")</dd>
+
+                        <dt class="col-sm-4">الحالة:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsAvailable)
+                            {
+                                <span class="badge bg-success">متوفر</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">غير متوفر</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    @if (Model.HealthRecordMedications != null && Model.HealthRecordMedications.Any())
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-ban"></i>
+                            <strong>تنبيه:</strong> هذا الدواء مرتبط بـ @Model.HealthRecordMedications.Count سجل صحي.
+                            لا يمكن حذفه!
+                        </div>
+                    }
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-danger" 
+                                    @(Model.HealthRecordMedications != null && Model.HealthRecordMedications.Any() ? "disabled" : "")>
+                                <i class="fas fa-trash"></i> تأكيد الحذف
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

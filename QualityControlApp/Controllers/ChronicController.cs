@@ -1,4 +1,4 @@
-﻿// QualityControlApp.Controllers.ChronicDiseaseController.cs
+// QualityControlApp.Controllers.ChronicDiseaseController.cs
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,8 @@ namespace QualityControlApp.Controllers
         public ChronicDiseaseController(
             ApplicationDbContext context,
             IUnitOfWork<ChronicDisease> chronicDiseaseUnitOfWork,
-            IWebHostEnvironment host) : base(host)
+                                            IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _context = context;
             _chronicDiseaseUnitOfWork = chronicDiseaseUnitOfWork;
@@ -53,12 +54,12 @@ namespace QualityControlApp.Controllers
             {
                 _chronicDiseaseUnitOfWork.Entity.Insert(model.NewChronicDisease);
                 await _chronicDiseaseUnitOfWork.SaveAsync();
-                TempData["success"] = "تم إضافة المرض المزمن بنجاح.";
+                TempData["success"] = "?? ????? ????? ?????? ?????.";
                 return RedirectToAction(nameof(Index)); // Redirect to refresh the list and clear the form
             }
 
             // If ModelState is invalid, we need to re-populate the list and return to the Index view
-            TempData["error"] = "فشل إضافة المرض المزمن. يرجى مراجعة البيانات المدخلة.";
+            TempData["error"] = "??? ????? ????? ??????. ???? ?????? ???????? ???????.";
             // Re-populate the list of chronic diseases for the view
             model.ChronicDiseases = _chronicDiseaseUnitOfWork.Entity.GetAll().OrderBy(cd => cd.Name);
             // The model.NewChronicDisease already contains the user's input and validation errors
@@ -69,13 +70,13 @@ namespace QualityControlApp.Controllers
         {
             if (id == null)
             {
-                return NotFound("معرف المرض المزمن غير متوفر.");
+                return NotFound("???? ????? ?????? ??? ?????.");
             }
 
             var chronicDisease = await _chronicDiseaseUnitOfWork.Entity.GetByIdAsync(id);
             if (chronicDisease == null)
             {
-                TempData["error"] = "المرض المزمن المطلوب تعديله غير موجود.";
+                TempData["error"] = "????? ?????? ??????? ?????? ??? ?????.";
                 return RedirectToAction(nameof(Index)); // Or return NotFound();
             }
             return View(chronicDisease); // This will render Views/ChronicDisease/Edit.cshtml
@@ -88,7 +89,7 @@ namespace QualityControlApp.Controllers
         {
             if (id != chronicDisease.Id)
             {
-                TempData["error"] = "عدم تطابق في معرف المرض المزمن.";
+                TempData["error"] = "??? ????? ?? ???? ????? ??????.";
                 return RedirectToAction(nameof(Index)); // Or return BadRequest();
             }
 
@@ -114,36 +115,36 @@ namespace QualityControlApp.Controllers
                     // If BaseEntity handles UpdatedAt automatically, just call Update.
                     _chronicDiseaseUnitOfWork.Entity.Update(chronicDisease);
                     await _chronicDiseaseUnitOfWork.SaveAsync();
-                    TempData["success"] = "تم تعديل المرض المزمن بنجاح.";
+                    TempData["success"] = "?? ????? ????? ?????? ?????.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!await ChronicDiseaseExistsAsync(chronicDisease.Id))
                     {
-                        TempData["error"] = "المرض المزمن لم يعد موجوداً (ربما تم حذفه بواسطة مستخدم آخر).";
+                        TempData["error"] = "????? ?????? ?? ??? ??????? (???? ?? ???? ?????? ?????? ???).";
                         return RedirectToAction(nameof(Index));
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "تم تعديل هذا السجل بواسطة مستخدم آخر. تم إلغاء تغييراتك. الرجاء إعادة تحميل البيانات والمحاولة مرة أخرى.");
+                        ModelState.AddModelError(string.Empty, "?? ????? ??? ????? ?????? ?????? ???. ?? ????? ????????. ?????? ????? ????? ???????? ????????? ??? ????.");
                         // Optional: Reload the entity from the database to show the conflicting values
                         // var databaseValues = await _chronicDiseaseUnitOfWork.Entity.GetByIdAsync(id);
                         // var databaseEntry = _context.Entry(databaseValues); // If UoW gives access to context or similar
                         // // You can then show databaseValues.Name etc. to the user or log them.
-                        // ModelState.AddModelError("Name", $"القيمة الحالية في قاعدة البيانات: {databaseValues.Name}");
+                        // ModelState.AddModelError("Name", $"?????? ??????? ?? ????? ????????: {databaseValues.Name}");
                     }
                 }
                 catch (Exception ex) // Catch other potential errors during update
                 {
                     // Log the error (ex)
-                    TempData["error"] = "حدث خطأ غير متوقع أثناء محاولة تعديل المرض المزمن.";
-                    ModelState.AddModelError(string.Empty, "حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى.");
+                    TempData["error"] = "??? ??? ??? ????? ????? ?????? ????? ????? ??????.";
+                    ModelState.AddModelError(string.Empty, "??? ??? ??? ?????. ?????? ???????? ??? ????.");
                 }
             }
             // If ModelState is invalid or an error occurred, return to the Edit view
             // The chronicDisease object still contains the user's attempted changes and validation errors
-            TempData["error"] = TempData["error"] as string ?? "فشل تعديل المرض المزمن. يرجى مراجعة البيانات المدخلة.";
+            TempData["error"] = TempData["error"] as string ?? "??? ????? ????? ??????. ???? ?????? ???????? ???????.";
             return View(chronicDisease);
         }
 
@@ -154,7 +155,7 @@ namespace QualityControlApp.Controllers
         {
             if (id == null)
             {
-                TempData["error"] = "معرف المرض المزمن غير موجود.";
+                TempData["error"] = "???? ????? ?????? ??? ?????.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -163,7 +164,7 @@ namespace QualityControlApp.Controllers
                 var chronicDisease = await _chronicDiseaseUnitOfWork.Entity.GetByIdAsync(id);
                 if (chronicDisease == null)
                 {
-                    TempData["error"] = "المرض المزمن المراد حذفه غير موجود.";
+                    TempData["error"] = "????? ?????? ?????? ???? ??? ?????.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -175,25 +176,25 @@ namespace QualityControlApp.Controllers
 
                 if (isLinkedToHealthRecord)
                 {
-                    TempData["error"] = "لا يمكن حذف هذا المرض المزمن لأنه مرتبط بسجلات صحية حالية. يرجى إزالة الارتباطات أولاً.";
+                    TempData["error"] = "?? ???? ??? ??? ????? ?????? ???? ????? ?????? ???? ?????. ???? ????? ?????????? ?????.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 _chronicDiseaseUnitOfWork.Entity.Delete(chronicDisease);
                 await _chronicDiseaseUnitOfWork.SaveAsync();
-                TempData["success"] = "تم حذف المرض المزمن بنجاح.";
+                TempData["success"] = "?? ??? ????? ?????? ?????.";
             }
             catch (DbUpdateException ex) // Handles potential FK issues not caught by the manual check or other DB errors during save
             {
                 // Log the error (ex)
-                TempData["error"] = "لا يمكن حذف هذا المرض المزمن بسبب ارتباطه ببيانات أخرى في النظام أو حدوث خطأ في قاعدة البيانات.";
+                TempData["error"] = "?? ???? ??? ??? ????? ?????? ???? ??????? ??????? ???? ?? ?????? ?? ???? ??? ?? ????? ????????.";
                 // Consider more specific error messages based on ex.InnerException if possible
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 // Log the generic error (ex)
-                TempData["error"] = "حدث خطأ غير متوقع أثناء محاولة الحذف.";
+                TempData["error"] = "??? ??? ??? ????? ????? ?????? ?????.";
                 return RedirectToAction(nameof(Index));
             }
             return RedirectToAction(nameof(Index));

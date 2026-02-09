@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Classes;
 using QualityControlApp.Models;
@@ -17,7 +17,8 @@ namespace QualityControlApp.Controllers
         public LocationController(
     ApplicationDbContext context,
                          IUnitOfWork<Location> location,
-                              IWebHostEnvironment host) : base(host)
+                                                              IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _context = context;
             _location = location;
@@ -38,9 +39,6 @@ namespace QualityControlApp.Controllers
 
 
 
-
-
-
             var location = await _location.Entity.GetByIdAsync(id);
 
 
@@ -55,18 +53,18 @@ namespace QualityControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name")] Location location)
+        public async Task<IActionResult> Create([Bind("Name,Latitude,Longitude")] Location location)
         {
-            //هذه لا تستعمل ابدا مع المفتاح الأجنبي لكن لو احتجنا لها في حقول اخرى
-            //ModelState.Remove("Sections");// طريقة أخرى لمنع التحقق داخل وظيفة معينة وليس في الكلاس سيمنع التحقق بالمطلق لكل الوظائف
+            //??? ?? ?????? ???? ?? ??????? ??????? ??? ?? ?????? ??? ?? ???? ????
+            //ModelState.Remove("Sections");// ????? ???? ???? ?????? ???? ????? ????? ???? ?? ?????? ????? ?????? ??????? ??? ???????
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    if (locationExistsadd(location.Name)) //في حال اسم موجود
+                    if (locationExistsadd(location.Name)) //?? ??? ??? ?????
                     {
-                        ViewBag.Message = " الاسم موجود مسبقا ";
+                        ViewBag.Message = " ????? ????? ????? ";
                         return View();
                     }
 
@@ -110,7 +108,7 @@ namespace QualityControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Id,Created")] Location location)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Id,Created,Longitude,Latitude")] Location location)
         {
 
             // (Cross-Site Request Forgery)
@@ -120,9 +118,9 @@ namespace QualityControlApp.Controllers
                 return View("NotFound");
             }
 
-            if (locationExistsEdit(location.Name, location.Id)) //في حال اسم موجود
+            if (locationExistsEdit(location.Name, location.Id)) //?? ??? ??? ?????
             {
-                ViewBag.Message = " الاسم موجود مسبقا ";
+                ViewBag.Message = " ????? ????? ????? ";
                 return View();
             }
 
@@ -137,14 +135,14 @@ namespace QualityControlApp.Controllers
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!locationExists(location.Id)) //في حال محذوف
+                    if (!locationExists(location.Id)) //?? ??? ?????
                     {
                         return View("NotFound");
                     }
                     else
                     {
                         ViewBag.ErrorTitle = "The basic data not found in the database ";
-                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                         return View("Error");
                     }
                 }
@@ -196,7 +194,7 @@ namespace QualityControlApp.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorTitle = "The basic data not found in the database ";
-                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                 return View("Error");
 
             }
@@ -223,3 +221,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

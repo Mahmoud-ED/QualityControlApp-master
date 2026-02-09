@@ -17,7 +17,8 @@
         {
             <h5 class="alert alert-danger">@ViewBag.Message</h5>
         }
-        <div class="col-md-4">
+        <div class="col-md-6">
+            @* غيرنا العرض ليكون أوسع قليلاً *@
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -27,24 +28,72 @@
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
-             
+                @* -- الحقول المخفية لتخزين الإحداثيات -- *@
+                <input asp-for="Latitude" type="hidden" />
+                <input asp-for="Longitude" type="hidden" />
+
 
                 <input type="hidden" name="Type" value="@ViewBag.Type" />
-                <div class="form-group">
+                <div class="form-group mt-3">
                     <input type="submit" value="Create" class="btn btn-primary" />
                     <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
                 </div>
             </form>
-
-
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">اختر الموقع من الخريطة</label>
+            @* -- هذا هو المكان الذي ستظهر فيه الخريطة -- *@
+            <div id="map" style="height: 400px; border: 1px solid #ddd; border-radius: 5px;"></div>
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 1. تهيئة الخريطة وتحديد مركزها المبدئي (مثلاً، طرابلس، ليبيا) ومستوى التقريب
+            var map = L.map('map').setView([32.88535, 13.18016], 12);
+
+            // 2. إضافة طبقة الخريطة الأساسية من OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // 3. إضافة علامة (Marker) في منتصف الخريطة وجعلها قابلة للسحب
+            var marker = L.marker([32.88535, 13.18016], {
+                draggable: true
+            }).addTo(map);
+
+            // 4. ربط حقول الإدخال المخفية بمتغيرات جافاسكريبت
+            var latInput = document.querySelector("#Latitude");
+            var lngInput = document.querySelector("#Longitude");
+
+            // 5. دالة لتحديث قيم حقول الإدخال عند تحريك العلامة
+            function updateInputs(latlng) {
+                latInput.value = latlng.lat.toFixed(6); // toFixed لتحديد عدد الأرقام بعد الفاصلة
+                lngInput.value = latlng.lng.toFixed(6);
+                console.log(`Updated Coords: Lat=${latInput.value}, Lng=${lngInput.value}`); // للتحقق في الكونسول
+            }
+
+            // تحديث القيم عند انتهاء سحب العلامة
+            marker.on('dragend', function (e) {
+                updateInputs(e.target.getLatLng());
+            });
+
+            // تحديث القيم عند النقر على أي مكان في الخريطة
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng); // حرك العلامة إلى مكان النقر
+                updateInputs(e.latlng); // حدث قيم الإحداثيات
+            });
+
+            // استدعاء الدالة في البداية لوضع القيم المبدئية في الحقول
+            updateInputs(marker.getLatLng());
+        });
+    </script>
 }
 

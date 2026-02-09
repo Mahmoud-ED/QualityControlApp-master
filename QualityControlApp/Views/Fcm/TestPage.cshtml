@@ -1,0 +1,301 @@
+@model QualityControlApp.ViewModels.FcmTestPageVM
+@{
+    ViewData["Title"] = "FCM Notification Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bell"></i> Firebase Cloud Messaging Test
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="SendTestNotification" method="post" id="notificationForm">
+                        <div class="row">
+                            <!-- Notification Content -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Notification Content</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="Notification.Title" class="form-label">Title *</label>
+                                            <input asp-for="Notification.Title" class="form-control" placeholder="Enter notification title" required />
+                                            <span asp-validation-for="Notification.Title" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Notification.Body" class="form-label">Body *</label>
+                                            <textarea asp-for="Notification.Body" class="form-control" rows="3" placeholder="Enter notification body" required></textarea>
+                                            <span asp-validation-for="Notification.Body" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Notification.ImageUrl" class="form-label">Image URL</label>
+                                            <input asp-for="Notification.ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                                            <span asp-validation-for="Notification.ImageUrl" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Notification.ClickAction" class="form-label">Click Action URL</label>
+                                            <input asp-for="Notification.ClickAction" class="form-control" placeholder="https://example.com/action" />
+                                            <span asp-validation-for="Notification.ClickAction" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Notification.Type" class="form-label">Notification Type</label>
+                                            <select asp-for="Notification.Type" class="form-select">
+                                                <option value="0">General</option>
+                                                <option value="1">System</option>
+                                                <option value="2">Marketing</option>
+                                                <option value="3">Alert</option>
+                                                <option value="4">Reminder</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Target Selection -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Target Selection</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Target Type</label>
+                                            <select asp-for="Notification.Target" class="form-select" id="targetType">
+                                                <option value="0">All Users</option>
+                                                <option value="1">Authenticated Users Only</option>
+                                                <option value="2">Anonymous Users Only</option>
+                                                <option value="3">Specific User</option>
+                                                <option value="4">Specific Device</option>
+                                                <option value="5">Custom Selection</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Specific User Selection -->
+                                        <div class="mb-3" id="specificUserDiv" style="display: none;">
+                                            <label class="form-label">Select Users</label>
+                                            <select class="form-select" id="userSelect" multiple>
+                                                @foreach (var user in Model.AvailableUsers)
+                                                {
+                                                    <option value="@user.Id">@user.UserName (@user.Email)</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <!-- Specific Device Selection -->
+                                        <div class="mb-3" id="specificDeviceDiv" style="display: none;">
+                                            <label class="form-label">Select Devices</label>
+                                            <select class="form-select" id="deviceSelect" multiple>
+                                                @foreach (var deviceId in Model.AvailableDeviceIds)
+                                                {
+                                                    <option value="@deviceId">@deviceId</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                        <!-- Custom Token Selection -->
+                                        <div class="mb-3" id="customSelectionDiv" style="display: none;">
+                                            <label class="form-label">Select Specific Tokens</label>
+                                            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                                @foreach (var token in Model.AvailableTokens)
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input token-checkbox" type="checkbox" value="@token.Token" id="token_@token.Id">
+                                                        <label class="form-check-label" for="token_@token.Id">
+                                                            <small>
+                                                                @if (!string.IsNullOrEmpty(token.UserName))
+                                                                {
+                                                                    <strong>@token.UserName</strong> 
+                                                                    @if (!string.IsNullOrEmpty(token.UserEmail))
+                                                                    {
+                                                                        <span>(@token.UserEmail)</span>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <strong>Anonymous</strong>
+                                                                }
+                                                                <br />
+                                                                <span class="text-muted">Device: @(token.DeviceType ?? "Unknown") | ID: @(token.DeviceId ?? "N/A")</span>
+                                                            </small>
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Scheduling -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="Notification.IsScheduled" class="form-check-input" type="checkbox" id="isScheduled">
+                                                <label class="form-check-label" for="isScheduled">
+                                                    Schedule Notification
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3" id="scheduleDiv" style="display: none;">
+                                            <label asp-for="Notification.ScheduledAt" class="form-label">Schedule Date & Time</label>
+                                            <input asp-for="Notification.ScheduledAt" class="form-control" type="datetime-local" />
+                                            <span asp-validation-for="Notification.ScheduledAt" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Statistics</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="info-box">
+                                                    <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Total Users</span>
+                                                        <span class="info-box-number">@Model.AvailableUsers.Count</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box">
+                                                    <span class="info-box-icon bg-success"><i class="fas fa-mobile-alt"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Active Tokens</span>
+                                                        <span class="info-box-number">@Model.AvailableTokens.Count</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box">
+                                                    <span class="info-box-icon bg-warning"><i class="fas fa-desktop"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Devices</span>
+                                                        <span class="info-box-number">@Model.AvailableDeviceIds.Count</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box">
+                                                    <span class="info-box-icon bg-primary"><i class="fas fa-user-secret"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Anonymous</span>
+                                                        <span class="info-box-number">@Model.AvailableTokens.Count(t => string.IsNullOrEmpty(t.UserId))</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane"></i> Send Test Notification
+                                </button>
+                                <a href="@Url.Action("Tokens")" class="btn btn-secondary btn-lg ms-2">
+                                    <i class="fas fa-list"></i> View All Tokens
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle target type change
+            $('#targetType').change(function() {
+                var targetType = $(this).val();
+                
+                // Hide all specific selection divs
+                $('#specificUserDiv, #specificDeviceDiv, #customSelectionDiv').hide();
+                
+                // Show relevant div based on selection
+                switch(targetType) {
+                    case '3': // Specific User
+                        $('#specificUserDiv').show();
+                        break;
+                    case '4': // Specific Device
+                        $('#specificDeviceDiv').show();
+                        break;
+                    case '5': // Custom Selection
+                        $('#customSelectionDiv').show();
+                        break;
+                }
+            });
+
+            // Handle scheduling checkbox
+            $('#isScheduled').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#scheduleDiv').show();
+                } else {
+                    $('#scheduleDiv').hide();
+                }
+            });
+
+            // Handle form submission
+            $('#notificationForm').submit(function(e) {
+                var targetType = $('#targetType').val();
+                
+                // Clear previous selections
+                $('input[name="Notification.SelectedTokens"]').remove();
+                $('input[name="Notification.SelectedUserIds"]').remove();
+                $('input[name="Notification.SelectedDeviceIds"]').remove();
+                
+                // Add selected values based on target type
+                if (targetType === '5') { // Custom Selection
+                    $('.token-checkbox:checked').each(function() {
+                        $('#notificationForm').append('<input type="hidden" name="Notification.SelectedTokens" value="' + $(this).val() + '">');
+                    });
+                } else if (targetType === '3') { // Specific User
+                    $('#userSelect option:selected').each(function() {
+                        $('#notificationForm').append('<input type="hidden" name="Notification.SelectedUserIds" value="' + $(this).val() + '">');
+                    });
+                } else if (targetType === '4') { // Specific Device
+                    $('#deviceSelect option:selected').each(function() {
+                        $('#notificationForm').append('<input type="hidden" name="Notification.SelectedDeviceIds" value="' + $(this).val() + '">');
+                    });
+                }
+            });
+
+            // Initialize the form
+            $('#targetType').trigger('change');
+            $('#isScheduled').trigger('change');
+        });
+    </script>
+}

@@ -1,0 +1,40 @@
+﻿@model QualityControlApp.Models.Entities.ImgeForViews
+
+@{
+    ViewData["Title"] = "Delete Image for View";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>ImgeForViews</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ViewName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ViewName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CoverImageUrl)
+        </dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="Cover Image" style="max-width: 200px; max-height: 200px;" />
+            }
+            else
+            {
+                <span>No Image</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>

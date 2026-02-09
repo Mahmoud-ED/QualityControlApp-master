@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +28,8 @@ namespace QualityControlApp.Controllers
                                IUnitOfWork<UserProfile> userProfile,
                                  IEmailSender emailSender,
                                  //UserSessionTracker userSessionTracker,
-                                IWebHostEnvironment host) : base(host)
+                                IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _roleManager = roleManager;
             _userManager = userManager;
@@ -202,3 +203,4 @@ namespace QualityControlApp.Controllers
         }
     }
 }
+

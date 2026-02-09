@@ -1,0 +1,371 @@
+@model IEnumerable<QualityControlApp.Models.Entities.Landing>
+
+@{
+    ViewData["Title"] = "Detailed Landing Report";
+    var operatorName = ViewBag.OperatorName as string;
+    var aircraftReg = ViewBag.AircraftReg as string;
+    var requestStatus = ViewBag.RequestStatus as string;
+    var dateFrom = ViewBag.DateFrom as string;
+    var dateTo = ViewBag.DateTo as string;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalCount = ViewBag.TotalCount ?? 0;
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-list-ul me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Comprehensive detailed report of all landing requests with advanced filtering.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Reports")" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                <i class="fas fa-arrow-left me-2"></i> Back to Reports
+            </a>
+            <button onclick="exportToExcel()" class="btn btn-success rounded-pill px-4 py-2">
+                <i class="fas fa-file-excel me-2"></i> Export Excel
+            </button>
+            <button onclick="exportToPDF()" class="btn btn-danger rounded-pill px-4 py-2">
+                <i class="fas fa-file-pdf me-2"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-light py-3 border-bottom-0">
+            <a class="h6 fw-semibold text-decoration-none text-dark d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#filtersCollapse" role="button" aria-expanded="false" aria-controls="filtersCollapse">
+                <span><i class="fas fa-filter me-2"></i>Advanced Filters</span>
+                <i class="fas fa-chevron-down collapse-icon"></i>
+            </a>
+        </div>
+        <div class="collapse show" id="filtersCollapse">
+            <div class="card-body p-4">
+                <form method="get" asp-action="DetailedReport" class="row g-3" id="filterForm">
+                    <div class="col-lg-2 col-md-4">
+                        <label for="operatorName" class="form-label small fw-semibold">Operator Name</label>
+                        <input type="text" id="operatorName" name="operatorName" class="form-control form-control-sm"
+                               placeholder="Enter operator name" value="@operatorName" />
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label for="aircraftReg" class="form-label small fw-semibold">Aircraft Registration</label>
+                        <input type="text" id="aircraftReg" name="aircraftReg" class="form-control form-control-sm"
+                               placeholder="Enter registration" value="@aircraftReg" />
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label for="requestStatus" class="form-label small fw-semibold">Status</label>
+                        <select id="requestStatus" name="requestStatus" class="form-select form-select-sm">
+                            <option value="">All Statuses</option>
+                            <option value="Pending" selected="@(requestStatus == "Pending")">Pending</option>
+                            <option value="Approved" selected="@(requestStatus == "Approved")">Approved</option>
+                            <option value="Rejected" selected="@(requestStatus == "Rejected")">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label for="dateFrom" class="form-label small fw-semibold">Date From</label>
+                        <input type="date" id="dateFrom" name="dateFrom" class="form-control form-control-sm" value="@dateFrom" />
+                    </div>
+                    <div class="col-lg-2 col-md-4">
+                        <label for="dateTo" class="form-label small fw-semibold">Date To</label>
+                        <input type="date" id="dateTo" name="dateTo" class="form-control form-control-sm" value="@dateTo" />
+                    </div>
+                    <div class="col-lg-2 col-md-4 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                                <i class="fas fa-search me-1"></i> Apply Filters
+                            </button>
+                            <a href="@Url.Action("DetailedReport")" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-undo me-1"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted">
+            <strong>@totalCount.ToString("N0")</strong> records found
+            @if (!string.IsNullOrEmpty(operatorName) || !string.IsNullOrEmpty(aircraftReg) ||
+                 !string.IsNullOrEmpty(requestStatus) || !string.IsNullOrEmpty(dateFrom) || !string.IsNullOrEmpty(dateTo))
+            {
+                <span>(filtered)</span>
+            }
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label for="pageSize" class="form-label small mb-0">Show:</label>
+            <select id="pageSize" class="form-select form-select-sm" style="width: auto;" onchange="changePageSize(this.value)">
+                <option value="25" selected="@(ViewBag.PageSize == 25 || ViewBag.PageSize == null)">25</option>
+                <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                <option value="100" selected="@(ViewBag.PageSize == 100)">100</option>
+                <option value="200" selected="@(ViewBag.PageSize == 200)">200</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="detailedReportTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0 fw-semibold">#</th>
+                            <th class="border-0 fw-semibold">Operator</th>
+                            <th class="border-0 fw-semibold">Aircraft</th>
+                            <th class="border-0 fw-semibold">Flight Date</th>
+                            <th class="border-0 fw-semibold">ETA/ETD</th>
+                            <th class="border-0 fw-semibold">Route</th>
+                            <th class="border-0 fw-semibold">Status</th>
+                            <th class="border-0 fw-semibold">Created</th>
+                            <th class="border-0 fw-semibold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var rowNumber = ((currentPage - 1) * (ViewBag.PageSize ?? 50)) + 1;
+                        }
+                        @foreach (var landing in Model)
+                        {
+                            <tr>
+                                <td class="border-0">@rowNumber</td>
+                                <td class="border-0">
+                                    <div class="fw-semibold">@landing.OperatorName</div>
+                                    <small class="text-muted">@landing.Email</small>
+                                </td>
+                                <td class="border-0">
+                                    <div class="fw-semibold">@landing.AircraftRegistration</div>
+                                    <small class="text-muted">@landing.AircraftType</small>
+                                </td>
+                                <td class="border-0">
+                                    @landing.DateOfFlights.ToString("dd MMM yyyy")
+                                </td>
+                                <td class="border-0">
+                                    <div>@landing.ETA.ToString("HH:mm")</div>
+                                    <small class="text-muted">to @landing.ETD.ToString("HH:mm")</small>
+                                </td>
+                                <td class="border-0">
+                                    <div class="text-truncate" style="max-width: 150px;" title="@landing.Route">
+                                        @landing.Route
+                                    </div>
+                                </td>
+                                <td class="border-0">
+                                    @switch (landing.RequestStatus)
+                                    {
+                                        case "Approved":
+                                            <span class="badge bg-success">Approved</span>
+                                            break;
+                                        case "Rejected":
+                                            <span class="badge bg-danger">Rejected</span>
+                                            break;
+                                        case "Pending":
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@landing.RequestStatus</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="border-0">
+                                    @landing.Created.ToString("dd MMM yyyy")
+                                </td>
+                                <td class="border-0 text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="@Url.Action("Details", new { id = landing.Id })"
+                                           class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = landing.Id })"
+                                           class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            rowNumber++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Detailed report pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("DetailedReport", new {
+                            operatorName = operatorName,
+                            aircraftReg = aircraftReg,
+                            requestStatus = requestStatus,
+                            dateFrom = dateFrom,
+                            dateTo = dateTo,
+                            page = currentPage - 1
+                        })" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("DetailedReport", new {
+                            operatorName = operatorName,
+                            aircraftReg = aircraftReg,
+                            requestStatus = requestStatus,
+                            dateFrom = dateFrom,
+                            dateTo = dateTo,
+                            page = i
+                        })">@i</a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("DetailedReport", new {
+                            operatorName = operatorName,
+                            aircraftReg = aircraftReg,
+                            requestStatus = requestStatus,
+                            dateFrom = dateFrom,
+                            dateTo = dateTo,
+                            page = currentPage + 1
+                        })" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+
+</div>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+        }
+
+        .table th {
+            font-size: 0.875rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .collapse-icon {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .collapse[aria-expanded="true"] .collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 0.375rem;
+            margin: 0 2px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function changePageSize(pageSize) {
+            const url = new URL(window.location);
+            url.searchParams.set('pageSize', pageSize);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function exportToExcel() {
+            const url = new URL('@Url.Action("ExportToExcel", "Landing")', window.location.origin);
+            const formData = new FormData(document.getElementById('filterForm'));
+
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    url.searchParams.set(key, value);
+                }
+            }
+
+            // For now, show the data in console. In production, this would download the Excel file
+            fetch(url.toString())
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Excel export data:', data);
+                    alert('Excel export feature is under development. Data is logged to console.');
+                })
+                .catch(error => {
+                    console.error('Export error:', error);
+                    alert('Error exporting to Excel');
+                });
+        }
+
+        function exportToPDF() {
+            const url = new URL('@Url.Action("ExportToPDF", "Landing")', window.location.origin);
+            const formData = new FormData(document.getElementById('filterForm'));
+
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    url.searchParams.set(key, value);
+                }
+            }
+
+            // For now, show the data in console. In production, this would generate PDF
+            fetch(url.toString())
+                .then(response => response.json())
+                .then(data => {
+                    console.log('PDF export data:', data);
+                    alert('PDF export feature is under development. Data is logged to console.');
+                })
+                .catch(error => {
+                    console.error('Export error:', error);
+                    alert('Error exporting to PDF');
+                });
+        }
+
+        // Auto-submit form on filter change
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterInputs = document.querySelectorAll('#filterForm input, #filterForm select');
+
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Reset to page 1 when filters change
+                    const pageInput = document.querySelector('input[name="page"]');
+                    if (pageInput) {
+                        pageInput.value = '1';
+                    }
+                });
+            });
+        });
+    </script>
+}

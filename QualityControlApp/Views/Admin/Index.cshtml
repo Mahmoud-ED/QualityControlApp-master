@@ -2,7 +2,14 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@* 1. تأكد من أن رابط Leaflet CSS موجود هنا أو في _Layout.cshtml *@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
 <style>
+    body {
+        background-color: #fff !important; /* Ensures white background for the entire page */
+    }
+
     .stat-icon-wrapper {
         width: 50px;
         height: 50px;
@@ -45,52 +52,208 @@
         background-color: rgba(32, 201, 151, 0.15);
     }
 
-    /* لتحسين مظهر مؤشر التحميل مع ApexCharts */
-    .apexcharts-canvas { /* التأكد من أن الشارت لا يظهر فوق مؤشر التحميل مبدئياً */
+    .apexcharts-canvas {
         transition: opacity 0.3s ease-in-out;
     }
 
     .chart-loading .apexcharts-canvas {
-        opacity: 0.3; /* جعل الشارت باهتاً أثناء التحميل */
+        opacity: 0.3;
     }
 
     .chart-container {
-        min-height: 250px; /* ارتفاع مبدئي لحاوية الشارت لتجنب القفز */
+        min-height: 250px;
     }
 
-
-
-    /* --- CSS جديد لقسم الصورة --- */
-    .hero-banner {
+    #locationsMap {
+        height: 450px;
         width: 100%;
-        height: 300px; /* يمكنك تعديل الارتفاع حسب رغبتك */
-        background-image: url('/img/Captin.jpg');
-        background-size: cover; /* لجعل الصورة تغطي المساحة بالكامل */
-        background-position: center center; /* لتوسيط الصورة */
-        background-repeat: no-repeat;
-        margin-bottom: 1.5rem; /* لإضافة مسافة أسفل الصورة وقبل الكروت */
-        border-radius: 0.375rem; /* نفس تقويس الكروت (اختياري) */
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); /* ظل خفيف (اختياري) */
-        display: flex; /* لتوسيط أي محتوى داخل البانر إذا أردت */
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        position: relative;
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 0.375rem;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+    }
+
+    .leaflet-popup-content {
+        font-weight: 500;
+        margin: 13px 19px;
+        line-height: 1.4;
+    }
+
+    .leaflet-popup-content h6 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .leaflet-popup-content .popup-info {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .leaflet-popup-content .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 5px;
+    }
+
+    .status-badge.active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-badge.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+
+    @@keyframes pulse-active {
+        0% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+        }
+    }
+
+    .pulsing-marker {
+        animation: pulse 2s infinite;
+    }
+
+    .pulsing-marker-active {
+        animation: pulse-active 2s infinite;
+    }
+
+    .leaflet-marker-icon:hover {
+        transform: scale(1.2);
+        transition: transform 0.2s ease-in-out;
+        z-index: 1000 !important;
+    }
+
+    .live-update-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 15px;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .live-indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #28a745;
+        animation: blink 1.5s infinite;
+    }
+
+    @@keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .update-spinner {
+        width: 12px;
+        height: 12px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .map-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
         align-items: center;
         justify-content: center;
-        color: white; /* لون النص إذا أضفت نصًا فوق الصورة */
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* ظل للنص لجعله أوضح (إذا أضفت نصًا) */
+        z-index: 2000;
+        border-radius: 0.375rem;
     }
 
-        .hero-banner h1 { /* مثال لتنسيق عنوان فوق الصورة */
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        padding: 10px;
+        background: #f8d7da;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
 </style>
-<div class="row mt-3">
+
+<div class="row mt-4">
     <div class="col-12">
-        <div class="hero-banner">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-map-fill me-2"></i>Open Oversight Tasks - Live Map</h5>
+                <small class="text-muted">Auto-refresh every 5 seconds</small>
+            </div>
+            <div class="card-body p-2">
+                <div style="position: relative;">
+                    <div id="locationsMap"></div>
+                    <div class="live-update-indicator" id="liveUpdateIndicator">
+                        <div class="live-indicator-dot"></div>
+                        <span>Live Update</span>
+                    </div>
+                    <div class="map-loading-overlay" id="mapLoadingOverlay" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="mapErrorMessage" class="error-message" style="display: none;"></div>
+            </div>
         </div>
     </div>
 </div>
-<!-- الكروت الإحصائية العلوية (تبقى كما هي) -->
+
+<!-- الكروت الإحصائية العلوية -->
 <div class="row mt-3">
+    <!-- ... محتوى الكروت يبقى كما هو ... -->
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -113,7 +276,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -136,17 +298,6 @@
             </div>
         </div>
     </div>
-   @*  <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <div class="stat-icon-wrapper bg-info-soft">
-                    <i class="bi bi-buildings-fill text-info"></i>
-                </div>
-                <h3 class="card-title fw-bold mb-0">Companies</h3>
-                <p class="card-text text-muted">@ViewBag.companies</p>
-            </div>
-        </div>
-    </div> *@
     <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -191,11 +342,112 @@
             </div>
         </div>
     </div>
-   
+</div>
+
+<!-- صف الخريطة -->
+
+<!-- قسم تتبع الطائرات الحية - OpenSky Network -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-airplane-fill me-2"></i>Live Aircraft Tracking - OpenSky Network
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">Auto-refresh every 10 seconds</small>
+                    <div class="live-update-indicator" id="aircraftLiveIndicator" style="position: relative; top: 0; right: 0;">
+                        <div class="live-indicator-dot"></div>
+                        <span>Live Data</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <button class="btn btn-sm btn-primary" id="btnLoadAllAircraft">
+                                <i class="bi bi-globe me-1"></i>Load All Aircraft
+                            </button>
+                            <button class="btn btn-sm btn-success" id="btnLoadLibyaAircraft">
+                                <i class="bi bi-geo-alt-fill me-1"></i>Libya Region
+                            </button>
+                            <button class="btn btn-sm btn-info" id="btnRefreshAircraft">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh Now
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="btnToggleView">
+                                <i class="bi bi-map me-1"></i>Toggle Map/Table
+                            </button>
+                            <div class="ms-auto">
+                                <span class="badge bg-secondary" id="aircraftCount">0 Aircraft</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="position-relative">
+                    <div id="aircraftLoadingOverlay" class="map-loading-overlay" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Aircraft Map View -->
+                    <div id="aircraftMapView" style="display: none;">
+                        <div style="position: relative;">
+                            <div id="aircraftMap" style="height: 600px; width: 100%; border-radius: 0.375rem; border: 1px solid #dee2e6;"></div>
+                            <div class="live-update-indicator" id="aircraftMapLiveIndicator" style="position: absolute; top: 10px; right: 10px;">
+                                <div class="live-indicator-dot"></div>
+                                <span>Live Tracking</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Aircraft Table View -->
+                    <div id="aircraftTableView">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-hover table-striped" id="aircraftTable">
+                                <thead class="table-dark sticky-top">
+                                    <tr>
+                                        <th><i class="bi bi-hash"></i></th>
+                                        <th><i class="bi bi-airplane"></i> Callsign</th>
+                                        <th><i class="bi bi-flag"></i> Country</th>
+                                        <th><i class="bi bi-geo-alt"></i> Position</th>
+                                        <th><i class="bi bi-speedometer2"></i> Altitude (m)</th>
+                                        <th><i class="bi bi-arrow-up-right"></i> Velocity (m/s)</th>
+                                        <th><i class="bi bi-compass"></i> Heading</th>
+                                        <th><i class="bi bi-clock"></i> Last Contact</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="aircraftTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="bi bi-airplane fs-1 d-block mb-2"></i>
+                                            Click a button above to load aircraft data
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="aircraftErrorMessage" class="error-message" style="display: none;"></div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Data provided by <strong>OpenSky Network</strong> - Free & Live Aircraft Tracking API
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- صف الشارتات -->
 <div class="row mt-3 g-3">
+    <!-- ... محتوى الشارتات يبقى كما هو ... -->
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body d-flex flex-column">
@@ -220,13 +472,12 @@
                     <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
                 </form>
                 <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container">
-                    <div id="questionsChart"></div> <!-- تغيير إلى div لـ ApexCharts -->
+                    <div id="questionsChart"></div>
                     <div id="questionsChartLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
                         <p class="mb-0 small">Loading Over Site...</p>
                         <p class="chart-error-message" style="color: red; display: none;"></p>
                     </div>
                 </div>
-                @* يمكنك إضافة div لعرض أعداد Active/Inactive هنا إذا أردت، بنفس نمط الشارتات الأخرى *@
                 <div id="questionsStatusCounts" class="text-center small mt-2" style="display:none;">
                     <span class="me-2">Active: <strong id="questionsActiveCount">0</strong></span>
                     <span>Inactive: <strong id="questionsInactiveCount">0</strong></span>
@@ -234,13 +485,12 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title text-center">AirRequest Status</h5>
                 <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container mb-2">
-                    <div id="requestStatusChart"></div> <!-- تغيير إلى div -->
+                    <div id="requestStatusChart"></div>
                     <div id="requestStatusLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
                         <p class="mb-0 small">Loading AirRequests...</p>
                         <p class="chart-error-message" style="color: red; display: none;"></p>
@@ -254,13 +504,12 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title text-center">Landing Requests Status</h5>
                 <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative chart-container mb-2">
-                    <div id="landingRequestStatusChart"></div> <!-- تغيير إلى div -->
+                    <div id="landingRequestStatusChart"></div>
                     <div id="landingRequestStatusLoadingIndicator" class="position-absolute top-50 start-50 translate-middle p-2 rounded" style="display: none; background-color: rgba(255,255,255,0.85); z-index: 10;">
                         <p class="mb-0 small">Loading Landing Requests...</p>
                         <p class="chart-error-message" style="color: red; display: none;"></p>
@@ -277,138 +526,664 @@
 </div>
 
 @section scripts {
-    <!-- 1. تضمين مكتبة ApexCharts -->
+    <!-- تضمين مكتبات الجافاسكريبت -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // --- دالة مساعدة لإظهار/إخفاء مؤشر التحميل وعرض الأخطاء ---
+            // =================================================================
+            // Interactive Map with Live Updates
+            // =================================================================
+            let mapInstance = null;
+            let markersLayer = null;
+            let currentMarkers = {};
+            const MAP_REFRESH_INTERVAL = 5000; // 5 seconds
+
+            function initializeMap() {
+                if (!document.getElementById('locationsMap')) {
+                    console.log('Map container not found.');
+                    return;
+                }
+
+                // Initialize map centered on Libya
+                mapInstance = L.map('locationsMap', {
+                    zoomControl: true,
+                    scrollWheelZoom: true,
+                    dragging: true,
+                    doubleClickZoom: true
+                }).setView([27.5, 17.0], 5);
+
+                // Add tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18
+                }).addTo(mapInstance);
+
+                // Initialize markers layer
+                markersLayer = L.featureGroup().addTo(mapInstance);
+
+                // Load initial data
+                loadMapData();
+
+                // Set up auto-refresh
+                setInterval(loadMapData, MAP_REFRESH_INTERVAL);
+            }
+
+            function showLoadingOverlay(show) {
+                const overlay = document.getElementById('mapLoadingOverlay');
+                if (overlay) {
+                    overlay.style.display = show ? 'flex' : 'none';
+                }
+            }
+
+            function showError(message) {
+                const errorDiv = document.getElementById('mapErrorMessage');
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => {
+                        errorDiv.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            function updateLiveIndicator(isUpdating) {
+                const indicator = document.getElementById('liveUpdateIndicator');
+                if (!indicator) return;
+
+                const dot = indicator.querySelector('.live-indicator-dot');
+                const text = indicator.querySelector('span');
+
+                if (isUpdating) {
+                    dot.style.backgroundColor = '#007bff';
+                    text.textContent = 'Updating...';
+                } else {
+                    dot.style.backgroundColor = '#28a745';
+                    text.textContent = 'Live Update';
+                }
+            }
+
+            function createMarkerIcon(status) {
+                const color = status === 'active' ? '#28a745' : 
+                             status === 'inactive' ? '#dc3545' : '#ffc107';
+                
+                return L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="
+                        width: 30px;
+                        height: 30px;
+                        background-color: ${color};
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                        cursor: pointer;
+                    " class="${status === 'inactive' ? 'pulsing-marker' : 'pulsing-marker-active'}"></div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15],
+                    popupAnchor: [0, -15]
+                });
+            }
+
+            function createPopupContent(location) {
+                const statusClass = location.status === 'active' ? 'active' : 
+                                   location.status === 'inactive' ? 'inactive' : 'pending';
+                const statusText = location.status.charAt(0).toUpperCase() + location.status.slice(1);
+                
+                const lastUpdate = location.lastUpdate ? 
+                    new Date(location.lastUpdate).toLocaleString() : 'N/A';
+
+                // Convert coordinates to numbers for display
+                const lat = parseFloat(location.latitude);
+                const lng = parseFloat(location.longitude);
+
+                return `
+                    <div>
+                        <h6><i class="bi bi-geo-alt-fill me-1"></i>${location.name}</h6>
+                        <div class="popup-info">
+                            <div><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusText}</span></div>
+                            <div class="mt-2"><strong>Last Update:</strong><br>${lastUpdate}</div>
+                            <div class="mt-1"><strong>Coordinates:</strong><br>${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updateMarkers(locations) {
+                if (!mapInstance || !markersLayer) return;
+
+                const newMarkerIds = new Set();
+                const hasActive = locations.some(loc => loc.status === 'active');
+
+                locations.forEach((loc, idx) => {
+                    // Convert latitude and longitude to numbers
+                    const lat = parseFloat(loc.latitude);
+                    const lng = parseFloat(loc.longitude);
+
+                    // Validate coordinates
+                    if (!lat || !lng || isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+                        console.warn('Invalid coordinates for location:', loc.name, lat, lng);
+                        return;
+                    }
+
+                    // إذا لم يكن هناك علامات خضراء، اجعل أول علامة باللون الأخضر كتمييز بصري
+                    const effectiveStatus = hasActive ? loc.status : (idx === 0 ? 'active' : loc.status);
+
+                    const markerId = loc.id || `${lat}-${lng}`;
+                    newMarkerIds.add(markerId);
+
+                    if (currentMarkers[markerId]) {
+                        // Update existing marker popup
+                        currentMarkers[markerId].setPopupContent(createPopupContent({ ...loc, status: effectiveStatus, latitude: lat, longitude: lng }));
+                    } else {
+                        // Create new marker with animation
+                        const marker = L.marker([lat, lng], {
+                            icon: createMarkerIcon(effectiveStatus),
+                            title: loc.name
+                        });
+
+                        marker.bindPopup(createPopupContent({ ...loc, status: effectiveStatus, latitude: lat, longitude: lng }), {
+                            maxWidth: 300,
+                            className: 'custom-popup'
+                        });
+
+                        // Add hover effect
+                        marker.on('mouseover', function() {
+                            this.openPopup();
+                        });
+
+                        markersLayer.addLayer(marker);
+                        currentMarkers[markerId] = marker;
+                    }
+                });
+
+                // Remove markers that no longer exist
+                Object.keys(currentMarkers).forEach(markerId => {
+                    if (!newMarkerIds.has(markerId)) {
+                        markersLayer.removeLayer(currentMarkers[markerId]);
+                        delete currentMarkers[markerId];
+                    }
+                });
+
+                // Fit bounds if markers exist
+                if (markersLayer.getLayers().length > 0) {
+                    mapInstance.fitBounds(markersLayer.getBounds().pad(0.1));
+                }
+            }
+
+            function loadMapData() {
+                updateLiveIndicator(true);
+
+                fetch('@Url.Action("GetLiveMapData", "Admin")')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.success && result.data) {
+                            updateMarkers(result.data);
+                            
+                            if (result.data.length === 0) {
+                                const mapContainer = document.getElementById('locationsMap');
+                                if (mapContainer && markersLayer.getLayers().length === 0) {
+                                    showError('No active locations to display on the map.');
+                                }
+                            }
+                        } else {
+                            showError(result.error || 'Failed to load map data');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading map data:', error);
+                        showError('Connection error. Retrying...');
+                    })
+                    .finally(() => {
+                        updateLiveIndicator(false);
+                    });
+            }
+
+            // Initialize the map
+            initializeMap();
+
+
+            // =================================================================
+            // Live Aircraft Tracking - OpenSky Network API
+            // =================================================================
+            let aircraftRefreshInterval = null;
+            let currentAircraftFilter = null;
+            let aircraftMapInstance = null;
+            let aircraftMarkersLayer = null;
+            let currentAircraftMarkers = {};
+            let currentAircraftData = [];
+            let isMapView = false;
+            const AIRCRAFT_REFRESH_INTERVAL = 10000; // 10 seconds
+
+            function showAircraftLoading(show) {
+                const overlay = document.getElementById('aircraftLoadingOverlay');
+                if (overlay) {
+                    overlay.style.display = show ? 'flex' : 'none';
+                }
+            }
+
+            function showAircraftError(message) {
+                const errorDiv = document.getElementById('aircraftErrorMessage');
+                if (errorDiv) {
+                    errorDiv.textContent = message;
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => {
+                        errorDiv.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            function updateAircraftIndicator(isUpdating) {
+                const indicator = document.getElementById('aircraftLiveIndicator');
+                if (!indicator) return;
+
+                const dot = indicator.querySelector('.live-indicator-dot');
+                const text = indicator.querySelector('span');
+
+                if (isUpdating) {
+                    dot.style.backgroundColor = '#007bff';
+                    text.textContent = 'Updating...';
+                } else {
+                    dot.style.backgroundColor = '#28a745';
+                    text.textContent = 'Live Data';
+                }
+            }
+
+            function formatTimestamp(timestamp) {
+                if (!timestamp) return 'N/A';
+                const date = new Date(timestamp * 1000);
+                const now = new Date();
+                const diffSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffSeconds < 60) return `${diffSeconds}s ago`;
+                if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+                return date.toLocaleTimeString();
+            }
+
+            function parseAircraftData(apiResponse) {
+                if (!apiResponse || !apiResponse.states) {
+                    return [];
+                }
+
+                return apiResponse.states.map((state, index) => {
+                    return {
+                        icao24: state[0] || 'N/A',
+                        callsign: (state[1] || 'Unknown').trim(),
+                        originCountry: state[2] || 'Unknown',
+                        timePosition: state[3],
+                        lastContact: state[4],
+                        longitude: state[5],
+                        latitude: state[6],
+                        baroAltitude: state[7],
+                        onGround: state[8],
+                        velocity: state[9],
+                        trueTrack: state[10],
+                        verticalRate: state[11],
+                        geoAltitude: state[13],
+                        squawk: state[14]
+                    };
+                }).filter(aircraft => 
+                    aircraft.latitude !== null && 
+                    aircraft.longitude !== null
+                );
+            }
+
+            function initializeAircraftMap() {
+                if (!document.getElementById('aircraftMap')) return;
+                
+                if (!aircraftMapInstance) {
+                    aircraftMapInstance = L.map('aircraftMap', {
+                        zoomControl: true,
+                        scrollWheelZoom: true,
+                        dragging: true,
+                        doubleClickZoom: true
+                    }).setView([27.5, 17.0], 5);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 18
+                    }).addTo(aircraftMapInstance);
+
+                    aircraftMarkersLayer = L.featureGroup().addTo(aircraftMapInstance);
+                }
+            }
+
+            function createAircraftIcon(aircraft) {
+                const rotation = aircraft.trueTrack || 0;
+                const color = aircraft.onGround ? '#6c757d' : '#007bff';
+                
+                return L.divIcon({
+                    className: 'aircraft-marker',
+                    html: `<div style="
+                        width: 32px;
+                        height: 32px;
+                        transform: rotate(${rotation}deg);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="${color}" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                            <path d="M21,16v-2l-8-5V3.5C13,2.67,12.33,2,11.5,2S10,2.67,10,3.5V9l-8,5v2l8-2.5V19l-2,1.5V22l3.5-1l3.5,1v-1.5L13,19v-5.5L21,16z"/>
+                        </svg>
+                    </div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                    popupAnchor: [0, -16]
+                });
+            }
+
+            function createAircraftPopup(aircraft) {
+                const altitude = aircraft.baroAltitude !== null ? 
+                    Math.round(aircraft.baroAltitude) + ' m' : 'N/A';
+                const velocity = aircraft.velocity !== null ? 
+                    aircraft.velocity.toFixed(1) + ' m/s' : 'N/A';
+                const heading = aircraft.trueTrack !== null ? 
+                    Math.round(aircraft.trueTrack) + '°' : 'N/A';
+                const lastContact = formatTimestamp(aircraft.lastContact);
+                const statusBadge = aircraft.onGround ? 
+                    '<span class="badge bg-warning text-dark">On Ground</span>' : 
+                    '<span class="badge bg-success">In Flight</span>';
+
+                return `
+                    <div style="min-width: 200px;">
+                        <h6><i class="bi bi-airplane-fill me-1"></i>${aircraft.callsign}</h6>
+                        <div class="popup-info">
+                            <div><strong>Country:</strong> ${aircraft.originCountry}</div>
+                            <div><strong>Status:</strong> ${statusBadge}</div>
+                            <div class="mt-2"><strong>Altitude:</strong> ${altitude}</div>
+                            <div><strong>Velocity:</strong> ${velocity}</div>
+                            <div><strong>Heading:</strong> ${heading}</div>
+                            <div class="mt-2"><strong>Position:</strong><br>
+                                <small>${aircraft.latitude.toFixed(4)}, ${aircraft.longitude.toFixed(4)}</small>
+                            </div>
+                            <div class="mt-1"><strong>Last Contact:</strong> ${lastContact}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updateAircraftMap(aircraftList) {
+                if (!aircraftMapInstance || !aircraftMarkersLayer) return;
+
+                const newMarkerIds = new Set();
+
+                aircraftList.forEach(aircraft => {
+                    const markerId = aircraft.icao24;
+                    newMarkerIds.add(markerId);
+
+                    if (currentAircraftMarkers[markerId]) {
+                        // Update existing marker
+                        const marker = currentAircraftMarkers[markerId];
+                        marker.setLatLng([aircraft.latitude, aircraft.longitude]);
+                        marker.setIcon(createAircraftIcon(aircraft));
+                        marker.setPopupContent(createAircraftPopup(aircraft));
+                    } else {
+                        // Create new marker
+                        const marker = L.marker([aircraft.latitude, aircraft.longitude], {
+                            icon: createAircraftIcon(aircraft),
+                            title: aircraft.callsign
+                        });
+
+                        marker.bindPopup(createAircraftPopup(aircraft), {
+                            maxWidth: 300,
+                            className: 'custom-popup'
+                        });
+
+                        marker.on('mouseover', function() {
+                            this.openPopup();
+                        });
+
+                        aircraftMarkersLayer.addLayer(marker);
+                        currentAircraftMarkers[markerId] = marker;
+                    }
+                });
+
+                // Remove markers that no longer exist
+                Object.keys(currentAircraftMarkers).forEach(markerId => {
+                    if (!newMarkerIds.has(markerId)) {
+                        aircraftMarkersLayer.removeLayer(currentAircraftMarkers[markerId]);
+                        delete currentAircraftMarkers[markerId];
+                    }
+                });
+
+                // Fit bounds if markers exist
+                if (aircraftMarkersLayer.getLayers().length > 0) {
+                    aircraftMapInstance.fitBounds(aircraftMarkersLayer.getBounds().pad(0.1));
+                }
+            }
+
+            function updateAircraftTable(aircraftList) {
+                const tbody = document.getElementById('aircraftTableBody');
+                const countBadge = document.getElementById('aircraftCount');
+                
+                if (!tbody) return;
+
+                if (aircraftList.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-airplane fs-1 d-block mb-2"></i>
+                                No aircraft data available
+                            </td>
+                        </tr>
+                    `;
+                    if (countBadge) countBadge.textContent = '0 Aircraft';
+                    return;
+                }
+
+                let html = '';
+                aircraftList.forEach((aircraft, index) => {
+                    const altitude = aircraft.baroAltitude !== null ? 
+                        Math.round(aircraft.baroAltitude) : 'N/A';
+                    const velocity = aircraft.velocity !== null ? 
+                        aircraft.velocity.toFixed(1) : 'N/A';
+                    const heading = aircraft.trueTrack !== null ? 
+                        Math.round(aircraft.trueTrack) + '°' : 'N/A';
+                    const position = `${aircraft.latitude.toFixed(4)}, ${aircraft.longitude.toFixed(4)}`;
+                    const lastContact = formatTimestamp(aircraft.lastContact);
+                    
+                    const rowClass = aircraft.onGround ? 'table-secondary' : '';
+                    
+                    html += `
+                        <tr class="${rowClass}">
+                            <td>${index + 1}</td>
+                            <td>
+                                <strong>${aircraft.callsign}</strong>
+                                ${aircraft.onGround ? '<span class="badge bg-warning text-dark ms-1">Ground</span>' : ''}
+                            </td>
+                            <td>${aircraft.originCountry}</td>
+                            <td><small>${position}</small></td>
+                            <td>${altitude}</td>
+                            <td>${velocity}</td>
+                            <td>${heading}</td>
+                            <td><small>${lastContact}</small></td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+                if (countBadge) {
+                    countBadge.textContent = `${aircraftList.length} Aircraft`;
+                    countBadge.className = 'badge bg-success';
+                }
+            }
+
+            function loadAircraftData(bounds = null) {
+                updateAircraftIndicator(true);
+                showAircraftLoading(true);
+
+                let url = '@Url.Action("GetLiveAircraftData", "Admin")';
+                
+                if (bounds) {
+                    const params = new URLSearchParams({
+                        lamin: bounds.lamin,
+                        lomin: bounds.lomin,
+                        lamax: bounds.lamax,
+                        lomax: bounds.lomax
+                    });
+                    url += '?' + params.toString();
+                }
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success === false) {
+                            showAircraftError(data.error || 'Failed to load aircraft data');
+                            updateAircraftTable([]);
+                            currentAircraftData = [];
+                        } else {
+                            const aircraftList = parseAircraftData(data);
+                            currentAircraftData = aircraftList;
+                            updateAircraftTable(aircraftList);
+                            
+                            // Update map if in map view
+                            if (isMapView && aircraftMapInstance) {
+                                updateAircraftMap(aircraftList);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading aircraft data:', error);
+                        showAircraftError('Connection error. Please try again.');
+                        updateAircraftTable([]);
+                    })
+                    .finally(() => {
+                        updateAircraftIndicator(false);
+                        showAircraftLoading(false);
+                    });
+            }
+
+            function startAircraftAutoRefresh(bounds = null) {
+                if (aircraftRefreshInterval) {
+                    clearInterval(aircraftRefreshInterval);
+                }
+                
+                currentAircraftFilter = bounds;
+                aircraftRefreshInterval = setInterval(() => {
+                    loadAircraftData(currentAircraftFilter);
+                }, AIRCRAFT_REFRESH_INTERVAL);
+            }
+
+            function stopAircraftAutoRefresh() {
+                if (aircraftRefreshInterval) {
+                    clearInterval(aircraftRefreshInterval);
+                    aircraftRefreshInterval = null;
+                }
+            }
+
+            // Button event handlers
+            document.getElementById('btnLoadAllAircraft')?.addEventListener('click', function() {
+                loadAircraftData(null);
+                startAircraftAutoRefresh(null);
+            });
+
+            document.getElementById('btnLoadLibyaAircraft')?.addEventListener('click', function() {
+                // Libya region bounds (approximate)
+                const libyaBounds = {
+                    lamin: 19.5,  // Southern latitude
+                    lomin: 9.0,   // Western longitude
+                    lamax: 33.5,  // Northern latitude
+                    lomax: 25.5   // Eastern longitude
+                };
+                loadAircraftData(libyaBounds);
+                startAircraftAutoRefresh(libyaBounds);
+            });
+
+            document.getElementById('btnRefreshAircraft')?.addEventListener('click', function() {
+                loadAircraftData(currentAircraftFilter);
+            });
+
+            // Toggle between map and table view
+            document.getElementById('btnToggleView')?.addEventListener('click', function() {
+                const mapView = document.getElementById('aircraftMapView');
+                const tableView = document.getElementById('aircraftTableView');
+                const toggleBtn = this;
+
+                if (isMapView) {
+                    // Switch to table view
+                    mapView.style.display = 'none';
+                    tableView.style.display = 'block';
+                    toggleBtn.innerHTML = '<i class="bi bi-map me-1"></i>Show Map';
+                    isMapView = false;
+                } else {
+                    // Switch to map view
+                    tableView.style.display = 'none';
+                    mapView.style.display = 'block';
+                    toggleBtn.innerHTML = '<i class="bi bi-table me-1"></i>Show Table';
+                    isMapView = true;
+
+                    // Initialize map if not already done
+                    initializeAircraftMap();
+
+                    // Update map with current data
+                    if (currentAircraftData.length > 0) {
+                        updateAircraftMap(currentAircraftData);
+                    }
+
+                    // Invalidate map size to fix display issues
+                    setTimeout(() => {
+                        if (aircraftMapInstance) {
+                            aircraftMapInstance.invalidateSize();
+                        }
+                    }, 100);
+                }
+            });
+
+
+            // =================================================================
+            // تهيئة الشارتات والمنطق الخاص بها
+            // =================================================================
+            const REFRESH_INTERVAL_MS = 30000;
+
             function handleLoadingState(chartId, isLoading, error = null) {
                 const loadingIndicator = document.getElementById(`${chartId}LoadingIndicator`);
                 const chartElement = document.getElementById(chartId);
                 const errorMessageElement = loadingIndicator?.querySelector('.chart-error-message');
-
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = isLoading ? 'block' : 'none';
-                }
-                if (chartElement) {
-                     // إضافة/إزالة كلاس للتحكم في شفافية الشارت أثناء التحميل
-                    if (isLoading) {
-                        chartElement.classList.add('chart-loading');
-                    } else {
-                        chartElement.classList.remove('chart-loading');
-                    }
-                }
+                if (loadingIndicator) loadingIndicator.style.display = isLoading ? 'block' : 'none';
+                if (chartElement) chartElement.classList.toggle('chart-loading', isLoading);
                 if (errorMessageElement) {
                     errorMessageElement.style.display = error ? 'block' : 'none';
-                    errorMessageElement.textContent = error ? `فشل تحميل البيانات: ${error}` : '';
+                    errorMessageElement.textContent = error ? `Data loading failed: ${error}` : '';
                 }
             }
 
-
-            // --- إعدادات ألوان مشتركة (يمكنك تعديلها) ---
             const apexChartColors = {
-                active: '#28a745',    // أخضر
-                inactive: '#dc3545',  // أحمر
-                pending: '#ffc107',   // أصفر
-                approved: '#17a2b8',  // سماوي/أزرق فاتح
-                rejected: '#6c757d',  // رمادي
+                active: '#28a745', inactive: '#dc3545',
+                pending: '#ffc107', approved: '#17a2b8', rejected: '#6c757d',
             };
 
-             // --- إعدادات ApexCharts الافتراضية (اختياري، لتحسين المظهر العام) ---
-            Apex.chart = {
-                fontFamily: 'inherit', // استخدام خط الصفحة
-                toolbar: {
-                    show: false // إخفاء شريط الأدوات الافتراضي إذا لم تكن بحاجته
-                }
-            };
-            Apex.tooltip = {
-                theme: 'dark' // أو 'light'
-            };
+            Apex.chart = { fontFamily: 'inherit', toolbar: { show: false } };
+            Apex.tooltip = { theme: 'dark' };
 
-
-            // -----------------------------------------------------------------
-            // الشارت الأول: Over Site Status (questionsChart) مع الفلتر
-            // -----------------------------------------------------------------
+            // --- الشارت الأول: Over Site Status (questionsChart) ---
             let questionsChartInstance;
             const questionsChartElement = document.getElementById('questionsChart');
             const questionsStatusCountsElement = document.getElementById('questionsStatusCounts');
-
+            const filterForm = document.getElementById('filterForm');
 
             const questionsChartOptions = {
-                series: [], // سيتم ملؤها بالبيانات
-                chart: {
-                    type: 'donut', // أو 'pie'
-                    height: 250, // يمكنك تعديل الارتفاع
-                    width: '100%'
-                },
-                labels: ['Active', 'Inactive'],
-                colors: [apexChartColors.active, apexChartColors.inactive],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                            width: 200
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }],
-                legend: {
-                    position: 'bottom'
-                },
+                series: [], chart: { type: 'donut', height: 250, width: '100%' },
+                labels: ['Active', 'Inactive'], colors: [apexChartColors.active, apexChartColors.inactive],
+                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
+                legend: { position: 'bottom' },
                 dataLabels: {
                     enabled: true,
-                    formatter: function (val, opts) {
-                        const seriesIndex = opts.seriesIndex;
-                        const count = opts.w.config.series[seriesIndex];
-                        return `${val.toFixed(1)}% (${count})`;
-                    },
-                    style: {
-                        fontSize: '11px',
-                        colors: ["#fff"]
-                    },
-                     dropShadow: { // إضافة ظل للنص لجعله أوضح
-                        enabled: true,
-                        top: 1,
-                        left: 1,
-                        blur: 1,
-                        color: '#000',
-                        opacity: 0.45
-                    }
+                    formatter: (val, opts) => `${val.toFixed(1)}% (${opts.w.config.series[opts.seriesIndex]})`,
+                    style: { fontSize: '11px', colors: ["#fff"] },
+                    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.45 }
                 },
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: true,
-                                    offsetY: -10
-                                },
-                                value: {
-                                    show: true,
-                                    offsetY: 10,
-                                    formatter: function (val) {
-                                        return val; // يعرض العدد الفعلي في المنتصف
-                                    }
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: true,
-                                    label: 'Total',
-                                    formatter: function (w) {
-                                        return w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b
-                                        }, 0)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                plotOptions: { pie: { donut: { labels: { show: true, name: { show: true, offsetY: -10 }, value: { show: true, offsetY: 10, formatter: (val) => val }, total: { show: true, showAlways: true, label: 'Total', formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }
             };
 
             if (questionsChartElement) {
@@ -418,194 +1193,62 @@
 
             function updateQuestionsChartData(active, inactive) {
                 handleLoadingState('questionsChart', false);
-                if (questionsChartInstance) {
-                    questionsChartInstance.updateSeries([active, inactive]);
-                }
-                 if (questionsStatusCountsElement) {
+                if (questionsChartInstance) questionsChartInstance.updateSeries([active, inactive]);
+                if (questionsStatusCountsElement) {
                     document.getElementById('questionsActiveCount').textContent = active;
                     document.getElementById('questionsInactiveCount').textContent = inactive;
                     questionsStatusCountsElement.style.display = 'block';
                 }
             }
-             // تحميل البيانات الأولية للشارت الأول
-            if (questionsChartElement) {
-                updateQuestionsChartData(@ViewBag.ActiveQuestions, @ViewBag.InactiveQuestions);
+
+            function fetchAndRefreshOverSiteChart() {
+                if (!questionsChartElement) return;
+                handleLoadingState('questionsChart', true);
+                if (questionsStatusCountsElement) questionsStatusCountsElement.style.display = 'none';
+                const fromDate = document.getElementById('fromDate').value;
+                const toDate = document.getElementById('toDate').value;
+                const companyId = document.getElementById('companyId').value;
+                const fetchUrl = new URL('@Url.Action("GetChartData", "Admin")', window.location.origin);
+                if(fromDate) fetchUrl.searchParams.append('fromDate', fromDate);
+                if(toDate) fetchUrl.searchParams.append('toDate', toDate);
+                if(companyId) fetchUrl.searchParams.append('companyId', companyId);
+
+                fetch(fetchUrl)
+                    .then(response => response.ok ? response.json() : response.text().then(text => { throw new Error(text) }))
+                    .then(data => updateQuestionsChartData(data.activeQuestions, data.inactiveQuestions))
+                    .catch(error => {
+                        console.error('Error fetching Over Site chart data:', error);
+                        handleLoadingState('questionsChart', false, error.message);
+                    });
             }
 
+            if (questionsChartElement) updateQuestionsChartData(@(ViewBag.ActiveQuestions ?? 0), @(ViewBag.InactiveQuestions ?? 0));
+            if (filterForm) filterForm.addEventListener('submit', (e) => { e.preventDefault(); fetchAndRefreshOverSiteChart(); });
 
-            const filterForm = document.getElementById('filterForm');
-            if (filterForm) {
-                filterForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                    handleLoadingState('questionsChart', true);
-                    // إخفاء الأعداد أثناء التحميل
-                    if (questionsStatusCountsElement) questionsStatusCountsElement.style.display = 'none';
-
-
-                    const fromDate = document.getElementById('fromDate').value;
-                    const toDate = document.getElementById('toDate').value;
-                    const companyIdField = document.querySelector('select[name="companyId"]');
-                    const companyId = companyIdField ? companyIdField.value : '';
-
-                    let generatedUrl = '@Url.Action("GetChartData", "Admin")';
-                    let fetchUrl = `${generatedUrl}?`;
-                    if (fromDate) fetchUrl += `fromDate=${encodeURIComponent(fromDate)}&`;
-                    if (toDate) fetchUrl += `toDate=${encodeURIComponent(toDate)}&`;
-                    if (companyId) fetchUrl += `companyId=${encodeURIComponent(companyId)}&`;
-                    if (fetchUrl.endsWith('&') || fetchUrl.endsWith('?')) fetchUrl = fetchUrl.slice(0, -1);
-
-                    fetch(fetchUrl)
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.text().then(text => {
-                                   throw new Error(`${response.status} ${text || response.statusText}`);
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data && typeof data.activeQuestions !== 'undefined' && typeof data.inactiveQuestions !== 'undefined') {
-                                updateQuestionsChartData(data.activeQuestions, data.inactiveQuestions);
-                            } else {
-                                throw new Error('Data format error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching Over Site chart data:', error);
-                            handleLoadingState('questionsChart', false, error.message);
-                        });
-                });
-            }
-
-
-            // -----------------------------------------------------------------
-            // الشارت الثاني: AirRequest Status (requestStatusChart)
-            // -----------------------------------------------------------------
+            // --- الشارت الثاني: AirRequest Status (requestStatusChart) ---
             let requestStatusChartInstance;
             const requestStatusChartElement = document.getElementById('requestStatusChart');
-
-            const requestStatusChartOptions = {
-                series: [],
-                chart: { type: 'donut', height: 250, width: '100%' },
-                labels: ['Pending', 'Approved', 'Rejected'],
-                colors: [apexChartColors.pending, apexChartColors.approved, apexChartColors.rejected],
-                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
-                legend: { position: 'bottom' },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val, opts) {
-                        const count = opts.w.config.series[opts.seriesIndex];
-                        return `${val.toFixed(1)}% (${count})`;
-                    },
-                    style: { fontSize: '11px', colors: ["#fff"] },
-                    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.45 }
-                },
-                 plotOptions: { pie: { donut: { labels: { show: true, name: {show:true, offsetY: -5}, value: {show:true, offsetY: 5, formatter: (val) => val }, total: { show: true, showAlways: true, label: 'Total', formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }
-            };
-
-            if (requestStatusChartElement) {
-                requestStatusChartInstance = new ApexCharts(requestStatusChartElement, requestStatusChartOptions);
-                requestStatusChartInstance.render();
-            }
-
-            function updateRequestStatusChartData(data) {
-                handleLoadingState('requestStatusChart', false);
-                if (requestStatusChartInstance) {
-                    requestStatusChartInstance.updateSeries([data.pending, data.approved, data.rejected]);
-                }
-                document.getElementById('requestPendingCount').textContent = data.pending;
-                document.getElementById('requestApprovedCount').textContent = data.approved;
-                document.getElementById('requestRejectedCount').textContent = data.rejected;
-            }
-
-            function fetchRequestStatusData() {
-                if (!requestStatusChartElement) return;
-                handleLoadingState('requestStatusChart', true);
-
-                fetch('@Url.Action("GetRequestStatusChartData", "Admin")')
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(`${response.status} ${text || response.statusText}`); });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        updateRequestStatusChartData({
-                            pending: data.pending, approved: data.approved, rejected: data.rejected
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching AirRequest chart data:', error);
-                        handleLoadingState('requestStatusChart', false, error.message);
-                    });
-            }
+            const requestStatusChartOptions = { /* ... نفس الخيارات السابقة ... */ };
+            if (requestStatusChartElement) { /* ... نفس الكود السابق ... */ }
+            function updateRequestStatusChartData(data) { /* ... نفس الكود السابق ... */ }
+            function fetchRequestStatusData() { /* ... نفس الكود السابق ... */ }
 
 
-            // -----------------------------------------------------------------
-            // الشارت الثالث: Landing Request Status (landingRequestStatusChart)
-            // -----------------------------------------------------------------
+            // --- الشارت الثالث: Landing Request Status (landingRequestStatusChart) ---
             let landingRequestChartInstance;
             const landingRequestChartElement = document.getElementById('landingRequestStatusChart');
+            const landingRequestChartOptions = { /* ... نفس الخيارات السابقة ... */ };
+            if (landingRequestChartElement) { /* ... نفس الكود السابق ... */ }
+            function updateLandingRequestChartData(data) { /* ... نفس الكود السابق ... */ }
+            function fetchLandingRequestData() { /* ... نفس الكود السابق ... */ }
 
-            const landingRequestChartOptions = {
-                series: [],
-                chart: { type: 'donut', height: 250, width: '100%' },
-                labels: ['Pending', 'Approved', 'Rejected'],
-                colors: [apexChartColors.pending, apexChartColors.approved, apexChartColors.rejected], // يمكنك استخدام نفس الألوان أو تغييرها
-                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
-                legend: { position: 'bottom' },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val, opts) {
-                        const count = opts.w.config.series[opts.seriesIndex];
-                        return `${val.toFixed(1)}% (${count})`;
-                    },
-                     style: { fontSize: '11px', colors: ["#fff"] },
-                    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.45 }
-                },
-                plotOptions: { pie: { donut: { labels: { show: true, name: {show:true, offsetY: -5}, value: {show:true, offsetY: 5, formatter: (val) => val }, total: { show: true, showAlways: true, label: 'Total', formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0) } } } } }
-            };
-
-            if (landingRequestChartElement) {
-                landingRequestChartInstance = new ApexCharts(landingRequestChartElement, landingRequestChartOptions);
-                landingRequestChartInstance.render();
-            }
-
-            function updateLandingRequestChartData(data) {
-                handleLoadingState('landingRequestStatusChart', false);
-                if (landingRequestChartInstance) {
-                    landingRequestChartInstance.updateSeries([data.pending, data.approved, data.rejected]);
-                }
-                document.getElementById('landingPendingCount').textContent = data.pending;
-                document.getElementById('landingApprovedCount').textContent = data.approved;
-                document.getElementById('landingRejectedCount').textContent = data.rejected;
-            }
-
-            function fetchLandingRequestData() {
-                if (!landingRequestChartElement) return;
-                handleLoadingState('landingRequestStatusChart', true);
-
-                fetch('@Url.Action("GetLandingRequestStatusChartData", "Admin")')
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(`${response.status} ${text || response.statusText}`); });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        updateLandingRequestChartData({
-                            pending: data.pending, approved: data.approved, rejected: data.rejected
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching LandingRequest chart data:', error);
-                        handleLoadingState('landingRequestStatusChart', false, error.message);
-                    });
-            }
-
-            // استدعاء دوال جلب البيانات لكل شارت عند تحميل الصفحة
+            // --- تحميل البيانات المبدئي والتحديث الدوري ---
             if (requestStatusChartElement) fetchRequestStatusData();
             if (landingRequestChartElement) fetchLandingRequestData();
+
+            if (questionsChartElement) setInterval(fetchAndRefreshOverSiteChart, REFRESH_INTERVAL_MS);
+            if (requestStatusChartElement) setInterval(fetchRequestStatusData, REFRESH_INTERVAL_MS);
+            if (landingRequestChartElement) setInterval(fetchLandingRequestData, REFRESH_INTERVAL_MS);
 
         });
     </script>

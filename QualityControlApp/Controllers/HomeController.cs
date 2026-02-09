@@ -35,7 +35,8 @@ namespace QualityControlApp.Controllers
                                IWebHostEnvironment host,
                                IEmailSender emailSender,
                                 IServiceProvider serviceProvider,
-                               SignInManager<ApplicationUser> signInManager) : base(host)
+                               SignInManager<ApplicationUser> signInManager,
+                               IConfiguration configuration) : base(host, configuration)
         {
             _siteInfo = siteInfo;
             _userManager = userManager;
@@ -52,7 +53,7 @@ namespace QualityControlApp.Controllers
         [ViewLayout("_LayoutTemplate")]
         public async Task<IActionResult> Index()
         {
-
+            ViewData["HeroViewName"] = "Home_Index";
 
             //var userName = User.Identity.Name;
             //User.IsInRole("Admin");

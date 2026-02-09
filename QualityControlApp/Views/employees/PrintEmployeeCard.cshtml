@@ -1,17 +1,24 @@
-﻿@model Employee
+@model Employee
 @inject IUnitOfWork<SiteInfo> _siteInfo
 @inject IUnitOfWork<Contact> _contact
 @{
-    ViewBag.Title = $"Employee ID - {Model.Name}";
+    ViewBag.Title = $"بطاقة الموظف - {Model.Name}";
     Layout = null;
 
+    // --- QR Code Content Generation ---
     string scheme = Context.Request.Scheme;
     string host = Context.Request.Host.Host;
+    string qrContent = Url.Action("Details", "EmployeesInfo", new { id = Model.Id }, scheme, host)
+                         ?? $"Fallback: Name: {Model.Name}, ID: {Model.Id}";
 
-    string qrContent = Url.Action("EmployeeDetails", "EmployeesInfo", new { id = Model.Id }, scheme, host)
-                       ?? $"Fallback: Name: {Model.Name}, ID: {Model.Id}";
+    // --- Fetch Site & Contact Info ---
+    var siteInfo = _siteInfo.Entity.GetAll().SingleOrDefault();
+    var contact = _contact.Entity.GetAll().SingleOrDefault();
 
-    string displayEmployeeId = Model.Id.ToString();
+    // --- Additional Data ---
+    var expiryDate = Model.Created.AddYears(2).ToString("yyyy/MM/dd");
+    var hireDate = Model.Created.ToString("yyyy/MM/dd");
+    var bloodType = "A+"; // <-- !! يفضل جلبها من المودل مثلاً: Model.BloodType ?? "N/A"
 }
 
 <!DOCTYPE html>
@@ -20,13 +27,26 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --card-bg-color: #ffffff;
+            --card-primary-color: #0d47a1; /* أزرق داكن */
+            --card-secondary-color: #5a6a7e; /* رمادي مزرق */
+            --card-text-dark: #2c3e50; /* أسود خفيف */
+            --card-text-light: #7f8c8d; /* رمادي فاتح */
+            --card-text-on-primary: #ffffff; /* أبيض (للنص فوق اللون الأساسي) */
+            --body-bg: #eef2f7;
+        }
+
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Tajawal', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #e0e0e0;
+            background-color: var(--body-bg);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -36,271 +56,288 @@
         }
 
         .print-controls {
-            margin-bottom: 20px;
-            text-align: center;
-            padding: 10px;
+            margin-bottom: 25px;
+            padding: 15px 20px;
             background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: calc(337px * 2 + 40px); /* Approximate width of two cards + gap */
-            max-width: 95%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid #dfe6ec;
         }
 
-            .print-controls button, .print-controls a {
-                padding: 10px 20px;
+            .print-controls .control-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .print-controls label {
+                font-size: 14px;
+                color: var(--card-text-dark);
+                font-weight: 500;
+            }
+
+            .print-controls select, .print-controls button, .print-controls a {
+                padding: 10px 18px;
                 font-size: 15px;
-                background-color: #007bff;
-                color: white;
-                border: none;
-                border-radius: 6px;
+                font-family: 'Tajawal', sans-serif;
+                border: 1px solid #ccc;
+                border-radius: 8px;
                 cursor: pointer;
-                transition: background-color 0.2s;
-                margin: 5px;
-                text-decoration: none;
+                transition: all 0.2s ease-in-out;
+            }
+
+            .print-controls select {
+                background-color: #f9fafb;
+            }
+
+            .print-controls button {
+                background-color: var(--card-primary-color);
+                color: white;
+                border-color: var(--card-primary-color);
                 display: inline-flex;
                 align-items: center;
-                gap: 5px;
+                gap: 8px;
             }
+
+                .print-controls button:hover {
+                    background-color: #0b3c85;
+                    box-shadow: 0 2px 8px rgba(13, 71, 161, 0.3);
+                }
 
             .print-controls a {
-                background-color: #6c757d;
+                background-color: var(--card-secondary-color);
+                color: white;
+                text-decoration: none;
+                border-color: var(--card-secondary-color);
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
             }
 
-            .print-controls button:hover {
-                background-color: #0056b3;
-            }
-
-            .print-controls a:hover {
-                background-color: #545b62;
-            }
+                .print-controls a:hover {
+                    background-color: #4a5768;
+                }
 
         .card-wrapper {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
             justify-content: center;
             width: 100%;
         }
 
         .id-card-container {
-            width: 337px;
-            height: 212px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            padding: 15px;
+            width: 337.5px; /* 85.6mm at 96dpi */
+            height: 212.5px; /* 53.98mm at 96dpi */
+            background-color: var(--card-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            position: relative;
+            color: var(--card-text-dark);
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        /* --- Front Card (NEW DESIGN) --- */
+        .card-front {
+            flex-direction: row-reverse; /* RTL layout */
+            padding: 0;
+        }
+
+        .card-front-sidebar {
+            width: 110px;
+            flex-shrink: 0;
+            background-color: var(--card-primary-color);
             display: flex;
             flex-direction: column;
-            position: relative;
-            color: #333;
-            overflow: hidden;
-            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 10px;
             box-sizing: border-box;
         }
 
-        /* --- Front Card Specific Styles --- */
-        /* --- Front Card Specific Styles --- */
-        .card-front .card-header-section {
+        .card-front-main {
+            flex: 1;
+            padding: 18px;
             display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            height: 28px;
-        }
-
-        .card-front .id-title {
-            font-size: 0.65em;
-            font-weight: bold;
-            color: #555;
-            text-transform: uppercase;
-        }
-
-        .card-front .sim-chip {
-            width: 32px;
-            height: 22px;
-            background-color: #d4af37;
-            border: 1px solid #b8860b;
-            border-radius: 3px;
-            position: absolute;
-            top: 17px; /* MOVED DOWN: Was 15px, now 17px */
-            left: 18px; /* In RTL, this is visually the RIGHT side of the card container */
-            box-shadow: inset 0 0 2px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-        }
-            .card-front .sim-chip::before {
-                content: '';
-                width: 70%;
-                height: 1px;
-                background-color: #b8860b;
-                position: absolute;
-                top: 35%;
-            }
-
-            .card-front .sim-chip::after {
-                content: '';
-                width: 1px;
-                height: 60%;
-                background-color: #b8860b;
-                position: absolute;
-                left: 40%;
-            }
-
-        .card-front .card-main-content {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center; /* Align items vertically center */
-            flex-grow: 1;
-            margin-top: 10px;
-            gap: 10px;
-            overflow: hidden; /* Helps contain children if they are still too wide */
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230d47a1' fill-opacity='0.05' d='M0,192L48,176C96,160,192,128,288,133.3C384,139,480,181,576,186.7C672,192,768,160,864,138.7C960,117,1056,107,1152,122.7C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: bottom left;
+            background-size: cover;
         }
 
-        .card-front .employee-info-cluster {
-            display: flex;
-            flex-direction: row;
-            align-items: center; /* Align photo and details vertically */
-            flex-grow: 1;
-            gap: 8px; /* Slightly reduced gap */
-            min-width: 0; /* Important for flex item to shrink if needed */
-        }
-
-        .card-front .employee-photo-container {
-            flex-shrink: 0;
-        }
-
-        .card-front .employee-photo-bank {
-            width: 75px; /* Slightly reduced photo size */
-            height: 75px;
+        .card-front .employee-photo {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            margin-top: 5px;
+        }
+
+        .card-front .header-logo {
+            max-width: 80%;
+            max-height: 40px;
+            object-fit: contain;
+            filter: brightness(0) invert(1); /* Makes logo white */
+        }
+
+        .card-front .card-eyebrow {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: var(--card-primary-color);
+            margin-bottom: 12px;
         }
 
         .card-front .employee-details {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            flex-grow: 1; /* Allow details to take remaining space in cluster */
-            min-width: 0; /* Important for text to wrap */
+            flex-grow: 1;
         }
 
-            .card-front .employee-details .name {
-                font-size: 1em;
-                font-weight: 600;
-                color: #1a2533;
-                margin-bottom: 2px;
-                line-height: 1.2;
-            }
-
-            .card-front .employee-details .specialization {
-                font-size: 0.7em;
-                color: #50667b;
-                margin-bottom: 5px;
-                text-transform: uppercase;
-            }
-
-            .card-front .employee-details .id-number-label {
-                font-size: 0.55em;
-                color: #777;
-                margin-bottom: 1px;
-                text-transform: uppercase;
-            }
-
-            .card-front .employee-details .id-number {
-                font-size: 0.8em; /* Reduced font size */
-                font-family: 'Courier New', Courier, monospace;
-                color: #2c3e50;
-                font-weight: bold;
-                word-break: break-all; /* Allow long IDs to break and wrap */
-                line-height: 1.1;
-            }
-
-        .card-front .qr-code-container-bank {
-            box-sizing: border-box;
-            width: 95px; /* Reduced width for QR */
-            height: 95px; /* Reduced height for QR */
-            border: 1px solid #ccc;
-            padding: 4px; /* Adjusted padding */
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-            .card-front .qr-code-container-bank img,
-            .card-front .qr-code-container-bank canvas {
-                display: block;
-                max-width: 100%;
-                max-height: 100%;
-            }
-
-        /* --- Back Card Specific Styles --- */
-        .card-back {
-            background: linear-gradient(135deg, #e1e5ea 0%, #bac8d9 100%);
-            padding: 10px;
-            text-align: center;
-            font-size: 0.7em;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+        .card-front .name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--card-text-dark);
             line-height: 1.3;
+            margin-bottom: 3px;
         }
 
-            .card-back .back-header {
-                font-weight: bold;
-                font-size: 0.85em;
-                margin-bottom: 8px;
-                color: #333;
+        .card-front .specialization {
+            font-size: 0.9em;
+            color: var(--card-secondary-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .card-front .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+            font-size: 0.7em;
+            color: var(--card-secondary-color);
+        }
+
+        .card-front .detail-item .label {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--card-text-light);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .card-front .detail-item .value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--card-text-dark);
+            font-family: 'Menlo', 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+
+        /* --- Back Card (NEW DESIGN) --- */
+        .card-back {
+            padding: 0;
+            flex-direction: column;
+        }
+
+            .card-back .magnetic-stripe {
+                height: 35px;
+                background-color: #2c3e50;
+                flex-shrink: 0;
+                width: 100%;
+            }
+
+            .card-back .back-content-wrapper {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                width: 100%;
+                padding: 15px;
+                box-sizing: border-box;
+            }
+
+            .card-back .back-main-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 15px;
+                width: 100%;
+            }
+
+            .card-back .contact-info {
+                flex: 1;
+                text-align: right;
+                font-size: 0.8em;
+                line-height: 1.5;
+            }
+
+            .card-back .contact-info-header {
+                font-weight: 700;
+                font-size: 1.1em;
+                color: var(--card-primary-color);
+                margin-bottom: 4px;
             }
 
             .card-back .contact-info p {
-                margin: 2px 0;
-                font-size: 0.8em;
+                margin: 3px 0;
+                color: var(--card-secondary-color);
             }
 
-            .card-back .magnetic-stripe {
-                height: 25px;
-                background-color: #333;
-                margin: 12px -10px;
+            .card-back .contact-info strong {
+                color: var(--card-text-dark);
+                font-weight: 700;
             }
 
-            .card-back .terms {
-                font-size: 0.6em;
-                color: #555;
-                margin-top: auto;
+            .card-back .qr-code-container {
+                width: 80px;
+                height: 80px;
+                flex-shrink: 0;
+                border: 1px solid #ddd;
+                padding: 4px;
+                background-color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .card-back .signature-area {
-                margin-top: 8px;
-                border-top: 1px solid #888;
-                padding-top: 4px;
-                font-size: 0.65em;
-                color: #555;
+                .card-back .qr-code-container img,
+                .card-back .qr-code-container canvas {
+                    max-width: 100%;
+                }
+
+            .card-back .back-footer {
+                font-size: 0.7em;
+                color: var(--card-text-light);
+                text-align: center;
+                line-height: 1.4;
+                margin-top: 10px;
             }
 
-            .card-back .company-logo-small {
-                max-height: 18px;
-                opacity: 0.7;
-                margin-top: 8px;
-                object-fit: contain;
-            }
+                .card-back .back-footer p {
+                    margin: 2px 0;
+                }
 
-        /* أنماط الطباعة */
+        /* --- Print Styles --- */
         @@media print {
             body {
                 background-color: #fff !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 display: block !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
             }
 
             .print-controls {
@@ -309,180 +346,216 @@
 
             .card-wrapper {
                 display: block !important;
+                margin: 0 auto;
+                width: auto !important;
             }
 
             .id-card-container {
                 width: 85.6mm !important;
                 height: 53.98mm !important;
                 box-shadow: none !important;
-                border: 0.2mm solid #444 !important;
-                margin: 5mm auto !important;
-                padding: 2.5mm !important;
+                border: 0.2mm solid #ccc !important;
+                margin: 10mm auto !important;
                 page-break-inside: avoid !important;
-                overflow: hidden !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
-                box-sizing: border-box !important;
             }
-
+            /* --- Front Print --- */
             .card-front {
                 page-break-after: always !important;
+                padding: 0 !important;
             }
 
+            .card-front-sidebar {
+                width: 28mm !important;
+                padding: 3mm 2mm !important;
+            }
+
+            .card-front-main {
+                padding: 3mm 4mm !important;
+            }
+
+            .card-front .employee-photo {
+                width: 22mm !important;
+                height: 22mm !important;
+                border-width: 0.5mm !important;
+            }
+
+            .card-front .header-logo {
+                max-height: 8mm !important;
+            }
+
+            .card-front .card-eyebrow {
+                font-size: 6.5pt !important;
+                margin-bottom: 2mm !important;
+            }
+
+            .card-front .name {
+                font-size: 10pt !important;
+            }
+
+            .card-front .specialization {
+                font-size: 7.5pt !important;
+                margin-bottom: 3mm !important;
+            }
+
+            .card-front .details-grid {
+                font-size: 5.5pt !important;
+                gap: 1.5mm !important;
+            }
+
+            .card-front .detail-item .value {
+                font-size: 1.2em !important;
+            }
+            /* --- Back Card Print Styles --- */
             .card-back {
+                page-break-after: avoid !important;
+                padding: 0 !important;
+            }
+
+                .card-back .magnetic-stripe {
+                    height: 8mm !important;
+                }
+
+                .card-back .back-content-wrapper {
+                    padding: 2.5mm 3mm !important;
+                }
+
+                .card-back .back-main-content {
+                    gap: 2mm !important;
+                }
+
+                .card-back .contact-info {
+                    font-size: 6pt !important;
+                }
+
+                .card-back .contact-info-header {
+                    font-size: 1.1em !important;
+                }
+
+                .card-back .qr-code-container {
+                    width: 19mm !important;
+                    height: 19mm !important;
+                    padding: 1mm !important;
+                }
+
+                .card-back .back-footer {
+                    font-size: 5pt !important;
+                    margin-top: 1.5mm !important;
+                }
+            /* --- Print Mode Logic --- */
+            body.printing-front-only .card-back {
+                display: none !important;
+            }
+
+            body.printing-front-only .card-front {
                 page-break-after: avoid !important;
             }
 
-            .card-front .card-header-section {
-                margin-bottom: 1.5mm !important;
-                padding-bottom: 1mm !important;
-                height: auto !important; /* Adjust height if needed for print */
+            body.printing-back-only .card-front {
+                display: none !important;
             }
 
-            .card-front .id-title {
-                font-size: 5pt !important;
+            body.printing-side-by-side .card-wrapper {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: 5mm !important;
+                width: 210mm !important;
+                height: 100vh !important;
             }
 
-            .card-front .sim-chip {
-                width: 7mm !important;
-                height: 5mm !important;
-                top: 2.5mm !important;
-                left: 3mm !important; /* RTL: Visual Right */
-                border-width: 0.15mm !important;
-            }
-
-            .card-front .card-main-content {
-                margin-top: 2mm !important;
-                gap: 1.5mm !important;
-            }
-
-            .card-front .employee-info-cluster {
-                gap: 1.5mm !important;
-            }
-
-            .card-front .employee-photo-bank {
-                width: 18mm !important;
-                height: 18mm !important; /* Slightly smaller photo for print */
-                border-radius: 2mm !important;
-                border-width: 0.3mm !important;
-            }
-
-            .card-front .employee-details .name {
-                font-size: 7.5pt !important;
-                margin-bottom: 0.5mm !important;
-            }
-
-            .card-front .employee-details .specialization {
-                font-size: 5pt !important;
-                margin-bottom: 1mm !important;
-            }
-
-            .card-front .employee-details .id-number-label {
-                font-size: 4.5pt !important;
-                margin-bottom: 0mm !important;
-            }
-
-            .card-front .employee-details .id-number {
-                font-size: 6.5pt !important;
-                line-height: 1.1 !important;
-            }
-
-            .card-front .qr-code-container-bank {
-                width: 20mm !important; /* Reduced print QR size */
-                height: 20mm !important; /* Reduced print QR size */
-                padding: 1mm !important;
-            }
-
-            .card-back .back-header {
-                font-size: 6.5pt !important;
-                margin-bottom: 1.5mm !important;
-            }
-
-            .card-back .contact-info p {
-                font-size: 5.5pt !important;
-                margin: 0.4mm 0 !important;
-            }
-
-            .card-back .magnetic-stripe {
-                height: 6mm !important;
-                margin: 2.5mm -2.5mm !important;
-            }
-
-            .card-back .terms {
-                font-size: 4.5pt !important;
-            }
-
-            .card-back .signature-area {
-                margin-top: 1.5mm !important;
-                padding-top: 1mm !important;
-                font-size: 5pt !important;
-                border-top-width: 0.15mm !important;
-            }
-
-            .card-back .company-logo-small {
-                max-height: 4mm !important;
-                margin-top: 1.5mm !important;
+            body.printing-side-by-side .id-card-container {
+                margin: 0 !important;
+                page-break-after: avoid !important;
             }
         }
     </style>
 </head>
 <body>
     <div class="print-controls">
-        <button onclick="initiatePrint();"><i class="fas fa-print"></i> طباعة البطاقة (الوجهين)</button>
         <a href="@Url.Action("Index", "Employees")"><i class="fas fa-list"></i> العودة للقائمة</a>
+        <div class="control-group">
+            <label for="print-option">خيار الطباعة:</label>
+            <select id="print-option">
+                <option value="both" selected>الوجهين (في صفحتين)</option>
+                <option value="front">الوجه الأمامي فقط</option>
+                <option value="back">الوجه الخلفي فقط</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <input type="checkbox" id="side-by-side-check" style="width: 18px; height: 18px;">
+            <label for="side-by-side-check">طباعة الوجهين في صفحة واحدة</label>
+        </div>
+        <button onclick="initiatePrint();"><i class="fas fa-print"></i> طباعة البطاقة</button>
     </div>
 
     <div class="card-wrapper">
-        <!-- ======== FRONT OF THE CARD ======== -->
-        <div class="id-card-container card-front" id="employeeCardFront_@Model.Id">
-            <div class="card-header-section">
-                <span class="id-title">بطاقة تعريف موظف</span>
+        <div class="id-card-container card-front" id="employeeCardFront">
+
+            <div class="card-front-sidebar">
+                <img src="~/img/AlSharef.jpg" alt="صورة @Model.Name" class="employee-photo">
+
+               @*  @if (siteInfo != null && !string.IsNullOrEmpty(siteInfo.LogoUrl))
+                {
+                    <img src="@Url.Content(siteInfo.LogoUrl)" alt="شعار الشركة" class="header-logo">
+                } *@
             </div>
 
-            <div class="card-main-content">
-                <div class="employee-info-cluster">
-                    <div class="employee-photo-container">
-                        <img src="~/img/AlSharef.jpg" alt="صورة @Model.Name" class="employee-photo-bank">
-                    </div>
-                    <div class="employee-details">
-                        <div class="name">@Model.Name</div>
-                        <div class="specialization">@Model.Specialization</div>
-                        <div class="id-number-label">الرقم الوظيفي</div>
-                        <div class="id-number">@displayEmployeeId</div>
-                    </div>
+            <div class="card-front-main">
+                <span class="card-eyebrow">بطاقة تعريف موظف</span>
+                <div class="employee-details">
+                    <div class="name">@Model.Name</div>
+                    <div class="specialization">@Model.Specialization</div>
                 </div>
 
-                <div class="qr-code-container-bank" id="qrCode_@Model.Id" data-qr-content="@qrContent">
-                    <!-- QR Code will be generated here by JavaScript -->
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="label">الرقم الوظيفي</span>
+                        <span class="value">@(Math.Abs(Model.Id.GetHashCode()) % 100000)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">تاريخ التعيين</span>
+                        <span class="value">@hireDate</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">فصيلة الدم</span>
+                        <span class="value">@bloodType</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">تاريخ الانتهاء</span>
+                        <span class="value">@expiryDate</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        @{
-            var siteInfo = _siteInfo.Entity.GetAll().SingleOrDefault();
-            var contact = _contact.Entity.GetAll().SingleOrDefault();
-        }
-
         @if (siteInfo != null && contact != null)
         {
-            <div class="id-card-container card-back" id="employeeCardBack_@Model.Id">
-                <div class="back-header">@siteInfo.Name</div>
+            <div class="id-card-container card-back" id="employeeCardBack">
                 <div class="magnetic-stripe"></div>
-                <div class="contact-info">
-                    <p>في حال العثور عليها، يرجى الاتصال:</p>
-                    <p>@contact.Phone | بريد: @contact.Email</p>
+
+                <div class="back-content-wrapper">
+
+                    <div class="back-main-content">
+                        <div class="contact-info">
+                            <div class="contact-info-header">@siteInfo.Name</div>
+                            <p>في حال العثور عليها، يرجى الاتصال على:</p>
+                            <p><strong>@contact.Phone</strong></p>
+                            <p><strong>@contact.Email</strong></p>
+                        </div>
+
+                        <div class="qr-code-container" id="qrCodeContainer" data-qr-content="@qrContent">
+                        </div>
+                    </div>
+
+                    <div class="back-footer">
+                        <p>هذه البطاقة ملك للشركة ويجب إبرازها عند الطلب.</p>
+                        <p>تاريخ الإصدار: @hireDate</p>
+                    </div>
+
                 </div>
-                <div class="signature-area">
-                    توقيع حامل البطاقة
-                </div>
-                <div class="terms">
-                    هذه البطاقة شخصية. يجب إبرازها عند الطلب.
-                    <br />تاريخ الإصدار: @Model.Created.ToString("yyyy/MM/dd")
-                </div>
-                @if (!string.IsNullOrEmpty(siteInfo.LogoUrl))
-                {
-                    <img src="@Url.Content(siteInfo.LogoUrl)" alt="شعار الشركة" class="company-logo-small">
-                }
             </div>
         }
     </div>
@@ -490,82 +563,52 @@
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var qrElement = document.getElementById('qrCode_@Model.Id');
+            // --- QR Code Generation ---
+            var qrElement = document.getElementById('qrCodeContainer');
             if (qrElement) {
                 var content = qrElement.getAttribute('data-qr-content');
-                if (!content) {
-                    console.error("QR Code content is missing for element:", qrElement);
-                    qrElement.innerHTML = "محتوى QR مفقود";
-                    return;
-                }
+                if (content) {
+                    const style = getComputedStyle(qrElement);
+                    const targetSize = qrElement.clientWidth - (parseFloat(style.paddingLeft) + parseFloat(style.paddingRight));
 
-                const computedStyle = window.getComputedStyle(qrElement);
-                // Use clientWidth/Height which includes padding but not border/margin if box-sizing is content-box
-                // For border-box, clientWidth is width - border.
-                // We want the area INSIDE padding for the QR code.
-
-                // Get dimensions *including* padding, *excluding* border.
-                let availableWidth = qrElement.clientWidth;
-                let availableHeight = qrElement.clientHeight;
-
-                // Subtract padding to get the pure content area.
-                let targetSize = Math.min(
-                    availableWidth - (parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight)),
-                    availableHeight - (parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom))
-                );
-
-                targetSize = Math.max(10, Math.floor(targetSize));
-
-                if (targetSize > 0) {
-                    try {
-                        new QRCode(qrElement, {
-                            text: content,
-                            width: targetSize,
-                            height: targetSize,
-                            colorDark: "#000000",
-                            colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
-                    } catch (e) {
-                        console.error("Error generating QR Code:", e);
-                        qrElement.innerHTML = "خطأ في توليد QR";
-                    }
+                    new QRCode(qrElement, {
+                        text: content,
+                        width: targetSize,
+                        height: targetSize,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
                 } else {
-                    console.error("Calculated target size for QR code is invalid:", targetSize, "Container clientW:", qrElement.clientWidth, "Container clientH:", qrElement.clientHeight);
-                    qrElement.innerHTML = "حجم QR غير صالح";
+                    qrElement.innerHTML = "QR Error";
                 }
             }
         });
 
+        // --- Advanced Print Function ---
         function initiatePrint() {
-            var images = Array.from(document.images).filter(img => !img.closest('.print-controls'));
+            const printOption = document.getElementById('print-option').value;
+            const sideBySide = document.getElementById('side-by-side-check').checked;
+            const body = document.body;
 
-            if (images.length === 0) {
-                setTimeout(function() { window.print(); }, 100); // Delay for canvas QR
-                return;
-            }
+            // Reset any existing print classes
+            body.classList.remove('printing-front-only', 'printing-back-only', 'printing-side-by-side');
 
-            let loadedImageCount = 0;
-            let allImagesAttempted = false;
-
-            function checkAndPrint() {
-                if (loadedImageCount === images.length && !allImagesAttempted) {
-                    allImagesAttempted = true; // Prevent multiple print calls
-                    setTimeout(function() { window.print(); }, 150);
+            // Apply classes based on user selection
+            if (sideBySide && printOption === 'both') {
+                body.classList.add('printing-side-by-side');
+            } else {
+                if (printOption === 'front') {
+                    body.classList.add('printing-front-only');
+                } else if (printOption === 'back') {
+                    body.classList.add('printing-back-only');
                 }
             }
 
-            images.forEach(img => {
-                if (img.complete && img.naturalHeight !== 0) {
-                    loadedImageCount++;
-                } else {
-                    img.onload = img.onerror = () => {
-                        loadedImageCount++;
-                        checkAndPrint();
-                    };
-                }
-            });
-            checkAndPrint(); // Check if all images were already loaded
+            // Wait for images and canvas to be ready
+            setTimeout(() => {
+                window.print();
+            }, 300); // Small delay to ensure everything renders
         }
     </script>
 </body>

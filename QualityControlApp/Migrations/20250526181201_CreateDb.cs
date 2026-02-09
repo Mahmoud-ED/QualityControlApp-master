@@ -216,7 +216,6 @@ namespace QualityControlApp.Migrations
                     AircraftRegistration = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CallSign = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FlightPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LandingTakeoffTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FlightPurpose = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EntryExitPoints = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),

@@ -1,0 +1,92 @@
+@model Medicine
+
+@{
+    ViewData["Title"] = "تعديل الدواء";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> تعديل الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Created" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label fw-bold"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="GenericName" class="form-label fw-bold"></label>
+                                <input asp-for="GenericName" class="form-control" />
+                                <span asp-validation-for="GenericName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Type" class="form-label fw-bold"></label>
+                                <select asp-for="Type" class="form-select">
+                                    <option value="">-- اختر النوع --</option>
+                                    <option value="أقراص">أقراص</option>
+                                    <option value="كبسولات">كبسولات</option>
+                                    <option value="شراب">شراب</option>
+                                    <option value="حقن">حقن</option>
+                                    <option value="مرهم">مرهم</option>
+                                    <option value="قطرة">قطرة</option>
+                                    <option value="بخاخ">بخاخ</option>
+                                    <option value="أخرى">أخرى</option>
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Manufacturer" class="form-label fw-bold"></label>
+                                <input asp-for="Manufacturer" class="form-control" />
+                                <span asp-validation-for="Manufacturer" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label fw-bold"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsAvailable" class="form-check-label fw-bold"></label>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> حفظ التعديلات
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> رجوع
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

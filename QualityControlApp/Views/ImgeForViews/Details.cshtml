@@ -1,0 +1,37 @@
+﻿@model QualityControlApp.Models.Entities.ImgeForViews
+
+@{
+    ViewData["Title"] = "Details of Image for View";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>ImgeForViews</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ViewName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ViewName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CoverImageUrl)
+        </dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="Cover Image" style="max-width: 300px; max-height: 300px;" />
+            }
+            else
+            {
+                <span>No Image Available</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> |
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

@@ -1,0 +1,384 @@
+@model QualityControlApp.ViewModels.AirPortRequestReportVM
+@{
+    ViewData["Title"] = "تقارير طلبات المطار";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        تقارير طلبات المطار
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="GenerateReport" method="post" id="reportForm">
+                        <div class="row">
+                            <!-- Report Type Selection -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="ReportType" class="form-label">نوع التقرير</label>
+                                    <select asp-for="ReportType" class="form-control" id="reportType">
+                                        @foreach (var type in AirPortRequestReportVM.ReportTypes)
+                                        {
+                                            <option value="@type">@type</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ReportType" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Date Range -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="DateFrom" class="form-label">من تاريخ</label>
+                                    <input asp-for="DateFrom" type="date" class="form-control" />
+                                    <span asp-validation-for="DateFrom" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="DateTo" class="form-label">إلى تاريخ</label>
+                                    <input asp-for="DateTo" type="date" class="form-control" />
+                                    <span asp-validation-for="DateTo" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Export Format -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="ExportFormat" class="form-label">تنسيق التصدير</label>
+                                    <select asp-for="ExportFormat" class="form-control">
+                                        @foreach (var format in AirPortRequestReportVM.ExportFormats)
+                                        {
+                                            <option value="@format">@format</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ExportFormat" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Company Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="CompanyName" class="form-label">اسم الشركة</label>
+                                    <input asp-for="CompanyName" class="form-control" placeholder="ابحث بالاسم" />
+                                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Department Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="Department" class="form-label">القسم</label>
+                                    <input asp-for="Department" class="form-control" placeholder="ابحث بالقسم" />
+                                    <span asp-validation-for="Department" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="RequestStatus" class="form-label">حالة الطلب</label>
+                                    <select asp-for="RequestStatus" class="form-control">
+                                        @foreach (var status in AirPortRequestReportVM.Statuses)
+                                        {
+                                            <option value="@status">@status</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="RequestStatus" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Aircraft Type Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="AircraftType" class="form-label">نوع الطائرة</label>
+                                    <input asp-for="AircraftType" class="form-control" placeholder="ابحث بنوع الطائرة" />
+                                    <span asp-validation-for="AircraftType" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Flight Purpose Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="FlightPurpose" class="form-label">غرض الرحلة</label>
+                                    <input asp-for="FlightPurpose" class="form-control" placeholder="ابحث بغرض الرحلة" />
+                                    <span asp-validation-for="FlightPurpose" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Crew Count Range -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="CrewCountFrom" class="form-label">عدد الطاقم من</label>
+                                    <input asp-for="CrewCountFrom" type="number" class="form-control" min="0" />
+                                    <span asp-validation-for="CrewCountFrom" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="CrewCountTo" class="form-label">عدد الطاقم إلى</label>
+                                    <input asp-for="CrewCountTo" type="number" class="form-control" min="0" />
+                                    <span asp-validation-for="CrewCountTo" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Email Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="Email" class="form-label">البريد الإلكتروني</label>
+                                    <input asp-for="Email" class="form-control" placeholder="ابحث بالبريد الإلكتروني" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Pilot Name Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="PilotName" class="form-label">اسم الطيار</label>
+                                    <input asp-for="PilotName" class="form-control" placeholder="ابحث باسم الطيار" />
+                                    <span asp-validation-for="PilotName" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Flight Number Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="FlightNumber" class="form-label">رقم الرحلة</label>
+                                    <input asp-for="FlightNumber" class="form-control" placeholder="ابحث برقم الرحلة" />
+                                    <span asp-validation-for="FlightNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Entry Point Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="EntryPoint" class="form-label">نقطة الدخول</label>
+                                    <input asp-for="EntryPoint" class="form-control" placeholder="ابحث بنقطة الدخول" />
+                                    <span asp-validation-for="EntryPoint" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Exit Point Filter -->
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label asp-for="ExitPoint" class="form-label">نقطة الخروج</label>
+                                    <input asp-for="ExitPoint" class="form-control" placeholder="ابحث بنقطة الخروج" />
+                                    <span asp-validation-for="ExitPoint" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-chart-line"></i>
+                                        إنشاء التقرير
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-lg" onclick="clearFilters()">
+                                        <i class="fas fa-eraser"></i>
+                                        مسح الفلاتر
+                                    </button>
+                                    <button type="button" class="btn btn-info btn-lg" onclick="loadQuickReport()">
+                                        <i class="fas fa-bolt"></i>
+                                        تقرير سريع
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Report Buttons -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">تقارير سريعة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary btn-block" onclick="quickReport('ByCompany', 'All')">
+                                <i class="fas fa-building"></i>
+                                تقرير بالشركات
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-success btn-block" onclick="quickReport('ByDate', 'All')">
+                                <i class="fas fa-calendar"></i>
+                                تقرير بالتاريخ
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-info btn-block" onclick="quickReport('ByPassengerCount', 'All')">
+                                <i class="fas fa-users"></i>
+                                تقرير بعدد الركاب
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-warning btn-block" onclick="quickReport('ByStatus', 'All')">
+                                <i class="fas fa-flag"></i>
+                                تقرير بالحالة
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary btn-block" onclick="quickReport('ByAircraftType', 'All')">
+                                <i class="fas fa-plane"></i>
+                                تقرير بنوع الطائرة
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-dark btn-block" onclick="quickReport('Detailed', 'All')">
+                                <i class="fas fa-list"></i>
+                                تقرير مفصل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">التقارير الأخيرة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fas fa-chart-pie"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">إجمالي الطلبات</span>
+                                    <span class="info-box-number" id="totalRequests">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">طلبات معلقة</span>
+                                    <span class="info-box-number" id="pendingRequests">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">طلبات معتمدة</span>
+                                    <span class="info-box-number" id="approvedRequests">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-danger"><i class="fas fa-times"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">طلبات مرفوضة</span>
+                                    <span class="info-box-number" id="rejectedRequests">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Load initial statistics
+            loadStatistics();
+            
+            // Set default date range to last 30 days
+            var today = new Date();
+            var thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            $('#DateFrom').val(thirtyDaysAgo.toISOString().split('T')[0]);
+            $('#DateTo').val(today.toISOString().split('T')[0]);
+        });
+
+        function clearFilters() {
+            $('#reportForm')[0].reset();
+            $('#DateFrom').val('');
+            $('#DateTo').val('');
+            $('#ReportType').val('Summary');
+            $('#ExportFormat').val('View');
+            $('#RequestStatus').val('All');
+        }
+
+        function quickReport(reportType, status) {
+            $('#ReportType').val(reportType);
+            $('#RequestStatus').val(status);
+            $('#reportForm').submit();
+        }
+
+        function loadQuickReport() {
+            var reportType = $('#ReportType').val();
+            var status = $('#RequestStatus').val();
+            quickReport(reportType, status);
+        }
+
+        function loadStatistics() {
+            $.ajax({
+                url: '@Url.Action("GetReportData", "AirPortRequests")',
+                type: 'GET',
+                data: {
+                    reportType: 'Summary',
+                    status: 'All'
+                },
+                success: function(data) {
+                    $('#totalRequests').text(data.summary.totalRequests);
+                    $('#pendingRequests').text(data.summary.pendingRequests);
+                    $('#approvedRequests').text(data.summary.approvedRequests);
+                    $('#rejectedRequests').text(data.summary.rejectedRequests);
+                },
+                error: function() {
+                    console.log('Error loading statistics');
+                }
+            });
+        }
+
+        // Form validation
+        $('#reportForm').on('submit', function(e) {
+            var dateFrom = $('#DateFrom').val();
+            var dateTo = $('#DateTo').val();
+            
+            if (dateFrom && dateTo) {
+                var fromDate = new Date(dateFrom);
+                var toDate = new Date(dateTo);
+                
+                if (fromDate > toDate) {
+                    e.preventDefault();
+                    alert('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+                    return false;
+                }
+            }
+        });
+    </script>
+}

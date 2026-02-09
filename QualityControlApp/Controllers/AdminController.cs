@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +7,7 @@ using QualityControlApp.Classes;
 using QualityControlApp.Models.Entities;
 using QualityControlApp.Models.Interfaces;
 using QualityControlApp.ViewModels;
+using SkiaSharp;
 using System.Text.RegularExpressions;
 
 namespace QualityControlApp.Controllers
@@ -20,6 +21,7 @@ namespace QualityControlApp.Controllers
         private readonly IUnitOfWork<SiteInfo> _siteInfo;
         private readonly IUnitOfWork<Contact> _contact;
         private readonly IUnitOfWork<Company> _company;
+        private readonly IUnitOfWork<Location> _location;
         private readonly IUnitOfWork<Landing> _landing;
         private readonly IUnitOfWork<AirPortRequest> _airPortRequest;
         private readonly IUnitOfWork<CompanyQuestion> _companyQuestion;
@@ -35,6 +37,7 @@ namespace QualityControlApp.Controllers
                                IUnitOfWork<SiteInfo> siteInfo,
                                IUnitOfWork<Contact> contact,
                                IUnitOfWork<Landing> landing,
+                               IUnitOfWork<Location> location,
                                IUnitOfWork<AirPortRequest> airPortReques,
                                IUnitOfWork<CompanyQuestion> companyQuestion,
                                IUnitOfWork<ApplicationUser> applicationUser,
@@ -52,6 +55,7 @@ namespace QualityControlApp.Controllers
             _applicationUser = applicationUser;
             _airPortRequest = airPortReques;
             _landing = landing;
+            _location = location;
             _company = company;
             _question = question;
             _userManager = userManager;
@@ -69,8 +73,8 @@ namespace QualityControlApp.Controllers
             ViewBag.ActiveUsers = _userSessionTracker.ActiveUsers;
             ViewBag.companies = await _company.Entity.GetAll().CountAsync();
             ViewBag.question = await _question.Entity.GetAll().CountAsync();
-            ViewBag.AirRequest = await _airPortRequest.Entity.GetWhere(s => s.RequestStatus == "Pending").CountAsync();
-            ViewBag.landing = await _landing.Entity.GetWhere(s => s.RequestStatus == "Pending").CountAsync();
+            ViewBag.AirRequest = await _airPortRequest.Entity.GetWhere(s => s.RequestStatus == "0").CountAsync();
+            ViewBag.landing = await _landing.Entity.GetWhere(s => s.RequestStatus == "0").CountAsync();
 
 
             var usersInRoleOps = await _userManager.GetUsersInRoleAsync("OpsPerm");
@@ -103,6 +107,27 @@ namespace QualityControlApp.Controllers
             ViewBag.InactiveQuestions = await questionsQuery.CountAsync(q => q.Active == false);
 
             ViewBag.SelectedCompanyId = companyId?.ToString();
+
+
+
+            var usedLocationIds = _companyQuestion.Entity.GetWhere(q => q.Type == "New" && q.Active==false)
+                                .Select(cq => cq.LocationId) 
+                                .Distinct();
+
+             
+            var locationsData = _location.Entity.GetAll() 
+                              .Where(loc => usedLocationIds.Contains(loc.Id)) // الفلترة الرئيسية
+                              .Select(loc => new {
+                                  loc.Name,
+                                  loc.Latitude,
+                                  loc.Longitude
+                              })
+                              .ToList();
+
+
+            // نمرر البيانات إلى الـ View
+            ViewBag.LocationsData = locationsData;
+
             // إذا كنت تستخدم companyId في الفلتر، تأكد من تمرير القيمة الحالية من الفلتر
             // ViewBag.SelectedFromDate = fromDate?.ToString("yyyy-MM-dd");
             // ViewBag.SelectedToDate = toDate?.ToString("yyyy-MM-dd");
@@ -116,22 +141,14 @@ namespace QualityControlApp.Controllers
         public async Task<IActionResult> GetRequestStatusChartData()
         {
            
-            var allPossibleStatuses = new List<string> { "Pending", "Approved", "Rejected" };
+            // Count by numeric codes: 0=Pending, 1=Approved, 2=Rejected
+            var statusCounts = await _airPortRequest.Entity.GetAll().ToListAsync();
 
-            // تجميع الطلبات حسب الحالة وحساب العدد لكل حالة
-            var statusCounts = await _airPortRequest.Entity 
-                .GetWhere(r => !string.IsNullOrEmpty(r.RequestStatus)) // تجاهل القيم الفارغة إذا وجدت
-                .GroupBy(r => r.RequestStatus)
-                .Select(g => new { StatusName = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            // إعداد البيانات النهائية للشارت، مع التأكد من وجود كل الحالات
             var chartData = new
             {
-                Pending = statusCounts.FirstOrDefault(s => s.StatusName == "Pending")?.Count ?? 0,
-                Approved = statusCounts.FirstOrDefault(s => s.StatusName == "Approved")?.Count ?? 0,
-                Rejected = statusCounts.FirstOrDefault(s => s.StatusName == "Rejected")?.Count ?? 0
-                // يمكنك إضافة أي حالات أخرى هنا بنفس الطريقة إذا توسع نطاق الحالات
+                Pending = statusCounts.Count(r => r.RequestStatus == "0"),
+                Approved = statusCounts.Count(r => r.RequestStatus == "1"),
+                Rejected = statusCounts.Count(r => r.RequestStatus == "2")
             };
 
             return Json(chartData);
@@ -142,21 +159,13 @@ namespace QualityControlApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetLandingRequestStatusChartData()
         {
-
-            var allPossibleStatuses = new List<string> { "Pending", "Approved", "Rejected" };
-
-            // تجميع الطلبات حسب الحالة وحساب العدد لكل حالة
-            var statusCounts = await _landing.Entity
-                .GetWhere(r => !string.IsNullOrEmpty(r.RequestStatus)) // تجاهل القيم الفارغة إذا وجدت
-                .GroupBy(r => r.RequestStatus)
-                .Select(g => new { StatusName = g.Key, Count = g.Count() })
-                .ToListAsync();
+            var statusList = await _landing.Entity.GetAll().ToListAsync();
 
             var chartData = new
             {
-                Pending = statusCounts.FirstOrDefault(s => s.StatusName == "Pending")?.Count ?? 0,
-                Approved = statusCounts.FirstOrDefault(s => s.StatusName == "Approved")?.Count ?? 0,
-                Rejected = statusCounts.FirstOrDefault(s => s.StatusName == "Rejected")?.Count ?? 0
+                Pending = statusList.Count(r => r.RequestStatus == "0"),
+                Approved = statusList.Count(r => r.RequestStatus == "1"),
+                Rejected = statusList.Count(r => r.RequestStatus == "2")
             };
 
             return Json(chartData);
@@ -187,6 +196,79 @@ namespace QualityControlApp.Controllers
             // var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             // return Json(new { activeQuestions, inactiveQuestions }, options);
             return Json(new {  ActiveQuestions, InactiveQuestions });
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetLiveMapData()
+        {
+            try
+            {
+                var usedLocationIds = _companyQuestion.Entity.GetWhere(q => q.Type == "New" && q.Active == false)
+                                    .Select(cq => cq.LocationId)
+                                    .Distinct();
+
+                var locationsData = await _location.Entity.GetAll()
+                                  .Where(loc => usedLocationIds.Contains(loc.Id))
+                                  .Select(loc => new
+                                  {
+                                      id = loc.Id,
+                                      name = loc.Name,
+                                      latitude = loc.Latitude,
+                                      longitude = loc.Longitude,
+                                      status = "inactive",
+                                      lastUpdate = DateTime.Now
+                                  })
+                                  .ToListAsync();
+
+                return Json(new { success = true, data = locationsData, timestamp = DateTime.Now });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetLiveAircraftData(double? lamin, double? lomin, double? lamax, double? lomax)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.Timeout = TimeSpan.FromSeconds(10);
+                    
+                    var baseUrl = "https://opensky-network.org/api/states/all";
+                    var queryParams = new List<string>();
+
+                    if (lamin.HasValue && lomin.HasValue && lamax.HasValue && lomax.HasValue)
+                    {
+                        queryParams.Add($"lamin={lamin.Value}");
+                        queryParams.Add($"lomin={lomin.Value}");
+                        queryParams.Add($"lamax={lamax.Value}");
+                        queryParams.Add($"lomax={lomax.Value}");
+                    }
+
+                    var url = queryParams.Count > 0 ? $"{baseUrl}?{string.Join("&", queryParams)}" : baseUrl;
+
+                    var response = await httpClient.GetAsync(url);
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        return Content(content, "application/json");
+                    }
+                    else
+                    {
+                        return Json(new { success = false, error = $"OpenSky API returned status: {response.StatusCode}" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
         }
 
 

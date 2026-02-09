@@ -36,7 +36,8 @@ namespace QualityControlApp.Controllers
                                  RoleManager<IdentityRole> roleManager,
                                   IUnitOfWork<Employee> employee,
                                  IUnitOfWork<UserProfile> userProfile,
-                                  IServiceProvider serviceProvider) : base(host)
+                                  IServiceProvider serviceProvider,
+                                 IConfiguration configuration) : base(host, configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;

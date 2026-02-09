@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Models.Entities;
 using QualityControlApp.Models.Interfaces;
 using QualityControlApp.ViewModels;
+using SkiaSharp;
 
 namespace QualityControlApp.Controllers
 {
@@ -24,11 +25,12 @@ namespace QualityControlApp.Controllers
             IUnitOfWork<HealthRecord> healthRecord,
             IUnitOfWork<ChronicDisease> ChronicDisease,
                                    IWebHostEnvironment host,
+                               IConfiguration configuration,
                       
                                    IEmailSender emailSender,
                                    UserManager<ApplicationUser> userManager,
                                    SignInManager<ApplicationUser> signInManager,
-                                   RoleManager<IdentityRole> roleManager) : base(host)
+                                   RoleManager<IdentityRole> roleManager) : base(host, configuration)
         {
             _healthRecord = healthRecord;
             _chronicDisease = ChronicDisease;
@@ -40,43 +42,55 @@ namespace QualityControlApp.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Details(Guid? id)
+        public async Task<IActionResult> Details(Guid id) // ?? ?? ??? ??????? ??? ID
         {
-            if (id == null)
+            if (id == Guid.Empty) // ?? ?? ???? ????? ??? ID
             {
-                return NotFound("Employee ID is missing.");
+                return NotFound();
             }
 
-            var employee = await _employee.Entity.GetByIdAsync(id.Value);
+            var employee = await _employee.Entity
+                                        .Include(e => e.ApplicationUser) // ??? ??? ???????
+                                        .FirstOrDefaultAsync(m => m.Id == id);
 
             if (employee == null)
             {
-                TempData["error"] = "الموظف غير موجود.";
-                return RedirectToAction(nameof(Index)); // Or your employee list action
+                TempData["error"] = "?? ??? ?????? ??? ??????.";
+                return RedirectToAction(nameof(Index)); // ?? ???? ??? ??????
             }
 
-            var healthRecords = await _healthRecord.Entity
-                                        .Include(hr => hr.ChronicDisease) // To display ChronicDisease.Name
-                                        .Where(hr => hr.EmployeeId == id)
-                                        .OrderByDescending(hr => hr.DiagnosisDate)
-                                        .ToListAsync();
+            // ??? ??????? ?????? ?????? ??????? ?????? ?? ????? ?????? ????? ??????
+            var healthRecordsForEmployee = await _healthRecord.Entity
+                                                .Include(hr => hr.ChronicDisease)
+                                                .Include(hr => hr.HealthRecordMedications)
+                                                    .ThenInclude(hrm => hrm.Medicine)
+                                                .Where(hr => hr.EmployeeId == id)
+                                                .ToListAsync();
 
-            // Fetch Chronic Diseases for the dropdown in the "Add Health Record" form
-            var chronicDiseases = _chronicDisease.Entity.GetAll(); // Assuming GetAllAsync exists
+            // >>> ????? ?????: ??? ???? ??????? ??????? ?? ????? ????????
+            var allChronicDiseasesFromDb = await _chronicDisease.Entity.GetAll().OrderBy(cd => cd.Name).ToListAsync();
 
             var viewModel = new EmployeeDetailsViewModel
             {
                 Employee = employee,
-                HealthRecords = healthRecords,
-                NewHealthRecord = new HealthRecord { EmployeeId = id.Value, DiagnosisDate = DateTime.Today }, // Pre-fill EmployeeId and a default date
-                ChronicDiseaseOptions = chronicDiseases.Select(cd => new SelectListItem
-                {
-                    Value = cd.Id.ToString(),
-                    Text = cd.Name
-                }).ToList()
+                HealthRecords = healthRecordsForEmployee,
+                AllChronicDiseases = allChronicDiseasesFromDb, // << ????? ??????? ??? ViewModel
+                                                               // NewHealthRecord ? ChronicDiseaseOptions ???? ????? ??? ??? ??? ????? ????? ??????? ?? ??? ??????
             };
 
-            return View("Details", viewModel);
+            // ??? ??? ??????? ????? ?????? ?? ???? ChronicDiseaseOptions
+            // viewModel.ChronicDiseaseOptions = allChronicDiseasesFromDb.Select(cd => new SelectListItem
+            // {
+            //     Value = cd.Id.ToString(),
+            //     Text = cd.Name
+            // }).ToList();
+
+            return View(viewModel);
         }
+
+
+
+
     }
 }
+

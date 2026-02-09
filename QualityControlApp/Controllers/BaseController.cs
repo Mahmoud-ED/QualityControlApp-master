@@ -5,10 +5,21 @@ namespace QualityControlApp.Controllers
     public class BaseController : Controller
     {
         private readonly IWebHostEnvironment _host;
+        private readonly IConfiguration _configuration;
 
-        public BaseController(IWebHostEnvironment host)
+        public BaseController(IWebHostEnvironment host, IConfiguration configuration)
         {
             _host = host;
+            _configuration = configuration;
+            
+            // Set Firebase configuration for views
+            ViewBag.FirebaseApiKey = _configuration["Firebase:ApiKey"];
+            ViewBag.FirebaseAuthDomain = _configuration["Firebase:AuthDomain"];
+            ViewBag.FirebaseProjectId = _configuration["Firebase:ProjectId"];
+            ViewBag.FirebaseStorageBucket = _configuration["Firebase:StorageBucket"];
+            ViewBag.FirebaseMessagingSenderId = _configuration["Firebase:MessagingSenderId"];
+            ViewBag.FirebaseAppId = _configuration["Firebase:AppId"];
+            ViewBag.FirebaseVapidKey = _configuration["Firebase:VapidKey"];
         }
 
         public string? UploadFile(string folder, IFormFile? img, string? imageUrl, string? isImg)

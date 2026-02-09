@@ -36,7 +36,7 @@ namespace QualityControlApp.Models.Entities
     {
         [Required(ErrorMessage = "اسم الموظف مطلوب")]
         [StringLength(100, ErrorMessage = "يجب ألا يتجاوز اسم الموظف 100 حرف")]
-        [Display(Name = "اسم الموظف")]
+        [Display(Name = "الاسم")]
         public string Name { get; set; }
 
         [Display(Name = "رقم الهاتف")]

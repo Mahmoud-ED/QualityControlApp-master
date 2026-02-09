@@ -1,0 +1,129 @@
+@model HealthRecordMedication
+
+@{
+    ViewData["Title"] = "تعديل معلومات الدواء";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- معلومات السجل الصحي -->
+            <div class="card shadow mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-medical"></i> معلومات السجل الصحي</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>الموظف:</strong> @Model.HealthRecord.Employee.Name
+                        </div>
+                        <div class="col-md-4">
+                            <strong>المرض:</strong> @Model.HealthRecord.ChronicDisease.Name
+                        </div>
+                        <div class="col-md-4">
+                            <strong>الدواء الحالي:</strong> @Model.Medicine.Name
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نموذج تعديل الدواء -->
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> تعديل معلومات الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="HealthRecordId" />
+                        <input type="hidden" asp-for="Created" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MedicineId" class="form-label fw-bold">
+                                    <i class="fas fa-pills"></i> الدواء <span class="text-danger">*</span>
+                                </label>
+                                <select asp-for="MedicineId" class="form-select" asp-items="ViewBag.Medicines">
+                                    <option value="">-- اختر الدواء --</option>
+                                </select>
+                                <span asp-validation-for="MedicineId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Dosage" class="form-label fw-bold">
+                                    <i class="fas fa-prescription-bottle"></i> الجرعة <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Dosage" class="form-control" />
+                                <span asp-validation-for="Dosage" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Frequency" class="form-label fw-bold">
+                                    <i class="fas fa-clock"></i> التكرار <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Frequency" class="form-control" />
+                                <span asp-validation-for="Frequency" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="StartDate" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt"></i> تاريخ البدء
+                                </label>
+                                <input asp-for="StartDate" class="form-control" type="date" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="EndDate" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-check"></i> تاريخ الانتهاء
+                                </label>
+                                <input asp-for="EndDate" class="form-control" type="date" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Instructions" class="form-label fw-bold">
+                                <i class="fas fa-info-circle"></i> تعليمات الاستخدام
+                            </label>
+                            <textarea asp-for="Instructions" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Instructions" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label fw-bold">
+                                <i class="fas fa-sticky-note"></i> ملاحظات
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label fw-bold">
+                                <i class="fas fa-toggle-on"></i> نشط حالياً
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> حفظ التعديلات
+                            </button>
+                            <a asp-controller="Employees" asp-action="Details" asp-route-id="@Model.HealthRecord.EmployeeId" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> رجوع
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

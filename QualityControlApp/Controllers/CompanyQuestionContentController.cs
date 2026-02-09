@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QualityControlApp.Models;
@@ -16,12 +16,13 @@ namespace QualityControlApp.Controllers
         public CompanyQuestionContentController(
   ApplicationDbContext context,
                        IUnitOfWork<CompanyQuestionContent> companyquestionContent,
-                            IWebHostEnvironment host) : base(host)
+                                                            IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
         {
             _context = context;
             _companyquestionContent = companyquestionContent;
 
-            //_host = host; // نفعله فقط لو احتجناه في هذا الكونترولر
+            //_host = host; // ????? ??? ?? ??????? ?? ??? ??????????
         }
 
        
@@ -35,3 +36,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

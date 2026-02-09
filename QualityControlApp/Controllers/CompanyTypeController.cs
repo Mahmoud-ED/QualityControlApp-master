@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using QualityControlApp.Classes;
 using QualityControlApp.Models.Entities;
 using QualityControlApp.Models.Interfaces;
@@ -26,7 +26,8 @@ namespace QualityControlApp.Controllers
                              IUnitOfWork<Company> company,
                              IUnitOfWork<CompanyType> compnayType,
                              IUnitOfWork<QuestionCategoryType> questioncategoryytpe,
-                                  IWebHostEnvironment host) : base(host)
+                                  IWebHostEnvironment host,
+                                IConfiguration configuration) : base(host, configuration)
             {
                 _context = context;
                 _companytype = compnayType;
@@ -77,16 +78,16 @@ namespace QualityControlApp.Controllers
         //[ValidateAntiForgeryToken]
         //public async Task<IActionResult> Create([Bind("Name")] CompanyType companytype)
         //{
-        //    //هذه لا تستعمل ابدا مع المفتاح الأجنبي لكن لو احتجنا لها في حقول اخرى
-        //    //ModelState.Remove("Sections");// طريقة أخرى لمنع التحقق داخل وظيفة معينة وليس في الكلاس سيمنع التحقق بالمطلق لكل الوظائف
+        //    //??? ?? ?????? ???? ?? ??????? ??????? ??? ?? ?????? ??? ?? ???? ????
+        //    //ModelState.Remove("Sections");// ????? ???? ???? ?????? ???? ????? ????? ???? ?? ?????? ????? ?????? ??????? ??? ???????
 
         //    if (ModelState.IsValid)
         //    {
         //        try
         //        {
-        //            if (companyExistsadd(companytype.Name)) //في حال اسم موجود
+        //            if (companyExistsadd(companytype.Name)) //?? ??? ??? ?????
         //            {
-        //                ViewBag.Message = " الاسم موجود مسبقا ";
+        //                ViewBag.Message = " ????? ????? ????? ";
         //                return View();
         //            }
 
@@ -213,9 +214,9 @@ namespace QualityControlApp.Controllers
                 return View("NotFound");
             }
 
-            if (companyExistsEdit(companytype.Name, companytype.Id)) //في حال اسم موجود
+            if (companyExistsEdit(companytype.Name, companytype.Id)) //?? ??? ??? ?????
             {
-                ViewBag.Message = " الاسم موجود مسبقا ";
+                ViewBag.Message = " ????? ????? ????? ";
                 return View();
             }
 
@@ -230,14 +231,14 @@ namespace QualityControlApp.Controllers
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!companyExists(companytype.Id)) //في حال محذوف
+                    if (!companyExists(companytype.Id)) //?? ??? ?????
                     {
                         return View("NotFound");
                     }
                     else
                     {
                         ViewBag.ErrorTitle = "The basic data not found in the database ";
-                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                        //ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                         return View("Error");
                     }
                 }
@@ -289,7 +290,7 @@ namespace QualityControlApp.Controllers
             catch (Exception ex)
             {
                 ViewBag.ErrorTitle = "The basic data not found in the database ";
-                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ارسالها للإيميل وعدم عرضها
+                // ViewBag.ErrorMessage = "Missing data row- " + ex;  // ??????? ??????? ???? ?????
                 return View("Error");
 
             }
@@ -316,3 +317,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

@@ -177,6 +177,34 @@
     }
 </div>
 
+<!-- KPIs Section -->
+<div class="mt-5 pt-4 border-top">
+    <h2 class="h3 fw-bold text-dark mb-4"><i class="fas fa-chart-pie me-2 text-info"></i>Key Performance Indicators</h2>
+    <div class="row g-4">
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light py-3">
+                    <h6 class="fw-semibold text-dark mb-0"><i class="fas fa-tasks me-2"></i>Requests by Status</h6>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <canvas id="requestsByStatusChart" style="max-width: 400px; max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light py-3">
+                    <h6 class="fw-semibold text-dark mb-0"><i class="fas fa-calendar-alt me-2"></i>Requests in Last 30 Days</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="last30DaysRequestsChart" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Styles {
     <style>
         body {
@@ -211,30 +239,153 @@
             */
     </style>
 }
-
 @section Scripts {
-    <script>
-        // Optional: Persist collapse state of search/filter section
-        document.addEventListener('DOMContentLoaded', function () {
-            const filterCollapse = document.getElementById('searchFilterCollapse');
-            if (filterCollapse) {
-                // Check if any filter input (excluding status 'All') has a value to auto-open
-                let hasActiveFilter = false;
-                const filterInputs = filterCollapse.querySelectorAll('input[type="text"], input[type="date"], select');
-                filterInputs.forEach(input => {
-                    if (input.name === 'status' && input.value === 'All') {
-                        // Skip 'All' status
-                    } else if (input.value && input.value.trim() !== '') {
-                        hasActiveFilter = true;
-                    }
-                });
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
-                if (hasActiveFilter) {
-                    new bootstrap.Collapse(filterCollapse, {
-                        show: true
-                    });
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let requestsByStatusChartInstance = null;
+            let last30DaysRequestsChartInstance = null; // تم تغيير الاسم
+
+            // --- دالة لتحديث مخطط توزيع الحالات ---
+            async function updateRequestsByStatusChart() {
+                try {
+                    const response = await fetch('@Url.Action("GetRequestsByStatusKpiData", "AirPortRequests")');
+                    if (!response.ok) {
+                        console.error("Failed to fetch status KPI data:", response.statusText);
+                        return;
+                    }
+                    const kpiData = await response.json();
+
+                    const requestsByStatusCtx = document.getElementById('requestsByStatusChart')?.getContext('2d');
+                    if (!requestsByStatusCtx) {
+                        console.warn("Canvas for 'Requests by Status' chart not found.");
+                        return;
+                    }
+
+                    if (requestsByStatusChartInstance) {
+                        requestsByStatusChartInstance.data.labels = kpiData.labels;
+                        requestsByStatusChartInstance.data.datasets[0].data = kpiData.data;
+                        // يمكنك تحديث الألوان هنا إذا كانت تعتمد على ترتيب الـ labels
+                        // requestsByStatusChartInstance.data.datasets[0].backgroundColor = getStatusColors(kpiData.labels);
+                        // requestsByStatusChartInstance.data.datasets[0].borderColor = getStatusBorderColors(kpiData.labels);
+                        requestsByStatusChartInstance.update();
+                    } else {
+                        requestsByStatusChartInstance = new Chart(requestsByStatusCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: kpiData.labels,
+                                datasets: [{
+                                    label: 'Requests by Status',
+                                    data: kpiData.data,
+                                    backgroundColor: [ // يجب أن تتطابق هذه الألوان مع ترتيب الحالات أو تُنشأ ديناميكيًا
+                                        'rgba(255, 193, 7, 0.7)',  // Pending
+                                        'rgba(40, 167, 69, 0.7)', // Approved
+                                        'rgba(220, 53, 69, 0.7)', // Rejected
+                                        'rgba(108, 117, 125, 0.7)' // Unknown/Other
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 193, 7, 1)',
+                                        'rgba(40, 167, 69, 1)',
+                                        'rgba(220, 53, 69, 1)',
+                                        'rgba(108, 117, 125, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'top' } }
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error updating status KPI chart:", error);
                 }
             }
+
+            // --- دالة لتحديث مخطط الطلبات لآخر 30 يومًا ---
+            async function updateLast30DaysRequestsChart() {
+                try {
+                    const response = await fetch('@Url.Action("GetLast30DaysRequestsKpiData", "AirPortRequests")');
+                     if (!response.ok) {
+                        console.error("Failed to fetch last 30 days KPI data:", response.statusText);
+                        return;
+                    }
+                    const kpiData = await response.json();
+
+                    const last30DaysRequestsCtx = document.getElementById('last30DaysRequestsChart')?.getContext('2d');
+                     if (!last30DaysRequestsCtx) {
+                        console.warn("Canvas for 'Last 30 Days Requests' chart not found.");
+                        return;
+                    }
+
+                    if (last30DaysRequestsChartInstance) {
+                        last30DaysRequestsChartInstance.data.labels = kpiData.labels;
+                        last30DaysRequestsChartInstance.data.datasets[0].data = kpiData.data;
+                        last30DaysRequestsChartInstance.update();
+                    } else {
+                        last30DaysRequestsChartInstance = new Chart(last30DaysRequestsCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: kpiData.labels,
+                                datasets: [{
+                                    label: 'Requests Submitted',
+                                    data: kpiData.data,
+                                    backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                                    borderColor: 'rgba(0, 123, 255, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    barPercentage: 0.7,
+                                    categoryPercentage: 0.8
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error updating last 30 days KPI chart:", error);
+                }
+            }
+
+            // --- تحميل المخططات لأول مرة ---
+            updateRequestsByStatusChart();
+            updateLast30DaysRequestsChart();
+
+            // --- تحديث المخططات كل 30 ثانية ---
+            setInterval(() => {
+                console.log("Updating KPI charts...");
+                updateRequestsByStatusChart();
+                updateLast30DaysRequestsChart();
+            }, 10000); // 10000 ميلي ثانية = 30 ثانية
+
+            // ... (السكربت الموجود لديك لـ filterCollapse) ...
         });
+
+        // (اختياري) دالة مساعدة لتحديد الألوان بناءً على ترتيب الحالات إذا تغير
+        function getStatusColors(labels) {
+            const colorMap = {
+                "Pending": 'rgba(255, 193, 7, 0.7)',
+                "Approved": 'rgba(40, 167, 69, 0.7)',
+                "Rejected": 'rgba(220, 53, 69, 0.7)',
+                "Unknown": 'rgba(108, 117, 125, 0.7)'
+            };
+            return labels.map(label => colorMap[label] || colorMap["Unknown"]);
+        }
+        function getStatusBorderColors(labels) {
+             const colorMap = {
+                "Pending": 'rgba(255, 193, 7, 1)',
+                "Approved": 'rgba(40, 167, 69, 1)',
+                "Rejected": 'rgba(220, 53, 69, 1)',
+                "Unknown": 'rgba(108, 117, 125, 1)'
+            };
+            return labels.map(label => colorMap[label] || colorMap["Unknown"]);
+        }
     </script>
 }

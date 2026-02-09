@@ -1,0 +1,133 @@
+@model HealthRecordMedication
+
+@{
+    ViewData["Title"] = "تفاصيل الدواء";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-prescription-bottle-alt"></i> تفاصيل الدواء</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">الموظف:</dt>
+                        <dd class="col-sm-8"><strong>@Model.HealthRecord.Employee.Name</strong></dd>
+
+                        <dt class="col-sm-4">المرض المزمن:</dt>
+                        <dd class="col-sm-8">@Model.HealthRecord.ChronicDisease.Name</dd>
+
+                        <dt class="col-sm-4">الدواء:</dt>
+                        <dd class="col-sm-8"><strong class="text-primary">@Model.Medicine.Name</strong></dd>
+
+                        @if (!string.IsNullOrEmpty(Model.Medicine.GenericName))
+                        {
+                            <dt class="col-sm-4">الاسم العلمي:</dt>
+                            <dd class="col-sm-8">@Model.Medicine.GenericName</dd>
+                        }
+
+                        <dt class="col-sm-4">الجرعة:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-primary">@Model.Dosage</span></dd>
+
+                        <dt class="col-sm-4">التكرار:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-info">@Model.Frequency</span></dd>
+
+                        @if (Model.StartDate.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ البدء:</dt>
+                            <dd class="col-sm-8">@Model.StartDate.Value.ToString("yyyy/MM/dd")</dd>
+                        }
+
+                        @if (Model.EndDate.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ الانتهاء:</dt>
+                            <dd class="col-sm-8">@Model.EndDate.Value.ToString("yyyy/MM/dd")</dd>
+                        }
+
+                        <dt class="col-sm-4">تعليمات الاستخدام:</dt>
+                        <dd class="col-sm-8">@(Model.Instructions ?? "-")</dd>
+
+                        <dt class="col-sm-4">الحالة:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success"><i class="fas fa-check"></i> نشط حالياً</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary"><i class="fas fa-times"></i> غير نشط</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">الملاحظات:</dt>
+                        <dd class="col-sm-8">@(Model.Notes ?? "-")</dd>
+
+                        <dt class="col-sm-4">تاريخ الإضافة:</dt>
+                        <dd class="col-sm-8">@Model.Created.ToString("yyyy/MM/dd HH:mm")</dd>
+
+                        @if (Model.Modified.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ آخر تعديل:</dt>
+                            <dd class="col-sm-8">@Model.Modified.Value.ToString("yyyy/MM/dd HH:mm")</dd>
+                        }
+                    </dl>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> تعديل
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> حذف
+                            </a>
+                        </div>
+                        <a asp-controller="HealthRecords" asp-action="Details" asp-route-id="@Model.HealthRecordId" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> رجوع للسجل الصحي
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-pills"></i> معلومات الدواء</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">النوع:</dt>
+                        <dd class="col-sm-7">@(Model.Medicine.Type ?? "-")</dd>
+
+                        <dt class="col-sm-5">الشركة:</dt>
+                        <dd class="col-sm-7">@(Model.Medicine.Manufacturer ?? "-")</dd>
+
+                        <dt class="col-sm-5">التوفر:</dt>
+                        <dd class="col-sm-7">
+                            @if (Model.Medicine.IsAvailable)
+                            {
+                                <span class="badge bg-success">متوفر</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">غير متوفر</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    @if (!string.IsNullOrEmpty(Model.Medicine.Description))
+                    {
+                        <hr />
+                        <p class="small mb-0">
+                            <strong>وصف الدواء:</strong><br />
+                            @Model.Medicine.Description
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

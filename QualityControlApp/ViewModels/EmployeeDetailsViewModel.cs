@@ -8,7 +8,10 @@ namespace QualityControlApp.ViewModels
     public class EmployeeDetailsViewModel
     {
         public Employee Employee { get; set; }
-        public IEnumerable<HealthRecord> HealthRecords { get; set; }
+        public IEnumerable<HealthRecord> HealthRecords { get; set; } // سجلات الموظف الحالية
+
+        // >>> إضافة جديدة: قائمة بجميع الأمراض المزمنة المتاحة في النظام
+        public IEnumerable<ChronicDisease> AllChronicDiseases { get; set; }
 
         // For the "Add New Health Record" form
         public HealthRecord NewHealthRecord { get; set; }
@@ -17,6 +20,7 @@ namespace QualityControlApp.ViewModels
         public EmployeeDetailsViewModel()
         {
             HealthRecords = new List<HealthRecord>();
+            AllChronicDiseases = new List<ChronicDisease>(); // << تهيئة القائمة الجديدة
             NewHealthRecord = new HealthRecord();
             ChronicDiseaseOptions = new List<SelectListItem>();
         }

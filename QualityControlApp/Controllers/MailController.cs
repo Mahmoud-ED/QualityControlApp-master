@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using QualityControlApp.Classes;
@@ -21,9 +21,10 @@ namespace QualityControlApp.Controllers
 
         public MailController(MailSettings mailSettings,
                               IWebHostEnvironment host,
+                               IConfiguration configuration,
                               IEmailSender emailSender,
                               RoleManager<IdentityRole> roleManager,
-                              UserManager<ApplicationUser> userManager) : base(host)
+                              UserManager<ApplicationUser> userManager) : base(host, configuration)
 
         {
             _mailSettings = mailSettings;
@@ -71,8 +72,8 @@ namespace QualityControlApp.Controllers
             StreamReader htmlFile = new StreamReader(filePath);
             string content = htmlFile.ReadToEnd();
             htmlFile.Close();
-            //تم استعماله مرتين: مرة ضمن الرسالة ومرة اخرى في عنوان الايميل ولكنه نفس العنوان// Subject
-            content = content.Replace("{Subject}", emailVM.Subject); // يظهر داخل الرسالة
+            //?? ???????? ?????: ??? ??? ??????? ???? ???? ?? ????? ??????? ????? ??? ???????// Subject
+            content = content.Replace("{Subject}", emailVM.Subject); // ???? ???? ???????
             content = content.Replace("{Content}", emailVM.Content);
 
             var message = new Message(new string[] { emailVM.To }, emailVM.Subject, content, emailVM.Attachments);
@@ -127,7 +128,7 @@ namespace QualityControlApp.Controllers
         {
             string content = ReadHtmlTemplate("Email.html");
 
-            content = content.Replace("{Subject}", roleEmailsVM.Subject); // يظهر داخل الرسالة
+            content = content.Replace("{Subject}", roleEmailsVM.Subject); // ???? ???? ???????
             content = content.Replace("{Content}", roleEmailsVM.Content);
 
             //var usersEmails1 = _userManager.Users.Select(u => u.Email).ToList();
@@ -168,3 +169,4 @@ namespace QualityControlApp.Controllers
 
     }
 }
+

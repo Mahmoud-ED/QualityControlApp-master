@@ -1,0 +1,873 @@
+@{
+    ViewData["Title"] = "تحليلات متقدمة للطيران";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-chart-area me-2 text-primary"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">تحليلات متقدمة ومفصلة للبيانات مع انميشن وحركة تفاعلية</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Reports")" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                <i class="fas fa-arrow-left me-2"></i> العودة للتقارير
+            </a>
+            <button onclick="refreshAllCharts()" class="btn btn-primary rounded-pill px-4 py-2">
+                <i class="fas fa-sync-alt me-2"></i> تحديث البيانات
+            </button>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <h6 class="mb-0"><i class="fas fa-filter me-2"></i>خيارات التحليل المتقدم</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">نوع التحليل</label>
+                    <select id="analysisType" class="form-select" onchange="updateChartType()">
+                        <option value="operators">تحليل المشغلين</option>
+                        <option value="aircraft">تحليل الطائرات</option>
+                        <option value="routes">تحليل المسارات</option>
+                        <option value="temporal">تحليل زمني</option>
+                        <option value="cargo">تحليل البضائع</option>
+                        <option value="passengers">تحليل الركاب</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">فترة البيانات</label>
+                    <select id="timeRange" class="form-select" onchange="updateTimeRange()">
+                        <option value="30">آخر 30 يوم</option>
+                        <option value="90">آخر 3 أشهر</option>
+                        <option value="180">آخر 6 أشهر</option>
+                        <option value="365">آخر سنة</option>
+                        <option value="all">جميع البيانات</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">نوع الشارت</label>
+                    <select id="chartType" class="form-select" onchange="updateVisualization()">
+                        <option value="bar">أعمدة</option>
+                        <option value="line">خطي</option>
+                        <option value="pie">دائري</option>
+                        <option value="doughnut">حلقي</option>
+                        <option value="radar">رادار</option>
+                        <option value="polar">قطبي</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">نمط الانميشن</label>
+                    <select id="animationType" class="form-select" onchange="updateAnimationStyle()">
+                        <option value="bounce">ارتداد</option>
+                        <option value="elastic">مرن</option>
+                        <option value="fade">تلاشي</option>
+                        <option value="slide">انزلاق</option>
+                        <option value="zoom">تكبير</option>
+                        <option value="spin">دوران</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chart Container -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-gradient-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0" id="chartTitle"><i class="fas fa-chart-bar me-2"></i>تحليل المشغلين</h5>
+                    <div class="d-flex gap-2">
+                        <button onclick="exportCurrentChart()" class="btn btn-light btn-sm">
+                            <i class="fas fa-download me-1"></i> تصدير
+                        </button>
+                        <button onclick="toggleFullscreen()" class="btn btn-light btn-sm">
+                            <i class="fas fa-expand me-1"></i> ملء الشاشة
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <canvas id="mainChart" style="max-height: 500px;"></canvas>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-controls">
+                                <h6 class="fw-semibold mb-3">إعدادات الشارت</h6>
+                                <div class="mb-3">
+                                    <label class="form-label small">شفافية الألوان</label>
+                                    <input type="range" class="form-range" id="opacitySlider" min="0.1" max="1" step="0.1" value="0.8" onchange="updateOpacity()">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small">سرعة الانميشن</label>
+                                    <input type="range" class="form-range" id="speedSlider" min="500" max="5000" step="500" value="2000" onchange="updateAnimationSpeed()">
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="showGrid" checked onchange="toggleGrid()">
+                                        <label class="form-check-label small" for="showGrid">
+                                            عرض الشبكة
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="showLegend" checked onchange="toggleLegend()">
+                                        <label class="form-check-label small" for="showLegend">
+                                            عرض المفتاح
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats -->
+                            <div class="mt-4">
+                                <h6 class="fw-semibold mb-3">إحصائيات سريعة</h6>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="stat-card bg-primary bg-opacity-10 p-2 rounded text-center">
+                                            <div class="fw-bold text-primary" id="totalCount">0</div>
+                                            <small class="text-muted">الإجمالي</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card bg-success bg-opacity-10 p-2 rounded text-center">
+                                            <div class="fw-bold text-success" id="avgValue">0</div>
+                                            <small class="text-muted">المتوسط</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card bg-info bg-opacity-10 p-2 rounded text-center">
+                                            <div class="fw-bold text-info" id="maxValue">0</div>
+                                            <small class="text-muted">الأعلى</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card bg-warning bg-opacity-10 p-2 rounded text-center">
+                                            <div class="fw-bold text-warning" id="minValue">0</div>
+                                            <small class="text-muted">الأدنى</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparative Analysis -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>تحليل مقارن</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <canvas id="comparisonChart1" style="max-height: 300px;"></canvas>
+                        </div>
+                        <div class="col-lg-6">
+                            <canvas id="comparisonChart2" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Analysis -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>تحليل الاتجاهات</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" style="max-height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Data Table -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>البيانات التفاعلية</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="interactiveTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>التصنيف</th>
+                                    <th>القيمة</th>
+                                    <th>النسبة المئوية</th>
+                                    <th>الاتجاه</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- سيتم ملؤها بالجافا سكريبت -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @* مكتبات الشارتس المتقدمة *@
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+    <script>
+        let mainChart = null;
+        let comparisonChart1 = null;
+        let comparisonChart2 = null;
+        let trendChart = null;
+        let currentData = null;
+        let animationSettings = {
+            type: 'bounce',
+            speed: 2000,
+            opacity: 0.8
+        };
+
+        // دوال التحكم في الشارتس
+        function updateChartType() {
+            const analysisType = document.getElementById('analysisType').value;
+            loadDataForAnalysis(analysisType);
+        }
+
+        function updateTimeRange() {
+            const timeRange = document.getElementById('timeRange').value;
+            updateChartType(); // إعادة تحميل البيانات بالنطاق الزمني الجديد
+        }
+
+        function updateVisualization() {
+            const chartType = document.getElementById('chartType').value;
+            if (currentData) {
+                renderMainChart(currentData, chartType);
+            }
+        }
+
+        function updateAnimationStyle() {
+            animationSettings.type = document.getElementById('animationType').value;
+            if (mainChart) {
+                mainChart.update('active');
+            }
+        }
+
+        function updateOpacity() {
+            animationSettings.opacity = parseFloat(document.getElementById('opacitySlider').value);
+            if (mainChart) {
+                mainChart.update('active');
+            }
+        }
+
+        function updateAnimationSpeed() {
+            animationSettings.speed = parseInt(document.getElementById('speedSlider').value);
+            if (mainChart) {
+                mainChart.update('active');
+            }
+        }
+
+        function toggleGrid() {
+            const showGrid = document.getElementById('showGrid').checked;
+            if (mainChart && mainChart.options.scales) {
+                if (mainChart.options.scales.x) {
+                    mainChart.options.scales.x.grid.display = showGrid;
+                }
+                if (mainChart.options.scales.y) {
+                    mainChart.options.scales.y.grid.display = showGrid;
+                }
+                mainChart.update('active');
+            }
+        }
+
+        function toggleLegend() {
+            const showLegend = document.getElementById('showLegend').checked;
+            if (mainChart && mainChart.options.plugins && mainChart.options.plugins.legend) {
+                mainChart.options.plugins.legend.display = showLegend;
+                mainChart.update('active');
+            }
+        }
+
+        // تحميل البيانات حسب نوع التحليل
+        async function loadDataForAnalysis(analysisType) {
+            try {
+                const timeRange = document.getElementById('timeRange').value;
+                const response = await fetch(`/Landing/GetAdvancedChartData?type=${analysisType}&range=${timeRange}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    currentData = result.data;
+                    renderMainChart(result.data);
+                    renderComparisonCharts(result.data);
+                    renderTrendChart(result.data);
+                    updateTable(result.data);
+                    updateStats(result.stats);
+                }
+            } catch (error) {
+                console.error('Error loading analysis data:', error);
+            }
+        }
+
+        // رسم الشارت الرئيسي
+        function renderMainChart(data, chartType = null) {
+            if (!chartType) {
+                chartType = document.getElementById('chartType').value;
+            }
+
+            const ctx = document.getElementById('mainChart');
+            if (!ctx) return;
+
+            // تدمير الشارت السابق
+            if (mainChart) {
+                mainChart.destroy();
+            }
+
+            const config = getChartConfig(chartType, data);
+            mainChart = new Chart(ctx, config);
+
+            // تحديث العنوان
+            document.getElementById('chartTitle').innerHTML = `<i class="fas fa-chart-bar me-2"></i>${data.title || 'تحليل البيانات'}`;
+        }
+
+        // الحصول على إعدادات الشارت حسب النوع
+        function getChartConfig(type, data) {
+            const baseConfig = {
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: data.datasetLabel,
+                        data: data.values,
+                        backgroundColor: getColors(data.labels.length, animationSettings.opacity),
+                        borderColor: getColors(data.labels.length, 1),
+                        borderWidth: 2,
+                        hoverBorderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: document.getElementById('showLegend').checked,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            };
+
+            switch (type) {
+                case 'pie':
+                    return {
+                        type: 'pie',
+                        ...baseConfig,
+                        options: {
+                            ...baseConfig.options,
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true,
+                                duration: animationSettings.speed,
+                                easing: getEasingFunction(animationSettings.type)
+                            }
+                        }
+                    };
+
+                case 'doughnut':
+                    return {
+                        type: 'doughnut',
+                        ...baseConfig,
+                        options: {
+                            ...baseConfig.options,
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true,
+                                duration: animationSettings.speed,
+                                easing: getEasingFunction(animationSettings.type)
+                            }
+                        }
+                    };
+
+                case 'radar':
+                    return {
+                        type: 'radar',
+                        ...baseConfig,
+                        options: {
+                            ...baseConfig.options,
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: document.getElementById('showGrid').checked
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                case 'polar':
+                    return {
+                        type: 'polarArea',
+                        ...baseConfig
+                    };
+
+                case 'line':
+                    return {
+                        type: 'line',
+                        ...baseConfig,
+                        options: {
+                            ...baseConfig.options,
+                            scales: {
+                                x: {
+                                    grid: {
+                                        display: document.getElementById('showGrid').checked
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: document.getElementById('showGrid').checked
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: animationSettings.speed,
+                                easing: getEasingFunction(animationSettings.type)
+                            }
+                        }
+                    };
+
+                default: // bar
+                    return {
+                        type: 'bar',
+                        ...baseConfig,
+                        options: {
+                            ...baseConfig.options,
+                            scales: {
+                                x: {
+                                    grid: {
+                                        display: document.getElementById('showGrid').checked
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: document.getElementById('showGrid').checked
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: animationSettings.speed,
+                                easing: getEasingFunction(animationSettings.type),
+                                delay: function(context) {
+                                    return context.dataIndex * 100;
+                                }
+                            }
+                        }
+                    };
+            }
+        }
+
+        // دوال مساعدة
+        function getColors(count, opacity = 0.8) {
+            const colors = [
+                `rgba(255, 99, 132, ${opacity})`, `rgba(54, 162, 235, ${opacity})`,
+                `rgba(255, 205, 86, ${opacity})`, `rgba(75, 192, 192, ${opacity})`,
+                `rgba(153, 102, 255, ${opacity})`, `rgba(255, 159, 64, ${opacity})`,
+                `rgba(199, 199, 199, ${opacity})`, `rgba(83, 102, 255, ${opacity})`,
+                `rgba(40, 159, 64, ${opacity})`, `rgba(210, 99, 132, ${opacity})`,
+                `rgba(60, 99, 132, ${opacity})`, `rgba(120, 99, 255, ${opacity})`
+            ];
+            return colors.slice(0, count);
+        }
+
+        function getEasingFunction(type) {
+            const easings = {
+                'bounce': 'easeOutBounce',
+                'elastic': 'easeOutElastic',
+                'fade': 'easeInOutQuart',
+                'slide': 'easeInOutCubic',
+                'zoom': 'easeOutBack',
+                'spin': 'easeInOutQuad'
+            };
+            return easings[type] || 'easeOutBounce';
+        }
+
+        // رسم شارتس المقارنة
+        function renderComparisonCharts(data) {
+            // شارت مقارنة 1
+            const ctx1 = document.getElementById('comparisonChart1');
+            if (ctx1) {
+                if (comparisonChart1) comparisonChart1.destroy();
+                comparisonChart1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels?.slice(0, 5) || [],
+                        datasets: [{
+                            label: 'القيم',
+                            data: data.values?.slice(0, 5) || [],
+                            backgroundColor: 'rgba(25, 135, 84, 0.8)',
+                            borderColor: 'rgba(25, 135, 84, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'المقارنة الأولى'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // شارت مقارنة 2
+            const ctx2 = document.getElementById('comparisonChart2');
+            if (ctx2) {
+                if (comparisonChart2) comparisonChart2.destroy();
+                comparisonChart2 = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels?.slice(0, 5) || [],
+                        datasets: [{
+                            label: 'الاتجاه',
+                            data: data.values?.slice(0, 5) || [],
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'المقارنة الثانية'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // رسم شارت الاتجاهات
+        function renderTrendChart(data) {
+            const ctx = document.getElementById('trendChart');
+            if (ctx) {
+                if (trendChart) trendChart.destroy();
+                trendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels || [],
+                        datasets: [{
+                            label: 'الاتجاه العام',
+                            data: data.values || [],
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'تحليل الاتجاهات'
+                            }
+                        },
+                        animation: {
+                            duration: 3000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            }
+        }
+
+        // تحديث الجدول التفاعلي
+        function updateTable(data) {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody || !data.labels) return;
+
+            tbody.innerHTML = '';
+
+            const total = data.values?.reduce((sum, val) => sum + val, 0) || 0;
+
+            data.labels.forEach((label, index) => {
+                const value = data.values[index] || 0;
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                const trend = index > 0 ? (value > (data.values[index - 1] || 0) ? 'up' : 'down') : 'neutral';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${label}</td>
+                    <td>${value.toLocaleString()}</td>
+                    <td>${percentage}%</td>
+                    <td>
+                        <span class="badge bg-${trend === 'up' ? 'success' : trend === 'down' ? 'danger' : 'secondary'}">
+                            <i class="fas fa-arrow-${trend === 'up' ? 'up' : trend === 'down' ? 'down' : 'right'} me-1"></i>
+                            ${trend === 'up' ? 'ارتفاع' : trend === 'down' ? 'انخفاض' : 'ثابت'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="focusOnItem('${label}')">
+                            <i class="fas fa-eye me-1"></i> عرض
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // تحديث الإحصائيات
+        function updateStats(stats) {
+            document.getElementById('totalCount').textContent = (stats?.total || 0).toLocaleString();
+            document.getElementById('avgValue').textContent = (stats?.avg || 0).toFixed(1);
+            document.getElementById('maxValue').textContent = (stats?.max || 0).toLocaleString();
+            document.getElementById('minValue').textContent = (stats?.min || 0).toLocaleString();
+        }
+
+        // دوال أخرى
+        function refreshAllCharts() {
+            updateChartType();
+            showNotification('تم تحديث جميع الشارتس!', 'success');
+        }
+
+        function exportCurrentChart() {
+            if (mainChart) {
+                const link = document.createElement('a');
+                link.download = 'advanced-chart.png';
+                link.href = mainChart.toBase64Image();
+                link.click();
+                showNotification('تم تصدير الشارت بنجاح!', 'success');
+            }
+        }
+
+        function toggleFullscreen() {
+            const chartContainer = document.querySelector('.card-body');
+            if (!document.fullscreenElement) {
+                chartContainer.requestFullscreen().then(() => {
+                    showNotification('تم تفعيل وضع ملء الشاشة', 'info');
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    showNotification('تم إلغاء وضع ملء الشاشة', 'info');
+                });
+            }
+        }
+
+        function focusOnItem(label) {
+            if (mainChart) {
+                // البحث عن الفهرس المطلوب
+                const index = mainChart.data.labels.indexOf(label);
+                if (index !== -1) {
+                    // تمييز العنصر المحدد
+                    mainChart.setActiveElements([{ datasetIndex: 0, index: index }]);
+                    mainChart.update();
+                    showNotification(`تم التركيز على: ${label}`, 'info');
+                }
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // تحميل البيانات الأولية
+        document.addEventListener('DOMContentLoaded', function() {
+            updateChartType();
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container-fluid {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .bg-gradient-secondary {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+
+        .form-select, .form-range {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-range:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .chart-controls {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,249,250,0.9) 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+            transform: scale(1.01);
+        }
+
+        .btn {
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .badge {
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* انميشن للعناصر */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* تخصيص شريط التمرير */
+        .form-range::-webkit-slider-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .form-range::-moz-range-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+}

@@ -1,4 +1,4 @@
-﻿// QualityControlApp.Models.Entities.HealthRecord.cs
+// QualityControlApp.Models.Entities.HealthRecord.cs
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
@@ -34,5 +34,14 @@ namespace QualityControlApp.Models.Entities
         [StringLength(1000)]
         [Display(Name = "ملاحظات")]
         public string? Notes { get; set; } // ملاحظات إضافية حول هذا السجل الصحي المحدد
+
+        // علاقة مع الأدوية (السجل الصحي الواحد يمكن أن يحتوي على عدة أدوية)
+        [ValidateNever]
+        public virtual ICollection<HealthRecordMedication> HealthRecordMedications { get; set; }
+
+        public HealthRecord()
+        {
+            HealthRecordMedications = new HashSet<HealthRecordMedication>();
+        }
     }
 }

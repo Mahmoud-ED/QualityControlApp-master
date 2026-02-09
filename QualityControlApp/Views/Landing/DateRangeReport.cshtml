@@ -1,0 +1,428 @@
+@{
+    ViewData["Title"] = "Date Range Landing Report";
+    var startDate = ViewBag.StartDate as string;
+    var endDate = ViewBag.EndDate as string;
+    var groupBy = ViewBag.GroupBy as string;
+    var groupedData = ViewBag.GroupedData as IEnumerable<dynamic>;
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-calendar-alt me-2 text-info"></i>@ViewData["Title"]</h1>
+            <p class="text-muted mb-0">Time-based analysis of landing requests with customizable date ranges and grouping options.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Reports")" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                <i class="fas fa-arrow-left me-2"></i> Back to Reports
+            </a>
+            <button onclick="exportChart()" class="btn btn-success rounded-pill px-4 py-2">
+                <i class="fas fa-download me-2"></i> Export Chart
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <form method="get" asp-action="DateRangeReport" class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <label for="startDate" class="form-label fw-semibold">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control"
+                           value="@startDate" required />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="endDate" class="form-label fw-semibold">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control"
+                           value="@endDate" required />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="groupBy" class="form-label fw-semibold">Group By</label>
+                    <select id="groupBy" name="groupBy" class="form-select">
+                        <option value="day" selected="@(groupBy == "day")">Daily</option>
+                        <option value="week" selected="@(groupBy == "week")">Weekly</option>
+                        <option value="month" selected="@(groupBy == "month")">Monthly</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="fas fa-search me-2"></i> Generate Report
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="setLastMonth()">
+                            <i class="fas fa-calendar-week me-1"></i> Last Month
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Filter Info -->
+    @if (!string.IsNullOrEmpty(startDate) && !string.IsNullOrEmpty(endDate))
+    {
+        <div class="alert alert-info border-0 shadow-sm mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle me-2"></i>
+                <div>
+                    <strong>Report Period:</strong> @DateTime.Parse(startDate).ToString("dd MMM yyyy") -
+                    @DateTime.Parse(endDate).ToString("dd MMM yyyy")
+                    <span class="text-muted">(@groupBy grouping)</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Chart Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light py-3">
+                    <h6 class="fw-semibold text-dark mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Landing Trends
+                        @if (groupedData != null && groupedData.Any())
+                        {
+                            <span class="badge bg-primary ms-2">@groupedData.Count() periods</span>
+                        }
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (groupedData != null && groupedData.Any())
+                    {
+                        <canvas id="dateRangeChart" style="max-height: 400px;"></canvas>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="icon-circle bg-light text-muted mb-3 mx-auto">
+                                <i class="fas fa-chart-line fa-3x"></i>
+                            </div>
+                            <h5 class="text-muted">No Data Available</h5>
+                            <p class="text-muted mb-0">Select a date range to generate the report.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    @if (groupedData != null && groupedData.Any())
+    {
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light py-3">
+                        <h6 class="fw-semibold text-dark mb-0">
+                            <i class="fas fa-table me-2"></i>
+                            Detailed Breakdown
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="dateRangeTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="border-0 fw-semibold">#</th>
+                                        <th class="border-0 fw-semibold">Period</th>
+                                        <th class="border-0 fw-semibold text-center">Landing Count</th>
+                                        <th class="border-0 fw-semibold text-center">Trend</th>
+                                        <th class="border-0 fw-semibold text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var index = 1;
+                                        var previousCount = 0;
+                                    }
+                                    @foreach (var item in groupedData)
+                                    {
+                                        var trend = "";
+                                        var trendClass = "";
+                                        var trendIcon = "";
+
+                                        if (index > 1)
+                                        {
+                                            if ((int)item.Count > previousCount)
+                                            {
+                                                trend = "Up";
+                                                trendClass = "text-success";
+                                                trendIcon = "fas fa-arrow-up";
+                                            }
+                                            else if ((int)item.Count < previousCount)
+                                            {
+                                                trend = "Down";
+                                                trendClass = "text-danger";
+                                                trendIcon = "fas fa-arrow-down";
+                                            }
+                                            else
+                                            {
+                                                trend = "Same";
+                                                trendClass = "text-muted";
+                                                trendIcon = "fas fa-minus";
+                                            }
+                                        }
+
+                                        <tr>
+                                            <td class="border-0">@index</td>
+                                            <td class="border-0 fw-semibold">@item.DisplayPeriod</td>
+                                            <td class="border-0 text-center">
+                                                <span class="badge bg-primary fs-6">@item.Count</span>
+                                            </td>
+                                            <td class="border-0 text-center">
+                                                @if (index > 1)
+                                                {
+                                                    <span class="@trendClass">
+                                                        <i class="@trendIcon me-1"></i>@trend
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td class="border-0 text-center">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewPeriodDetails('@item.Period')">
+                                                    <i class="fas fa-eye me-1"></i> Details
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        previousCount = (int)item.Count;
+                                        index++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Summary Statistics -->
+    @if (groupedData != null && groupedData.Any())
+    {
+        var totalLandings = groupedData.Sum(x => (int)x.Count);
+        var avgLandings = Math.Round((double)totalLandings / groupedData.Count(), 1);
+        var maxPeriod = groupedData.OrderByDescending(x => x.Count).First();
+        var minPeriod = groupedData.OrderBy(x => x.Count).First();
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light py-3">
+                        <h6 class="fw-semibold text-dark mb-0"><i class="fas fa-chart-bar me-2"></i>Summary Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="text-center">
+                                    <div class="icon-circle bg-primary bg-opacity-10 text-primary mb-2 mx-auto">
+                                        <i class="fas fa-plane-arrival fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-primary">@totalLandings.ToString("N0")</h4>
+                                    <p class="text-muted mb-0 small">Total Landings</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="text-center">
+                                    <div class="icon-circle bg-success bg-opacity-10 text-success mb-2 mx-auto">
+                                        <i class="fas fa-calculator fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-success">@avgLandings.ToString("N1")</h4>
+                                    <p class="text-muted mb-0 small">Average per Period</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="text-center">
+                                    <div class="icon-circle bg-info bg-opacity-10 text-info mb-2 mx-auto">
+                                        <i class="fas fa-arrow-up fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-info">@maxPeriod.Count</h4>
+                                    <p class="text-muted mb-0 small">@maxPeriod.DisplayPeriod</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="text-center">
+                                    <div class="icon-circle bg-warning bg-opacity-10 text-warning mb-2 mx-auto">
+                                        <i class="fas fa-arrow-down fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-warning">@minPeriod.Count</h4>
+                                    <p class="text-muted mb-0 small">@minPeriod.DisplayPeriod</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+        }
+
+        .table th {
+            font-size: 0.875rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .table td {
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .badge {
+            font-size: 0.875rem;
+        }
+
+        .alert {
+            border-radius: 0.75rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+    <script>
+        let dateRangeChart = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeChart();
+        });
+
+        function initializeChart() {
+            const chartCanvas = document.getElementById('dateRangeChart');
+            if (chartCanvas && @Json.Serialize(groupedData)) {
+                const data = @Json.Serialize(groupedData);
+
+                if (dateRangeChart) {
+                    dateRangeChart.destroy();
+                }
+
+                dateRangeChart = new Chart(chartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.DisplayPeriod),
+                        datasets: [{
+                            label: 'Landings',
+                            data: data.map(item => item.Count),
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: function(context) {
+                                        return context[0].label;
+                                    },
+                                    label: function(context) {
+                                        return `Landings: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Period'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Landings'
+                                },
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            }
+        }
+
+        function setLastMonth() {
+            const today = new Date();
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+
+            document.getElementById('startDate').value = lastMonth.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endOfLastMonth.toISOString().split('T')[0];
+        }
+
+        function viewPeriodDetails(period) {
+            // Navigate to detailed report with date filters
+            const url = '@Url.Action("DetailedReport", "Landing")' + '?dateFrom=' + period + '&dateTo=' + period;
+            window.location.href = url;
+        }
+
+        function exportChart() {
+            if (dateRangeChart) {
+                const link = document.createElement('a');
+                link.download = 'landing-trends-chart.png';
+                link.href = dateRangeChart.toBase64Image();
+                link.click();
+            } else {
+                alert('No chart data available to export');
+            }
+        }
+    </script>
+}
